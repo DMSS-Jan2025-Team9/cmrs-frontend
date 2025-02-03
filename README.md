@@ -8,3 +8,9 @@ Reference source code: https://github.com/refinedev/refine/tree/master/examples/
 ### Local development
 1) Install packages: npm install
 2) Run in local: npm run dev
+
+
+## Development guideline
+
+## Source control
+Refer to https://github.com/DMSS-Jan2025-Team9/project-documentation/blob/main/Version%20Control/general.md
