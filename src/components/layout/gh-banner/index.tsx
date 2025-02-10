@@ -134,7 +134,7 @@ const Text = () => {
   return (
     <a
       className="gh-link"
-      href="https://github.com/refinedev/refine/tree/main/examples/app-crm-minimal"
+      href="https://github.com/DMSS-Jan2025-Team9/cmrs-frontend"
       target="_blank"
       rel="noreferrer"
       style={{
@@ -173,7 +173,7 @@ const Text = () => {
           💡
         </span>
         <span className="text">
-          This example is open-source! Get the full source code.
+          CMRS GitHub source code (To be removed for PROD deployment)
         </span>
       </div>
     </a>
