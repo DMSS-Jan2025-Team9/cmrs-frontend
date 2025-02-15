@@ -24,6 +24,7 @@ import {
   TasksCreatePage,
   TasksEditPage,
   TasksListPage,
+  CourseListPage
 } from "@/routes";
 
 import "@refinedev/antd/dist/reset.css";
@@ -81,6 +82,8 @@ const App = () => {
                     <Route path="edit/:id" element={<CompanyEditPage />} />
                   </Route>
 
+                  <Route path="/courses" element={<CourseListPage />} />
+  
                   <Route path="*" element={<ErrorComponent />} />
                 </Route>
 

@@ -16,6 +16,17 @@ export const resources: IResourceItem[] = [
     },
   },
   {
+    name: "courses",
+    list: "/courses",
+    show: "/courses/:id",
+    create: "/courses/new",
+    edit: "/courses/edit/:id",
+    meta: {
+      label: "Courses",
+      icon: <ShopOutlined />,
+    },
+  },
+  {
     name: "companies",
     list: "/companies",
     show: "/companies/:id",
