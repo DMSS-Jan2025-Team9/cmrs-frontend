@@ -4,8 +4,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import axios from "axios";
 
 import { useGo } from "@refinedev/core";
-import { CreateButton } from "@refinedev/antd";
-import { CustomAvatar, PaginationTotal, Text } from "@/components";
+import { PaginationTotal } from "@/components";
 import type { Course } from "@/models";  // Assuming you've created a type for your courses
 
 export const CourseListPage = ({ children }: React.PropsWithChildren) => {
@@ -15,55 +14,56 @@ export const CourseListPage = ({ children }: React.PropsWithChildren) => {
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [searchName, setSearchName] = useState<string>("");
   const [searchCode, setSearchCode] = useState<string>("");
-  const [pagination, setPagination] = useState({ page: 1, pageSize: 12 });
+  const [pagination, setPagination] = useState({ page: 1, pageSize: 10 });
 
   // Fetch courses from the API
-  const fetchCourses = async () => {
+  const fetchCourses = async (searchName: string, searchCode: string, page: number, pageSize: number) => {
     try {
-       const response = await axios.get("http://localhost:8081/api/courses"
-       , {
+      const response = await axios.get("http://localhost:8081/api/courses/searchCourses", {
         params: {
           courseName: searchName,
           courseCode: searchCode,
-          page: pagination.page,
-          pageSize: pagination.pageSize,
+          page: page,
+          pageSize: pageSize,
         },
-      }
-      );
-      console.log(response.data);
+      });
+      console.log(response.data); // Log the response to check the structure
       setCourses(response.data);
-      setFilteredCourses(response.data);
+      setFilteredCourses(response.data); // Update the filtered courses (table)
     } catch (error) {
       console.error("Error fetching courses:", error);
     }
   };
 
   useEffect(() => {
-    fetchCourses();
-  }, [searchName, searchCode, pagination]);
+    fetchCourses(searchName, searchCode, pagination.page, pagination.pageSize);
+  }, []); // Fetch courses only once when the component mounts
 
-  // Handle search filters
+  // Trigger fetchCourses only when search button is clicked
   const handleSearch = () => {
-    fetchCourses();
+    setPagination({ page: 1, pageSize: 10 }); // Reset to first page when searching
+    fetchCourses(searchName, searchCode, 1, 10); // Pass the search params to the fetchCourses function
   };
 
   // Handle pagination
   const handlePaginationChange = (page: number, pageSize: number) => {
     setPagination({ page, pageSize });
+    fetchCourses(searchName, searchCode, page, pageSize); // Ensure pagination works with search
   };
 
-  // Helper function for deletion
-  const handleDelete = async (courseId: number) => {
-    try {
-      await axios.delete(`http://localhost:8081/api/courses/${courseId}`);
-      alert('Course deleted successfully');
-      // Refresh course list after delete
-      fetchCourses();
-    } catch (error) {
-      console.error("Error deleting course:", error);
-      alert('Failed to delete course');
-    }
-  };
+    // Handle course deletion
+    const handleView = async (courseId: number) => {
+      try {
+        await axios.delete(`http://localhost:8081/api/courses/${courseId}`);
+        alert('Course deleted successfully');
+        // Refresh course list after deletion
+        fetchCourses(searchName, searchCode, pagination.page, pagination.pageSize);
+      } catch (error) {
+        console.error("Error deleting course:", error);
+        alert('Failed to delete course');
+      }
+    };
+  
 
   return (
     <div className="page-container">
@@ -72,19 +72,19 @@ export const CourseListPage = ({ children }: React.PropsWithChildren) => {
           <Input
             placeholder="Search by Course Name"
             value={searchName}
-            onChange={(e) => setSearchName(e.target.value)}
+            onChange={(e) => setSearchName(e.target.value)} // Update search name on input change
             allowClear
           />
           <Input
             placeholder="Search by Course Code"
             value={searchCode}
-            onChange={(e) => setSearchCode(e.target.value)}
+            onChange={(e) => setSearchCode(e.target.value)} // Update search code on input change
             allowClear
           />
           <Button
             type="primary"
             icon={<SearchOutlined />}
-            onClick={handleSearch}
+            onClick={handleSearch} // Search only when the button is clicked
           >
             Search
           </Button>
@@ -96,7 +96,7 @@ export const CourseListPage = ({ children }: React.PropsWithChildren) => {
         pagination={{
           current: pagination.page,
           pageSize: pagination.pageSize,
-          onChange: handlePaginationChange,
+          onChange: handlePaginationChange, // Handle pagination change
           showTotal: (total) => <PaginationTotal total={total} entityName="courses" />,
         }}
         rowKey="courseId"
@@ -106,8 +106,7 @@ export const CourseListPage = ({ children }: React.PropsWithChildren) => {
         <Table.Column<Course> title="Course Description" dataIndex="courseDesc" />
         <Table.Column<Course> title="Actions" key="actions" render={(value, record) => (
           <Space>
-            <Button size="small" onClick={() => go({ to: { resource: "courses", action: "edit", id: record.courseId } })}>Edit</Button>
-            <Button size="small" onClick={() => handleDelete(record.courseId)}>Delete</Button>
+            <Button size="small" onClick={() => handleView(record.courseId)}>View</Button>
           </Space>
         )} />
       </Table>
