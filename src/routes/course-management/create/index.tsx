@@ -3,8 +3,11 @@ import { Form, Input, Button, DatePicker, notification, InputNumber } from "antd
 import axios from "axios";
 import type { Course } from "@/models";
 import moment from "moment";
+import { useGo } from "@refinedev/core";
 
 export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
+  const go = useGo();
+  
   const [courseName, setCourseName] = useState<string>("");
   const [courseCode, setCourseCode] = useState<string>("");
   const [courseDesc, setCourseDesc] = useState<string>("");
@@ -40,6 +43,7 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
         notification.success({
           message: "Course Added Successfully!",
           description: `The course "${courseName}" has been added.`,
+          duration: 3,
         });
       })
       .catch((error) => {
@@ -150,6 +154,15 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
           </Button>
         </Form.Item>
       </Form>
+          <Button
+            onClick={() => {
+              go({
+                to: "/courseManagement",
+              });
+            }}
+          >
+            Cancel 
+          </Button>
 
       {children}
     </div>

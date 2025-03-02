@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Table, Input, Space, Button } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import {
-  CreateButton,
-  DeleteButton,
-  EditButton,
-  FilterDropdown,
-  List,
-  useTable,
-} from "@refinedev/antd";
+import {CreateButton, } from "@refinedev/antd";
 import axios from "axios";
 
 import { useGo } from "@refinedev/core";
@@ -18,7 +11,6 @@ import type { Course } from "@/models";  // Assuming you've created a type for y
 export const CourseListPage = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
   
-  const [courses, setCourses] = useState<Course[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [searchName, setSearchName] = useState<string>("");
   const [searchCode, setSearchCode] = useState<string>("");
@@ -35,8 +27,6 @@ export const CourseListPage = ({ children }: React.PropsWithChildren) => {
           pageSize: pageSize,
         },
       });
-      console.log(response.data); // Log the response to check the structure
-      setCourses(response.data);
       setFilteredCourses(response.data); // Update the filtered courses (table)
     } catch (error) {
       console.error("Error fetching courses:", error);
@@ -58,20 +48,6 @@ export const CourseListPage = ({ children }: React.PropsWithChildren) => {
     setPagination({ page, pageSize });
     fetchCourses(searchName, searchCode, page, pageSize); // Ensure pagination works with search
   };
-
-    // Handle course deletion
-    const handleView = async (courseId: number) => {
-      try {
-        await axios.delete(`http://localhost:8081/api/courses/${courseId}`);
-        alert('Course deleted successfully');
-        // Refresh course list after deletion
-        fetchCourses(searchName, searchCode, pagination.page, pagination.pageSize);
-      } catch (error) {
-        console.error("Error deleting course:", error);
-        alert('Failed to delete course');
-      }
-    };
-  
 
   return (
     <div className="page-container">
@@ -97,20 +73,19 @@ export const CourseListPage = ({ children }: React.PropsWithChildren) => {
             Search
           </Button>
         </Space>
-
-          <CreateButton
-              onClick={() => {
-                go({
-                  to: {
-                    resource: "courseManagement",
-                    action: "create",
-                  },
-                });
-              }}
-            >
-              Add Course
-            </CreateButton>
-  </div>
+        <CreateButton
+            onClick={() => {
+              go({
+                to: {
+                  resource: "courseManagement",
+                  action: "create",
+                },
+              });
+            }}
+          >
+            Add Course
+          </CreateButton>
+      </div>
 
       <Table
         dataSource={filteredCourses}
@@ -127,7 +102,8 @@ export const CourseListPage = ({ children }: React.PropsWithChildren) => {
         <Table.Column<Course> title="Course Description" dataIndex="courseDesc" />
         <Table.Column<Course> title="Actions" key="actions" render={(value, record) => (
           <Space>
-            <Button size="small" onClick={() => record.courseId !== undefined && handleView(record.courseId)}>View</Button>
+            <Button size="small" onClick={() => go({ to: `/courseManagement/view/${record.courseId}` })}>View</Button>
+            <Button size="small" onClick={() => go({ to: `/courseManagement/edit/${record.courseId}` })}>Edit</Button>
           </Space>
         )} />
       </Table>

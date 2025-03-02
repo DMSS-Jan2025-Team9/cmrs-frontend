@@ -50,6 +50,7 @@ export const resources: IResourceItem[] = [
   {
     name: "courseRegistration",
     list: "/courseRegistration",
+    show: "/courseRegistration/show/:id",
     create: "/courseRegistration/new/:classId",
     meta: {
       label: "Course Registration",
