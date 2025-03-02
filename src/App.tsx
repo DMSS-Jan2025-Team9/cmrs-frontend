@@ -15,6 +15,7 @@ import { App as AntdApp, ConfigProvider } from "antd";
 import { Layout } from "@/components";
 import { resources } from "@/config/resources";
 import { authProvider, dataProvider, liveProvider } from "@/providers";
+import dataProviders from "@refinedev/simple-rest";
 import {
   CompanyCreatePage,
   CompanyEditPage,
@@ -24,10 +25,13 @@ import {
   TasksCreatePage,
   TasksEditPage,
   TasksListPage,
+  CourseClassList,
+  RegistrationCreatePage
   CourseListPage
 } from "@/routes";
 
 import "@refinedev/antd/dist/reset.css";
+const REGISTRATION_API_URL = "http://localhost:8083/api";
 
 const App = () => {
   return (
@@ -37,7 +41,11 @@ const App = () => {
           <DevtoolsProvider>
             <Refine
               routerProvider={routerProvider}
-              dataProvider={dataProvider}
+              dataProvider={{
+                default: dataProvider,
+                courseRegistration: dataProviders(REGISTRATION_API_URL),
+              }}
+            
               liveProvider={liveProvider}
               notificationProvider={useNotificationProvider}
               authProvider={authProvider}
@@ -80,6 +88,11 @@ const App = () => {
                     <Route index element={<CompanyListPage />} />
                     <Route path="new" element={<CompanyCreatePage />} />
                     <Route path="edit/:id" element={<CompanyEditPage />} />
+                  </Route>
+
+                  <Route path="/courseRegistration">
+                    <Route index element={<CourseClassList/>} />
+                    <Route path="new/:classId" element={<RegistrationCreatePage />} />
                   </Route>
 
                   <Route path="/courses" element={<CourseListPage />} />

@@ -47,4 +47,15 @@ export const resources: IResourceItem[] = [
       icon: <ProjectOutlined />,
     },
   },
+  {
+    name: "courseRegistration",
+    list: "/courseRegistration",
+    create: "/courseRegistration/new/:classId",
+    meta: {
+      label: "Course Registration",
+      icon: <ProjectOutlined />,
+      dataProviderName: "courseRegistration", 
+      liveMode: "off",
+    },
+  },
 ];
