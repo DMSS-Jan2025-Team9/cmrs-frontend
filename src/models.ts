@@ -1,10 +1,10 @@
 export interface Course {
-    courseId: number;
+    courseId?: number;
     courseName: string;
     courseCode: string;
     registrationStart: string;
     registrationEnd: string;
-    maxCapacity: string;
+    maxCapacity: number;
     status: string; 
     courseDesc: string; 
   }

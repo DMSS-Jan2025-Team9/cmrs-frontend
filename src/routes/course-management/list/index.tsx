@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Table, Input, Space, Button } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
+import {
+  CreateButton,
+  DeleteButton,
+  EditButton,
+  FilterDropdown,
+  List,
+  useTable,
+} from "@refinedev/antd";
 import axios from "axios";
 
 import { useGo } from "@refinedev/core";
@@ -89,7 +97,20 @@ export const CourseListPage = ({ children }: React.PropsWithChildren) => {
             Search
           </Button>
         </Space>
-      </div>
+
+          <CreateButton
+              onClick={() => {
+                go({
+                  to: {
+                    resource: "courseManagement",
+                    action: "create",
+                  },
+                });
+              }}
+            >
+              Add Course
+            </CreateButton>
+  </div>
 
       <Table
         dataSource={filteredCourses}
@@ -106,7 +127,7 @@ export const CourseListPage = ({ children }: React.PropsWithChildren) => {
         <Table.Column<Course> title="Course Description" dataIndex="courseDesc" />
         <Table.Column<Course> title="Actions" key="actions" render={(value, record) => (
           <Space>
-            <Button size="small" onClick={() => handleView(record.courseId)}>View</Button>
+            <Button size="small" onClick={() => record.courseId !== undefined && handleView(record.courseId)}>View</Button>
           </Space>
         )} />
       </Table>
