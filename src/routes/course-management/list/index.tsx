@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Table, Input, Space, Button } from "antd";
+import { Table, Input, Space, Button, Row, Col } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import {CreateButton, } from "@refinedev/antd";
+import { CreateButton } from "@refinedev/antd";
 import axios from "axios";
 
 import { useGo } from "@refinedev/core";
 import { PaginationTotal } from "@/components";
-import type { Course } from "@/models";  // Assuming you've created a type for your courses
+import type { Course } from "@/models";  
 
 export const CourseListPage = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
@@ -51,29 +51,32 @@ export const CourseListPage = ({ children }: React.PropsWithChildren) => {
 
   return (
     <div className="page-container">
-      <div className="search-container">
-        <Space>
-          <Input
-            placeholder="Search by Course Name"
-            value={searchName}
-            onChange={(e) => setSearchName(e.target.value)} // Update search name on input change
-            allowClear
-          />
-          <Input
-            placeholder="Search by Course Code"
-            value={searchCode}
-            onChange={(e) => setSearchCode(e.target.value)} // Update search code on input change
-            allowClear
-          />
-          <Button
-            type="primary"
-            icon={<SearchOutlined />}
-            onClick={handleSearch} // Search only when the button is clicked
-          >
-            Search
-          </Button>
-        </Space>
-        <CreateButton
+      <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
+        <Col>
+          <Space>
+            <Input
+              placeholder="Search by Course Name"
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              allowClear
+            />
+            <Input
+              placeholder="Search by Course Code"
+              value={searchCode}
+              onChange={(e) => setSearchCode(e.target.value)}
+              allowClear
+            />
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={handleSearch}
+            >
+              Search
+            </Button>
+          </Space>
+        </Col>
+        <Col>
+          <CreateButton
             onClick={() => {
               go({
                 to: {
@@ -85,14 +88,15 @@ export const CourseListPage = ({ children }: React.PropsWithChildren) => {
           >
             Add Course
           </CreateButton>
-      </div>
+        </Col>
+      </Row>
 
       <Table
         dataSource={filteredCourses}
         pagination={{
           current: pagination.page,
           pageSize: pagination.pageSize,
-          onChange: handlePaginationChange, // Handle pagination change
+          onChange: handlePaginationChange,
           showTotal: (total) => <PaginationTotal total={total} entityName="courses" />,
         }}
         rowKey="courseId"

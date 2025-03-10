@@ -27,6 +27,16 @@ export const resources: IResourceItem[] = [
     },
   },
   {
+    name: "classScheduling",
+    show: "/classScheduling/:id",
+    create: "/classScheduling/new",
+    edit: "/classScheduling/edit/:id",
+    meta: {
+      label: "Class Scheduling",
+      icon: <ShopOutlined />,
+    },
+  },
+  {
     name: "companies",
     list: "/companies",
     show: "/companies/:id",

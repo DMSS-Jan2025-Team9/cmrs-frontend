@@ -4,3 +4,4 @@ export * from "./login";
 export * from "./tasks";
 export * from "./course-management";
 export * from "./registration";
+export * from "./class-scheduling";

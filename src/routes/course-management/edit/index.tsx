@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, Input, Button, DatePicker, notification, InputNumber } from "antd";
+import { Form, Input, Button, DatePicker, notification, InputNumber, Space } from "antd";
 import axios from "axios";
 import type { Course } from "@/models";
 import moment from "moment";
@@ -154,21 +154,22 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
         </Form.Item>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Edit
-          </Button>
+          <Space size="middle">
+            <Button type="primary" htmlType="submit">
+              Edit
+            </Button>
+            <Button
+              onClick={() => {
+                go({
+                  to: "/courseManagement",
+                });
+              }}
+            >
+              Cancel
+            </Button>
+          </Space>
         </Form.Item>
       </Form>
-
-      <Button
-        onClick={() => {
-          go({
-            to: "/courseManagement",
-          });
-        }}
-      >
-        Cancel
-      </Button>
 
       {children}
     </div>
