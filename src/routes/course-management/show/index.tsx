@@ -29,6 +29,11 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
 
   const { Title } = Typography;
 
+  // Function to capitalize first letter
+  const capitalizeFirstLetter = (string: string): string => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+
   // Fetch course data based on courseId
   useEffect(() => {
     if (courseId) {
@@ -168,7 +173,7 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
         }
       >
         <Descriptions bordered column={1}>
-          <Descriptions.Item label="Course ID">{courseData?.courseId}</Descriptions.Item>
+          {/* <Descriptions.Item label="Course ID">{courseData?.courseId}</Descriptions.Item> */}
           <Descriptions.Item label="Course Name">{courseData?.courseName}</Descriptions.Item>
           <Descriptions.Item label="Course Code">{courseData?.courseCode}</Descriptions.Item>
           <Descriptions.Item label="Registration Start">
@@ -178,7 +183,7 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
             {formatDate(courseData?.registrationEnd || "")}
           </Descriptions.Item>
           <Descriptions.Item label="Max Capacity">{courseData?.maxCapacity}</Descriptions.Item>
-          <Descriptions.Item label="Status">{courseData?.status}</Descriptions.Item>
+          <Descriptions.Item label="Status">{capitalizeFirstLetter(courseData?.status || "")}</Descriptions.Item>
           <Descriptions.Item label="Description">{courseData?.courseDesc}</Descriptions.Item>
         </Descriptions>
 

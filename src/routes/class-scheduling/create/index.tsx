@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button, TimePicker, Select, InputNumber, notification, Space } from "antd";
+import { Form, Button, TimePicker, Select, InputNumber, notification, Space, Input } from "antd";
 import axios from "axios";
 import { useGo } from "@refinedev/core";
 import { useLocation } from "react-router-dom";
@@ -53,7 +53,10 @@ export const ClassScheduleCreatePage = ({ children }: React.PropsWithChildren) =
           setCurrentCourse(response.data);
           setShowCourseDropdown(false);
           // Set the courseId in the form
-          form.setFieldsValue({ courseId });
+          form.setFieldsValue({ 
+            courseId: response.data.courseId,
+            courseName: `${response.data.courseName} (${response.data.courseCode})`
+          });
         })
         .catch((error) => {
           console.error("Error fetching course details:", error);
@@ -149,9 +152,6 @@ export const ClassScheduleCreatePage = ({ children }: React.PropsWithChildren) =
   return (
     <div className="page-container">
       <h1>Add New Class Schedule</h1>
-      {!showCourseDropdown && currentCourse && (
-        <h2>Course: {currentCourse.courseName} ({currentCourse.courseCode})</h2>
-      )}
       
       <Form layout="vertical" onFinish={handleAdd} form={form}>
         {showCourseDropdown ? (
@@ -176,9 +176,20 @@ export const ClassScheduleCreatePage = ({ children }: React.PropsWithChildren) =
             </Select>
           </Form.Item>
         ) : (
-          <Form.Item name="courseId" hidden={true}>
-            <InputNumber />
-          </Form.Item>
+          <>
+            <Form.Item name="courseId" hidden={true}>
+              <InputNumber />
+            </Form.Item>
+            <Form.Item
+              label="Course"
+              name="courseName"
+            >
+              <Input 
+                disabled
+                className="ant-input-disabled"
+              />
+            </Form.Item>
+          </>
         )}
 
         <Form.Item

@@ -108,7 +108,6 @@ const App = () => {
                   </Route>
 
                   <Route path="/classScheduling">
-                    <Route index element={<CourseListPage />} />
                     <Route path="new" element={<ClassScheduleCreatePage />} />
                     <Route path="edit/:classId" element={<ClassScheduleEditPage />} />
                   </Route>

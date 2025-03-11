@@ -3,6 +3,7 @@ import type { IResourceItem } from "@refinedev/core";
 import {
   DashboardOutlined,
   ProjectOutlined,
+  ScheduleOutlined,
   ShopOutlined,
 } from "@ant-design/icons";
 
@@ -23,17 +24,7 @@ export const resources: IResourceItem[] = [
     edit: "/courseManagement/edit/:id",
     meta: {
       label: "Course Management",
-      icon: <ShopOutlined />,
-    },
-  },
-  {
-    name: "classScheduling",
-    show: "/classScheduling/:id",
-    create: "/classScheduling/new",
-    edit: "/classScheduling/edit/:id",
-    meta: {
-      label: "Class Scheduling",
-      icon: <ShopOutlined />,
+      icon: <ScheduleOutlined/>,
     },
   },
   {

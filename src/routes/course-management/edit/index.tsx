@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, Input, Button, DatePicker, notification, InputNumber, Space } from "antd";
+import { Form, Input, Button, DatePicker, notification, InputNumber, Space, Select } from "antd";
 import axios from "axios";
 import type { Course } from "@/models";
 import moment from "moment";
@@ -12,6 +12,9 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
 
   const [form] = Form.useForm(); // Create a reference to the form
 
+  const courseStatus = [
+    "active", "inactive"
+  ];
   // Fetch course data based on courseId
   useEffect(() => {
     if (courseId) {
@@ -28,6 +31,7 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
             maxCapacity: courseData.maxCapacity,
             registrationStart: moment(courseData.registrationStart),
             registrationEnd: moment(courseData.registrationEnd),
+            status: courseData.status,
           });
         })
         .catch((error) => {
@@ -45,6 +49,11 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
     return date ? date.toISOString() : "";
   };
 
+  // Function to capitalize first letter
+  const capitalizeFirstLetter = (string: string): string => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+
   function handleEdit(): void {
     const courseName = form.getFieldValue("courseName");
     const updatedCourse: Course = {
@@ -55,7 +64,7 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
       registrationEnd: formatDate(form.getFieldValue("registrationEnd")),
       maxCapacity: form.getFieldValue("maxCapacity"),
       courseDesc: form.getFieldValue("courseDesc"),
-      status: "active", // Keep the same status or update as needed
+      status: form.getFieldValue("status"), // Fixed: use "status" instead of (courseStatus)
     };
 
     axios
@@ -135,6 +144,20 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
           ]}
         >
           <DatePicker showTime />
+        </Form.Item>
+
+        <Form.Item
+          label="Course Status"
+          name="status"
+          rules={[{ required: true, message: "Course Status is required!" }]}
+        >
+          <Select placeholder="Select status">
+            {courseStatus.map((status) => (
+              <Select.Option key={status} value={status}>
+                {capitalizeFirstLetter(status)}
+              </Select.Option>
+            ))}
+          </Select>
         </Form.Item>
 
         <Form.Item
