@@ -3,3 +3,4 @@ export * from "./dashboard";
 export * from "./login";
 export * from "./tasks";
 export * from "./registration";
+export * from "./user-management";
