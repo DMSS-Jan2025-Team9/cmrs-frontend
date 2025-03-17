@@ -3,6 +3,7 @@ import type { IResourceItem } from "@refinedev/core";
 import {
   DashboardOutlined,
   ProjectOutlined,
+  ScheduleOutlined,
   ShopOutlined,
 } from "@ant-design/icons";
 
@@ -13,6 +14,17 @@ export const resources: IResourceItem[] = [
     meta: {
       label: "Dashboard",
       icon: <DashboardOutlined />,
+    },
+  },
+  {
+    name: "courseManagement",
+    list: "/courseManagement",
+    show: "/courseManagement/:id",
+    create: "/courseManagement/new",
+    edit: "/courseManagement/edit/:id",
+    meta: {
+      label: "Course Management",
+      icon: <ScheduleOutlined/>,
     },
   },
   {
@@ -39,6 +51,7 @@ export const resources: IResourceItem[] = [
   {
     name: "courseRegistration",
     list: "/courseRegistration",
+    show: "/courseRegistration/show/:id",
     create: "/courseRegistration/new/:classId",
     meta: {
       label: "Course Registration",

@@ -28,6 +28,12 @@ import {
   CourseClassList,
   RegistrationCreatePage,
   BatchJobUploadPage,
+  CourseListPage,
+  CourseCreatePage,
+  CourseEditPage,
+  CourseViewPage,
+  ClassScheduleCreatePage,
+  ClassScheduleEditPage
 } from "@/routes";
 
 import "@refinedev/antd/dist/reset.css";
@@ -95,6 +101,18 @@ const App = () => {
                     <Route path="new/:classId" element={<RegistrationCreatePage />} />
                   </Route>
 
+                  <Route path="/courseManagement">
+                    <Route index element={<CourseListPage />} />
+                    <Route path="new" element={<CourseCreatePage />} />
+                    <Route path="view/:courseId" element={<CourseViewPage />} />
+                    <Route path="edit/:courseId" element={<CourseEditPage />} />
+                  </Route>
+
+                  <Route path="/classScheduling">
+                    <Route path="new" element={<ClassScheduleCreatePage />} />
+                    <Route path="edit/:classId" element={<ClassScheduleEditPage />} />
+                  </Route>
+  
                   <Route path="/batchjob/upload">
                     <Route index element={<BatchJobUploadPage />} />
                   </Route>
