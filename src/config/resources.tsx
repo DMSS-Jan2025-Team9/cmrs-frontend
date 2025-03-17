@@ -60,4 +60,12 @@ export const resources: IResourceItem[] = [
       liveMode: "off",
     },
   },
+  {
+    name: "batchJobUpload",
+    list: "/batchjob/upload",
+    meta: {
+      label: "Add Students",
+      icon: <ProjectOutlined />,
+    },
+  },
 ];

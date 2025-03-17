@@ -27,6 +27,7 @@ import {
   TasksListPage,
   CourseClassList,
   RegistrationCreatePage,
+  BatchJobUploadPage,
   CourseListPage,
   CourseCreatePage,
   CourseEditPage,
@@ -112,6 +113,10 @@ const App = () => {
                     <Route path="edit/:classId" element={<ClassScheduleEditPage />} />
                   </Route>
   
+                  <Route path="/batchjob/upload">
+                    <Route index element={<BatchJobUploadPage />} />
+                  </Route>
+
                   <Route path="*" element={<ErrorComponent />} />
                 </Route>
 
