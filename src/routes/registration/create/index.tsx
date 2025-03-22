@@ -1,45 +1,98 @@
-import React from "react";
-import { Create, useForm } from "@refinedev/antd";
-import { Form, Input } from "antd";
-import { useParsed } from "@refinedev/core";
+import React, { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Form, Input, Button, List, message } from "antd";
+import axios from "axios";
 
-interface RegistrationFormValues {
+interface CreateRegistrationDTO {
     classId: number;
-    studentId: string;
+    studentIds: string[];
 }
 
 export const RegistrationCreatePage: React.FC = () => {
-    const { params } = useParsed<{ classId?: string }>();
+    const { classId } = useParams<{ classId: string }>();
+    const [studentIds, setStudentIds] = useState<string[]>([]);
+    const [form] = Form.useForm();
+    const navigate = useNavigate();
 
-    // Parse `classId` from the URL query parameters
-    const classId = params?.classId ? Number(params.classId) : undefined;
+    const handleAddStudent = () => {
+        if (studentIds.length < 5) {
+            setStudentIds([...studentIds, ""]);
+        } else {
+            message.warning("You can only register up to 5 students.");
+        }
+    };
 
-    // Define initial form values
-    const initialValues: Partial<RegistrationFormValues> = classId ? { classId } : {};
+    const handleStudentIdChange = (index: number, value: string) => {
+        const newStudentIds = [...studentIds];
+        newStudentIds[index] = value;
+        setStudentIds(newStudentIds);
+    };
 
-    const { formProps, saveButtonProps } = useForm<RegistrationFormValues>({
-        resource: "courseRegistration",
-        redirect: "list", 
-    });
+    const onFinish = async (values: any) => {
+        // Add the studentIds to the form values
+        values.studentIds = studentIds.filter(id => id.trim() !== "");
+        if (values.studentIds.length === 0) {
+            message.error("Please enter at least one student ID.");
+            return;
+        }
+
+        try {
+            // Make the API call using axios
+            const response = await axios.post("http://localhost:8083/api/courseRegistration", values);
+            if (response.status === 201) {
+                message.success("Registration created successfully!");
+                navigate("/courseRegistration"); // Redirect to the list page
+            } else {
+                message.error("Failed to create registration.");
+            }
+        } catch (error) {
+            message.error("An error occurred while creating the registration.");
+        }
+    };
 
     return (
-        <Create saveButtonProps={saveButtonProps} title="Create Registration">
-            <Form {...formProps} layout="vertical" initialValues={initialValues}>
+        <div>
+            <h1>Create Registration</h1>
+            <Form form={form} layout="vertical" onFinish={onFinish} initialValues={{ classId }}>
                 {/* Class ID Field */}
                 <Form.Item label="Class ID" name="classId">
                     <Input disabled placeholder="Class ID" />
                 </Form.Item>
 
-                {/* Student ID Field */}
-                <Form.Item
-                    label="Student ID"
-                    name="studentId"
-                    rules={[{ required: true, message: "Please enter your student ID" }]}
-                >
-                    <Input placeholder="Enter your student ID" />
+                {/* Student ID Fields */}
+                <List
+                    header={<div>Student</div>}
+                    dataSource={studentIds}
+                    renderItem={(id, index) => (
+                        <List.Item>
+                            <Form.Item
+                                label={`Student ID ${index + 1}`}
+                                name={`studentIds[${index}]`}
+                                rules={[{ required: true, message: "Please enter a student ID" }]}
+                            >
+                                <Input
+                                    placeholder="Enter student ID"
+                                    value={id}
+                                    onChange={(e) => handleStudentIdChange(index, e.target.value)}
+                                />
+                            </Form.Item>
+                        </List.Item>
+                    )}
+                />
+
+                {/* Add Student Button */}
+                <Button type="dashed" onClick={handleAddStudent} style={{ width: "100%" }}>
+                    + Add Student
+                </Button>
+
+                {/* Submit Button */}
+                <Form.Item>
+                    <Button type="primary" htmlType="submit">
+                        Submit
+                    </Button>
                 </Form.Item>
             </Form>
-        </Create>
+        </div>
     );
 };
 
