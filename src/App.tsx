@@ -33,7 +33,8 @@ import {
   CourseEditPage,
   CourseViewPage,
   ClassScheduleCreatePage,
-  ClassScheduleEditPage
+  ClassScheduleEditPage,
+  AllStudentsPage
 } from "@/routes";
 
 import "@refinedev/antd/dist/reset.css";
@@ -115,6 +116,10 @@ const App = () => {
   
                   <Route path="/batchjob/upload">
                     <Route index element={<BatchJobUploadPage />} />
+                  </Route>
+
+                  <Route path="/students">
+                    <Route index element={<AllStudentsPage />} />
                   </Route>
 
                   <Route path="*" element={<ErrorComponent />} />
