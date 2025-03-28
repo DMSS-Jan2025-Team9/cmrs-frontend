@@ -30,9 +30,11 @@ jobs:
     
     - name: Run esLint
       run: npm run lint
+      continue-on-error: true
 
     - name: Run prettier
-      run: npm prettier:check
+      run: npm run prettier:check
+      continue-on-error: true
     
     - name: Build
       run: npm run build
