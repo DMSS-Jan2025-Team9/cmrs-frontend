@@ -14,6 +14,13 @@ interface GroupRegistration {
     registrations: RegistrationDTO[];
 }
 
+interface ClassDetails {
+    dayOfWeek: string;
+    startTime: string;
+    endTime: string;
+    vacancy: number;
+}
+
 export const MyRegistrationPage: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false);
     // Registered data
@@ -22,9 +29,12 @@ export const MyRegistrationPage: React.FC = () => {
     // Waitlisted data
     const [waitlistedIndividual, setWaitlistedIndividual] = useState<RegistrationDTO[]>([]);
     const [waitlistedGroup, setWaitlistedGroup] = useState<GroupRegistration[]>([]);
-    // Caches for student names and class vacancies
+    // Caches for student names
     const [studentNames, setStudentNames] = useState<{ [key: number]: string }>({});
-    const [classVacancies, setClassVacancies] = useState<{ [key: number]: number }>({});
+    // Cache full class details (including dayOfWeek, startTime, endTime, vacancy)
+    const [classDetails, setClassDetails] = useState<{ [key: number]: ClassDetails }>({});
+    // Track unenrolled group registration IDs for highlighting (for current user)
+    const [unenrolledGroupRegistrationIds, setUnenrolledGroupRegistrationIds] = useState<number[]>([]);
 
     // Hard-coded student ID
     const hardCodedStudentId = 1;
@@ -43,8 +53,9 @@ export const MyRegistrationPage: React.FC = () => {
                     (reg) => reg.registrationStatus === "Waitlisted"
                 );
 
-                // For registered, split into individual and group registrations
+                // Registered Individual
                 setRegisteredIndividual(registered.filter((reg) => !reg.groupRegistrationId));
+                // Registered Group
                 const regGroupIds = Array.from(
                     new Set(
                         registered
@@ -70,8 +81,9 @@ export const MyRegistrationPage: React.FC = () => {
                         message.error("Error fetching registered group registrations.");
                     });
 
-                // For waitlisted, split into individual and group registrations
+                // Waitlisted Individual
                 setWaitlistedIndividual(waitlisted.filter((reg) => !reg.groupRegistrationId));
+                // Waitlisted Group
                 const waitGroupIds = Array.from(
                     new Set(
                         waitlisted
@@ -127,128 +139,219 @@ export const MyRegistrationPage: React.FC = () => {
         });
     }, [registeredGroup, waitlistedGroup, studentNames]);
 
-    // Fetch vacancy for each class in waitlisted registrations
+    // Fetch full class details (dayOfWeek, startTime, endTime, vacancy) for all relevant class IDs
     useEffect(() => {
         const classIdsToFetch = new Set<number>();
-        waitlistedIndividual.forEach((reg) => {
-            if (!classVacancies[reg.classId]) {
+        // Check individual registrations (registered & waitlisted)
+        [...registeredIndividual, ...waitlistedIndividual].forEach((reg) => {
+            if (!classDetails[reg.classId]) {
                 classIdsToFetch.add(reg.classId);
+            }
+        });
+        // Check group registrations
+        registeredGroup.forEach((group) => {
+            const classId = group.registrations[0]?.classId;
+            if (classId && !classDetails[classId]) {
+                classIdsToFetch.add(classId);
             }
         });
         waitlistedGroup.forEach((group) => {
             const classId = group.registrations[0]?.classId;
-            if (classId && !classVacancies[classId]) {
+            if (classId && !classDetails[classId]) {
                 classIdsToFetch.add(classId);
             }
         });
         classIdsToFetch.forEach((classId) => {
             fetch(`http://localhost:8081/api/classes/${classId}`)
                 .then((res) => res.json())
-                .then((data) => {
-                    // Assume data has a "vacancy" property
-                    setClassVacancies((prev) => ({ ...prev, [classId]: data.vacancy }));
+                .then((data: ClassDetails) => {
+                    // Assume data includes dayOfWeek, startTime, endTime, vacancy
+                    setClassDetails((prev) => ({ ...prev, [classId]: data }));
                 })
                 .catch((err) =>
-                    console.error("Error fetching class vacancy:", err)
+                    console.error("Error fetching class details:", err)
                 );
         });
-    }, [waitlistedIndividual, waitlistedGroup, classVacancies]);
+    }, [registeredIndividual, waitlistedIndividual, registeredGroup, waitlistedGroup, classDetails]);
 
-    // Update functions for waitlisted registrations
-    const handleIndividualRegister = (registrationId: number) => {
-        fetch(`http://localhost:8083/api/courseRegistration/individual/${registrationId}?newStatus=Registered`, {
+    // Unenroll function (for both individual and group - uses same API)
+    const handleUnenroll = (registrationId: number) => {
+        fetch(`http://localhost:8083/api/courseRegistration/unenroll/${registrationId}`, {
             method: "PUT",
         })
             .then((response) => {
                 if (response.ok) {
-                    message.success("Individual registration updated successfully");
-                    // Optionally, refresh or update state here
+                    message.success("Unenrolled successfully");
+                    // Refresh the page after unenrollment
+                    window.location.reload();
                 } else {
-                    message.error("Failed to update individual registration");
+                    message.error("Failed to unenroll");
                 }
             })
             .catch((error) => {
                 console.error(error);
-                message.error("Error updating individual registration");
+                message.error("Error during unenrollment");
             });
     };
 
-    const handleGroupRegister = (groupRegistrationId: number) => {
-        fetch(`http://localhost:8083/api/courseRegistration/group/${groupRegistrationId}?newStatus=Registered`, {
+    // For group registrations, highlight the current student's name if unenrolled
+    const handleGroupUnenroll = (registrationId: number) => {
+        fetch(`http://localhost:8083/api/courseRegistration/unenroll/${registrationId}`, {
             method: "PUT",
         })
             .then((response) => {
                 if (response.ok) {
-                    message.success("Group registration updated successfully");
-                    // Optionally, refresh or update state here
+                    message.success("Unenrolled successfully");
+                    setUnenrolledGroupRegistrationIds((prev) => [...prev, registrationId]);
                 } else {
-                    message.error("Failed to update group registration");
+                    message.error("Failed to unenroll");
                 }
             })
             .catch((error) => {
                 console.error(error);
-                message.error("Error updating group registration");
+                message.error("Error during unenrollment");
             });
     };
 
-    // Columns for Registered sections (no action button needed)
+    // Registered Individual Columns (Registration ID hidden)
     const registeredIndividualColumns = [
         {
-            title: "Registration ID",
-            dataIndex: "registrationId",
-            key: "registrationId",
+            title: "Day",
+            key: "dayOfWeek",
+            render: (_: any, reg: RegistrationDTO) => {
+                const details = classDetails[reg.classId];
+                return details ? details.dayOfWeek : "Loading...";
+            },
         },
         {
-            title: "Class ID",
-            dataIndex: "classId",
-            key: "classId",
+            title: "Start Time",
+            key: "startTime",
+            render: (_: any, reg: RegistrationDTO) => {
+                const details = classDetails[reg.classId];
+                return details ? details.startTime : "Loading...";
+            },
+        },
+        {
+            title: "End Time",
+            key: "endTime",
+            render: (_: any, reg: RegistrationDTO) => {
+                const details = classDetails[reg.classId];
+                return details ? details.endTime : "Loading...";
+            },
+        },
+        {
+            title: "Action",
+            key: "action",
+            render: (_: any, reg: RegistrationDTO) => (
+                <Button onClick={() => handleUnenroll(reg.registrationId)}>
+                    Unenroll
+                </Button>
+            ),
         },
     ];
 
+    // Registered Group Columns (Group Registration ID hidden)
     const registeredGroupColumns = [
         {
-            title: "Group Registration ID",
-            dataIndex: "groupId",
-            key: "groupId",
+            title: "Day",
+            key: "dayOfWeek",
+            render: (_: any, record: GroupRegistration) => {
+                const classId = record.registrations[0]?.classId;
+                const details = classId ? classDetails[classId] : undefined;
+                return details ? details.dayOfWeek : "Loading...";
+            },
         },
         {
-            title: "Class ID",
-            key: "classId",
-            render: (_: any, record: GroupRegistration) =>
-                record.registrations.length > 0 ? record.registrations[0].classId : "N/A",
+            title: "Start Time",
+            key: "startTime",
+            render: (_: any, record: GroupRegistration) => {
+                const classId = record.registrations[0]?.classId;
+                const details = classId ? classDetails[classId] : undefined;
+                return details ? details.startTime : "Loading...";
+            },
+        },
+        {
+            title: "End Time",
+            key: "endTime",
+            render: (_: any, record: GroupRegistration) => {
+                const classId = record.registrations[0]?.classId;
+                const details = classId ? classDetails[classId] : undefined;
+                return details ? details.endTime : "Loading...";
+            },
         },
         {
             title: "Students",
             key: "students",
             render: (_: any, record: GroupRegistration) => {
-                const names = record.registrations.map(
-                    (reg) => studentNames[reg.studentId] || "Loading..."
+                return record.registrations.map((reg, index) => (
+                    <span
+                        key={reg.registrationId}
+                        style={
+                            unenrolledGroupRegistrationIds.includes(reg.registrationId)
+                                ? { color: "red", fontWeight: "bold" }
+                                : {}
+                        }
+                    >
+                        {studentNames[reg.studentId] || "Loading..."}
+                        {index < record.registrations.length - 1 ? ", " : ""}
+                    </span>
+                ));
+            },
+        },
+        {
+            title: "Action",
+            key: "action",
+            render: (_: any, record: GroupRegistration) => {
+                const myRegistration = record.registrations.find(
+                    (reg) => reg.studentId === hardCodedStudentId
                 );
-                return names.join(", ");
+                if (myRegistration) {
+                    return (
+                        <Button onClick={() => handleGroupUnenroll(myRegistration.registrationId)}>
+                            Unenroll
+                        </Button>
+                    );
+                }
+                return null;
             },
         },
     ];
 
-    // Columns for Waitlisted sections (with Registered action button if vacancy permits)
+    // Waitlisted Individual Columns (Registration ID hidden)
     const individualWaitlistedColumns = [
         {
-            title: "Registration ID",
-            dataIndex: "registrationId",
-            key: "registrationId",
+            title: "Day",
+            key: "dayOfWeek",
+            render: (_: any, reg: RegistrationDTO) => {
+                const details = classDetails[reg.classId];
+                return details ? details.dayOfWeek : "Loading...";
+            },
         },
         {
-            title: "Class ID",
-            dataIndex: "classId",
-            key: "classId",
+            title: "Start Time",
+            key: "startTime",
+            render: (_: any, reg: RegistrationDTO) => {
+                const details = classDetails[reg.classId];
+                return details ? details.startTime : "Loading...";
+            },
+        },
+        {
+            title: "End Time",
+            key: "endTime",
+            render: (_: any, reg: RegistrationDTO) => {
+                const details = classDetails[reg.classId];
+                return details ? details.endTime : "Loading...";
+            },
         },
         {
             title: "Action",
             key: "action",
             render: (_: any, reg: RegistrationDTO) => {
-                const vacancy = classVacancies[reg.classId];
+                const details = classDetails[reg.classId];
+                const vacancy = details ? details.vacancy : undefined;
                 if (vacancy !== undefined && vacancy >= 1) {
                     return (
-                        <Button onClick={() => handleIndividualRegister(reg.registrationId)}>
+                        <Button onClick={() => handleUnenroll(reg.registrationId)}>
                             Registered
                         </Button>
                     );
@@ -258,43 +361,64 @@ export const MyRegistrationPage: React.FC = () => {
         },
     ];
 
+    // Waitlisted Group Columns (Group Registration ID hidden)
     const groupWaitlistedColumns = [
         {
-            title: "Group Registration ID",
-            dataIndex: "groupId",
-            key: "groupId",
+            title: "Day",
+            key: "dayOfWeek",
+            render: (_: any, record: GroupRegistration) => {
+                const classId = record.registrations[0]?.classId;
+                const details = classId ? classDetails[classId] : undefined;
+                return details ? details.dayOfWeek : "Loading...";
+            },
         },
         {
-            title: "Class ID",
-            key: "classId",
-            render: (_: any, record: GroupRegistration) =>
-                record.registrations.length > 0 ? record.registrations[0].classId : "N/A",
+            title: "Start Time",
+            key: "startTime",
+            render: (_: any, record: GroupRegistration) => {
+                const classId = record.registrations[0]?.classId;
+                const details = classId ? classDetails[classId] : undefined;
+                return details ? details.startTime : "Loading...";
+            },
+        },
+        {
+            title: "End Time",
+            key: "endTime",
+            render: (_: any, record: GroupRegistration) => {
+                const classId = record.registrations[0]?.classId;
+                const details = classId ? classDetails[classId] : undefined;
+                return details ? details.endTime : "Loading...";
+            },
         },
         {
             title: "Students",
             key: "students",
             render: (_: any, record: GroupRegistration) => {
-                const names = record.registrations.map(
-                    (reg) => studentNames[reg.studentId] || "Loading..."
-                );
-                return names.join(", ");
+                return record.registrations.map((reg, index) => (
+                    <span key={reg.registrationId}>
+                        {studentNames[reg.studentId] || "Loading..."}
+                        {index < record.registrations.length - 1 ? ", " : ""}
+                    </span>
+                ));
             },
         },
         {
             title: "Action",
             key: "action",
             render: (_: any, record: GroupRegistration) => {
-                const classId = record.registrations.length > 0 ? record.registrations[0].classId : undefined;
-                if (
-                    classId !== undefined &&
-                    classVacancies[classId] !== undefined &&
-                    classVacancies[classId] >= record.registrations.length
-                ) {
-                    return (
-                        <Button onClick={() => handleGroupRegister(record.groupId)}>
-                            Registered
-                        </Button>
+                const classId = record.registrations[0]?.classId;
+                const details = classId ? classDetails[classId] : undefined;
+                if (classId && details && details.vacancy >= record.registrations.length) {
+                    const myRegistration = record.registrations.find(
+                        (reg) => reg.studentId === hardCodedStudentId
                     );
+                    if (myRegistration) {
+                        return (
+                            <Button onClick={() => handleUnenroll(myRegistration.registrationId)}>
+                                Registered
+                            </Button>
+                        );
+                    }
                 }
                 return null;
             },
