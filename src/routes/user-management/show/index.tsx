@@ -4,10 +4,11 @@ import axios from "axios";
 import { Table, Typography, Button, Select } from "antd";
 
 interface Student {
-    studentFullId: string;
+    studentId: string;
     name: string;
     programName: string;
     enrolledAt: string;
+    studentFullId: string;
 }
 
 export const StudentsByProgramPage: React.FC = () => {
@@ -15,6 +16,7 @@ export const StudentsByProgramPage: React.FC = () => {
     const [students, setStudents] = useState<Student[]>([]);
     const [loading, setLoading] = useState(true);
     const [pageSize, setPageSize] = useState(10); // Default page size
+    const [currentPage, setCurrentPage] = useState(1); // Track current page
 
     useEffect(() => {
         if (!programName) return;
@@ -35,12 +37,12 @@ export const StudentsByProgramPage: React.FC = () => {
         {
             title: "#",
             key: "index",
-            render: (_: any, __: Student, index: number) => index + 1, // Auto index
+            render: (_: any, __: Student, index: number) => (currentPage - 1) * pageSize + index + 1, // Adjusted numbering
         },
         {
             title: "Student ID",
-            dataIndex: "studentFullId",
-            key: "studentFullId",
+            dataIndex: "studentId",
+            key: "studentId",
         },
         {
             title: "Name",
@@ -56,13 +58,18 @@ export const StudentsByProgramPage: React.FC = () => {
             title: "Enrollment Date",
             dataIndex: "enrolledAt",
             key: "enrolledAt",
-        }
+        },
+        {
+            title: "Email",
+             key: "email",
+            render: (_: any, record: Student) => `${record.studentFullId}@university.edu`, // Hardcoded email
+        },
     ];
 
     return (
         <div>
             <Button type="default">
-                <Link to="/programs">⬅ Back to Programs</Link>
+                <Link to="/programs">← Back to Programs</Link>
             </Button>
 
             <Typography.Title level={2}>
@@ -76,7 +83,10 @@ export const StudentsByProgramPage: React.FC = () => {
                 <Select
                     defaultValue={10}
                     style={{ width: 100, marginLeft: 10 }}
-                    onChange={value => setPageSize(value)}
+                    onChange={value => {
+                        setPageSize(value);
+                        setCurrentPage(1); // Reset to first page when changing page size
+                    }}
                     options={[
                         { value: 10, label: "10" },
                         { value: 20, label: "20" },
@@ -90,9 +100,13 @@ export const StudentsByProgramPage: React.FC = () => {
             <Table 
                 dataSource={students} 
                 columns={columns} 
-                rowKey="studentFullId" 
+                rowKey="studentId" 
                 loading={loading} 
-                pagination={{ pageSize }} 
+                pagination={{
+                    pageSize,
+                    current: currentPage,
+                    onChange: (page) => setCurrentPage(page), // Update current page
+                }} 
             />
         </div>
     );
