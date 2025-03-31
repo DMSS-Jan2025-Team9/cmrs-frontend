@@ -1,80 +1,99 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import axios from "axios";
+import { Table, Typography, Button, Select } from "antd";
+
+interface Student {
+    studentFullId: string;
+    name: string;
+    programName: string;
+    enrolledAt: string;
+}
 
 export const StudentsByProgramPage: React.FC = () => {
     const { programName } = useParams<{ programName: string }>();
-    const [students, setStudents] = useState<any[]>([]); // Ensure it's an array
+    const [students, setStudents] = useState<Student[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    const [pageSize, setPageSize] = useState(10); // Default page size
 
     useEffect(() => {
-        const fetchStudents = async () => {
-            if (!programName) {
-                setError("Program name is missing.");
-                setLoading(false);
-                return;
-            }
+        if (!programName) return;
 
-            try {
-                const encodedProgramName = encodeURIComponent(programName);
-                const response = await axios.get(`http://localhost:8085/api/students/program/${encodedProgramName}`);
+        axios.get(`http://localhost:8085/api/students/program/${encodeURIComponent(programName)}`)
+            .then((response) => {
                 setStudents(response.data || []);
-            } catch (err) {
-                console.error("Failed to fetch students:", err);
-                setError("Failed to fetch students.");
-            } finally {
+            })
+            .catch((error) => {
+                console.error("Failed to fetch students:", error);
+            })
+            .finally(() => {
                 setLoading(false);
-            }
-        };
-
-        fetchStudents();
+            });
     }, [programName]);
 
-    if (loading) return <p>Loading students...</p>;
-    if (error) return <p>{error}</p>;
+    const columns = [
+        {
+            title: "#",
+            key: "index",
+            render: (_: any, __: Student, index: number) => index + 1, // Auto index
+        },
+        {
+            title: "Student ID",
+            dataIndex: "studentFullId",
+            key: "studentFullId",
+        },
+        {
+            title: "Name",
+            dataIndex: "name",
+            key: "name",
+        },
+        {
+            title: "Program Name",
+            dataIndex: "programName",
+            key: "programName",
+        },
+        {
+            title: "Enrollment Date",
+            dataIndex: "enrolledAt",
+            key: "enrolledAt",
+        }
+    ];
 
     return (
-        // <div>
-        //     <h2>Students in {decodeURIComponent(programName || "")}</h2>
-        //     {students.length > 0 ? (
-        //         <ul>
-        //             {students.map((student) => (
-        //                 <li key={student.studentFullId}>
-        //                     {student.name} - {student.programName} ({student.enrolledAt})
-        //                 </li>
-        //             ))}
-        //         </ul>
-        //     ) : (
-        //         <p>No students found for this program.</p>
-        //     )}
-        // </div>
         <div>
-            <h2>Students in {decodeURIComponent(programName || "")}</h2>
-            {students.length > 0 ? (
-                <table border={1} cellPadding="8" cellSpacing="0" style={{ width: "100%", borderCollapse: "collapse" }}>
-                    <thead>
-                        <tr style={{ backgroundColor: "#f2f2f2" }}>
-                            <th>Student ID</th>
-                            <th>Name</th>
-                            <th>Program</th>
-                            <th>Enrolled At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {students.map((student) => (
-                            <tr key={student.studentFullId}>
-                                <td>{student.studentFullId}</td>
-                                <td>{student.name}</td>
-                                <td>{student.programName}</td>
-                                <td>{new Date(student.enrolledAt).toLocaleDateString()}</td> {/* Formats the date */}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            ) : (
-                <p>No students found for this program.</p>
-            )}
+            <Button type="default">
+                <Link to="/programs">⬅ Back to Programs</Link>
+            </Button>
+
+            <Typography.Title level={2}>
+                Students in {decodeURIComponent(programName || "")}
+            </Typography.Title>
+
+            <Typography.Text strong>Total Students: {students.length}</Typography.Text>
+
+            <div style={{ margin: "10px 0" }}>
+                <Typography.Text>Show:</Typography.Text>
+                <Select
+                    defaultValue={10}
+                    style={{ width: 100, marginLeft: 10 }}
+                    onChange={value => setPageSize(value)}
+                    options={[
+                        { value: 10, label: "10" },
+                        { value: 20, label: "20" },
+                        { value: 50, label: "50" },
+                        { value: 100, label: "100" }
+                    ]}
+                />
+                <Typography.Text> students per page</Typography.Text>
+            </div>
+
+            <Table 
+                dataSource={students} 
+                columns={columns} 
+                rowKey="studentFullId" 
+                loading={loading} 
+                pagination={{ pageSize }} 
+            />
         </div>
     );
 };

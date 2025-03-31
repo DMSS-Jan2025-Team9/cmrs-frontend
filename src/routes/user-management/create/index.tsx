@@ -134,7 +134,7 @@ export const BatchJobUploadPage: React.FC = () => {
     const scrollProps = csvContents.length > 15 ? { y: 300 } : {};  // Adjust `y` value as needed for scroll height
 
     return (
-        <Create title="Upload CSV and Start Batch Job">
+        <Create title="Upload CSV and Start Batch Job" saveButtonProps={{ style: { display: "none" } }}>
             <Form layout="vertical" onFinish={handleBatchJobSubmit}>
                 <Form.Item
                     label="Upload CSV"
