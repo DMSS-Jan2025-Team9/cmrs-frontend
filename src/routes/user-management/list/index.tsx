@@ -1,45 +1,50 @@
 import React, { useEffect, useState } from "react";
-import { Table, Typography } from "antd";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { Table, Typography } from "antd";
 
-interface Student {
-    studentFullId: string;
-    name: string;
+interface Program {
     programName: string;
-    enrolledAt: string;
+    studentCount: number;  // If you want to show count
 }
 
-export const AllStudentsPage: React.FC = () => {
-    const [students, setStudents] = useState<Student[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+export const ProgramsPage: React.FC = () => {
+    const [programs, setPrograms] = useState<Program[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get("http://localhost:8085/api/students")
-            .then((response) => setStudents(response.data))
-            .catch((error) => console.error("Error fetching students:", error))
-            .finally(() => setLoading(false));
+        axios.get("http://localhost:8081/api/program")
+            .then((response) => {
+                setPrograms(response.data);
+            })
+            .catch((error) => {
+                console.error("Failed to fetch programs:", error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, []);
 
-    // 👉 Column definitions (with clickable Program Name)
-const studentColumns = [
-    { title: "Student ID", dataIndex: "studentFullId", key: "studentFullId" },
-    { title: "Name", dataIndex: "name", key: "name" },
-    {
-        title: "Program Name",
-        dataIndex: "programName",
-        key: "programName",
-        render: (text: string) => (
-            <Link to={`/students/program/${encodeURIComponent(text)}`}>{text}</Link>
-        ),
-    },
-    { title: "Enrollment Date", dataIndex: "enrolledAt", key: "enrolledAt" },
-];
+    const columns = [
+        {
+            title: "Program Name",
+            dataIndex: "programName",
+            key: "programName",
+            render: (text: string) => <Link to={`/students/program/${encodeURIComponent(text)}`}>{text}</Link>,
+        },
+        // {
+        //     title: "Total Students",
+        //     dataIndex: "studentCount",
+        //     key: "studentCount",
+        // }
+    ];
 
     return (
         <div>
-            <Typography.Title level={3}>All Students</Typography.Title>
-            <Table dataSource={students} columns={studentColumns} loading={loading} rowKey="studentFullId" />
+            <Typography.Title level={2}>Programs</Typography.Title>
+            <Table dataSource={programs} columns={columns} rowKey="programName" loading={loading} />
         </div>
     );
 };
+
+export default ProgramsPage;

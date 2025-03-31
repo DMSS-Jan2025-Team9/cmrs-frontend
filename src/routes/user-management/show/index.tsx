@@ -35,16 +35,43 @@ export const StudentsByProgramPage: React.FC = () => {
     if (error) return <p>{error}</p>;
 
     return (
+        // <div>
+        //     <h2>Students in {decodeURIComponent(programName || "")}</h2>
+        //     {students.length > 0 ? (
+        //         <ul>
+        //             {students.map((student) => (
+        //                 <li key={student.studentFullId}>
+        //                     {student.name} - {student.programName} ({student.enrolledAt})
+        //                 </li>
+        //             ))}
+        //         </ul>
+        //     ) : (
+        //         <p>No students found for this program.</p>
+        //     )}
+        // </div>
         <div>
             <h2>Students in {decodeURIComponent(programName || "")}</h2>
             {students.length > 0 ? (
-                <ul>
-                    {students.map((student) => (
-                        <li key={student.studentFullId}>
-                            {student.name} - {student.programName} ({student.enrolledAt})
-                        </li>
-                    ))}
-                </ul>
+                <table border={1} cellPadding="8" cellSpacing="0" style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <thead>
+                        <tr style={{ backgroundColor: "#f2f2f2" }}>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Program</th>
+                            <th>Enrolled At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {students.map((student) => (
+                            <tr key={student.studentFullId}>
+                                <td>{student.studentFullId}</td>
+                                <td>{student.name}</td>
+                                <td>{student.programName}</td>
+                                <td>{new Date(student.enrolledAt).toLocaleDateString()}</td> {/* Formats the date */}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             ) : (
                 <p>No students found for this program.</p>
             )}
