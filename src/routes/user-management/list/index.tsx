@@ -22,17 +22,19 @@ export const AllStudentsPage: React.FC = () => {
     }, []);
 
     // 👉 Column definitions (with clickable Program Name)
-    const studentColumns = [
-        { title: "Student ID", dataIndex: "studentFullId", key: "studentFullId" },
-        { title: "Name", dataIndex: "name", key: "name" },
-        {
-            title: "Program Name",
-            dataIndex: "programName",
-            key: "programName",
-            render: (text: string) => <Link to={`/students/program/${encodeURIComponent(text)}`}>{text}</Link>,
-        },
-        { title: "Enrollment Date", dataIndex: "enrolledAt", key: "enrolledAt" },
-    ];
+const studentColumns = [
+    { title: "Student ID", dataIndex: "studentFullId", key: "studentFullId" },
+    { title: "Name", dataIndex: "name", key: "name" },
+    {
+        title: "Program Name",
+        dataIndex: "programName",
+        key: "programName",
+        render: (text: string) => (
+            <Link to={`/students/program/${encodeURIComponent(text)}`}>{text}</Link>
+        ),
+    },
+    { title: "Enrollment Date", dataIndex: "enrolledAt", key: "enrolledAt" },
+];
 
     return (
         <div>
