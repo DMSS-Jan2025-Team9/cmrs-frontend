@@ -33,7 +33,8 @@ import {
   CourseEditPage,
   CourseViewPage,
   ClassScheduleCreatePage,
-  ClassScheduleEditPage
+  ClassScheduleEditPage,
+  MyRegistrationPage
 } from "@/routes";
 
 import "@refinedev/antd/dist/reset.css";
@@ -99,6 +100,7 @@ const App = () => {
                   <Route path="/courseRegistration">
                     <Route index element={<CourseClassList/>} />
                     <Route path="new/:classId" element={<RegistrationCreatePage />} />
+                    <Route path="MyRegistration" element={<MyRegistrationPage />} />
                   </Route>
 
                   <Route path="/courseManagement">
