@@ -1,0 +1,48 @@
+name: Frontend SonarQube Analysis
+
+on:
+  # Run on the same triggers as your main CI/CD workflow
+  push:
+    branches: [ '**' ]
+  pull_request:
+    branches: [ '**' ]
+  # Optional: Add a manual trigger
+  workflow_dispatch:
+
+jobs:
+  sonarqube:
+    name: SonarQube Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Required for SonarQube to analyze the full history
+        
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.x'
+        cache: 'npm'
+        cache-dependency-path: './package-lock.json'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Test SonarQube Connection
+      run: |
+        echo "Testing connection to SonarQube server via ngrok..."
+        curl -s -o /dev/null -w "%{http_code}" "https://ec4f-116-89-50-222.ngrok-free.app/api/system/status"
+    
+    - name: SonarQube Analysis
+      uses: SonarSource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: https://ec4f-116-89-50-222.ngrok-free.app
+      with:
+        args: >
+          -Dsonar.projectKey=frontend
+          -Dsonar.projectName='Frontend'
+          -Dsonar.sources=src
+          -Dsonar.exclusions=node_modules/**,build/**,dist/**,**/*.test.js,**/*.spec.js,**/*.test.jsx,**/*.spec.jsx,**/*.test.ts,**/*.spec.ts,**/*.test.tsx,**/*.spec.tsx
+          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
