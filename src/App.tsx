@@ -121,15 +121,11 @@ const App = () => {
                     <Route index element={<BatchJobUploadPage />} />
                   </Route>
 
-              {/* Added Programs List Page Route Here */}
-            <Route path="/programs" element={<ProgramsPage />} />
-            {/* End of added route */}
+                  <Route path="/programs" element={<ProgramsPage />} />
 
                   <Route path="/students">
-  <Route path="program/:programName" element={<StudentsByProgramPage />} />
-</Route>
-
-             
+                    <Route path="program/:programName" element={<StudentsByProgramPage />} />
+                  </Route>
 
                   <Route path="*" element={<ErrorComponent />} />
                 </Route>
