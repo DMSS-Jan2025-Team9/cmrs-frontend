@@ -35,7 +35,8 @@ import {
   ClassScheduleCreatePage,
   ClassScheduleEditPage,
   ProgramsPage,
-  StudentsByProgramPage
+  StudentsByProgramPage,
+  MyRegistrationPage
 } from "@/routes";
 
 
@@ -103,6 +104,7 @@ const App = () => {
                   <Route path="/courseRegistration">
                     <Route index element={<CourseClassList/>} />
                     <Route path="new/:classId" element={<RegistrationCreatePage />} />
+                    <Route path="MyRegistration" element={<MyRegistrationPage />} />
                   </Route>
 
                   <Route path="/courseManagement">
