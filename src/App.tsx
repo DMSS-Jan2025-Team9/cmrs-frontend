@@ -28,6 +28,7 @@ import {
   CourseClassList,
   RegistrationCreatePage,
   BatchJobUploadPage,
+  RoleCreatePage,
   CourseListPage,
   CourseCreatePage,
   CourseEditPage,
@@ -117,6 +118,10 @@ const App = () => {
   
                   <Route path="/batchjob/upload">
                     <Route index element={<BatchJobUploadPage />} />
+                  </Route>
+
+                  <Route path="/roleManagement">
+                    <Route path="new" element={<RoleCreatePage />} />
                   </Route>
 
                   <Route path="*" element={<ErrorComponent />} />
