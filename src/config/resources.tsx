@@ -5,6 +5,9 @@ import {
   ProjectOutlined,
   ScheduleOutlined,
   ShopOutlined,
+  UserAddOutlined,
+  FileAddOutlined,
+  TagOutlined
 } from "@ant-design/icons";
 
 export const resources: IResourceItem[] = [
@@ -55,9 +58,17 @@ export const resources: IResourceItem[] = [
     create: "/courseRegistration/new/:classId",
     meta: {
       label: "Course Registration",
-      icon: <ProjectOutlined />,
+      icon: <FileAddOutlined />,
       dataProviderName: "courseRegistration", 
       liveMode: "off",
+    },
+  },
+  {
+    name: "roleManagement",
+    create: "/roleManagement/new",
+    meta: {
+      label: "Role Management",
+      icon: <TagOutlined/>,
     },
   },
   {
@@ -65,7 +76,16 @@ export const resources: IResourceItem[] = [
     list: "/batchjob/upload",
     meta: {
       label: "Add Students",
-      icon: <ProjectOutlined />,
+      icon: <UserAddOutlined />,
+    },
+  },
+  {
+    name: "programs",
+    list: "/programs",
+    show: "/programs/:id",
+    meta: {
+      label: "Programs",
+      icon: <ScheduleOutlined />,
     },
   },
 ];
