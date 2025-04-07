@@ -34,8 +34,12 @@ import {
   CourseViewPage,
   ClassScheduleCreatePage,
   ClassScheduleEditPage,
+  ProgramsPage,
+  StudentsByProgramPage,
   MyRegistrationPage
 } from "@/routes";
+
+
 
 import "@refinedev/antd/dist/reset.css";
 const REGISTRATION_API_URL = "http://localhost:8083/api";
@@ -117,6 +121,12 @@ const App = () => {
   
                   <Route path="/batchjob/upload">
                     <Route index element={<BatchJobUploadPage />} />
+                  </Route>
+
+                  <Route path="/programs" element={<ProgramsPage />} />
+
+                  <Route path="/students">
+                    <Route path="program/:programName" element={<StudentsByProgramPage />} />
                   </Route>
 
                   <Route path="*" element={<ErrorComponent />} />
