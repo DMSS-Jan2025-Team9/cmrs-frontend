@@ -4,36 +4,40 @@ import type { User } from "@/graphql/schema.types";
 
 import { API_URL, dataProvider } from "./data";
 
+import { jwtDecode } from "jwt-decode";
+
 /**
  * For demo purposes and to make it easier to test the app, you can use the following credentials:
  */
 export const authCredentials = {
-  email: "michael.scott@dundermifflin.com",
-  password: "demodemo",
+  username: "", // Changed from email to username
+  password: "",
 };
 
+interface CustomJwtPayload{
+  sub: string;
+  email: string;
+  roles: string[];
+}
+
 export const authProvider: AuthProvider = {
-  login: async ({ email }) => {
+  login: async ({ username, password }) => {
     try {
-      const { data } = await dataProvider.custom({
-        url: API_URL,
-        method: "post",
-        headers: {},
-        meta: {
-          variables: { email },
-          rawQuery: `
-                mutation Login($email: String!) {
-                    login(loginInput: {
-                      email: $email
-                    }) {
-                      accessToken,
-                    }
-                  }
-                `,
+      // Using the JWT API with username and password
+      const response = await fetch("http://localhost:8085/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({ username, password }),
       });
 
-      localStorage.setItem("access_token", data.login.accessToken);
+      if (!response.ok) {
+        throw new Error("Login failed");
+      }
+
+      const data = await response.json();
+      localStorage.setItem("access_token", data.accessToken);
 
       return {
         success: true,
@@ -46,7 +50,7 @@ export const authProvider: AuthProvider = {
         success: false,
         error: {
           message: "message" in error ? error.message : "Login failed",
-          name: "name" in error ? error.name : "Invalid email or password",
+          name: "name" in error ? error.name : "Invalid username or password",
         },
       };
     }
@@ -69,22 +73,27 @@ export const authProvider: AuthProvider = {
     return { error };
   },
   check: async () => {
-    try {
-      await dataProvider.custom({
-        url: API_URL,
-        method: "post",
-        headers: {},
-        meta: {
-          rawQuery: `
-                    query Me {
-                        me {
-                          name
-                        }
-                      }
-                `,
-        },
-      });
+    const accessToken = localStorage.getItem("access_token");
+    
+    if (!accessToken) {
+      return {
+        authenticated: false,
+        redirectTo: "/login",
+      };
+    }
 
+    try {
+      // Just verify the token format or check expiration if needed
+      const decodedToken = jwtDecode(accessToken);
+      const currentTime = Math.floor(Date.now() / 1000);
+      
+      if (decodedToken.exp && decodedToken.exp < currentTime) {
+        return {
+          authenticated: false,
+          redirectTo: "/login",
+        };
+      }
+      
       return {
         authenticated: true,
         redirectTo: "/",
@@ -99,33 +108,22 @@ export const authProvider: AuthProvider = {
   getIdentity: async () => {
     const accessToken = localStorage.getItem("access_token");
 
-    try {
-      const { data } = await dataProvider.custom<{ me: User }>({
-        url: API_URL,
-        method: "post",
-        headers: accessToken
-          ? {
-              Authorization: `Bearer ${accessToken}`,
-            }
-          : {},
-        meta: {
-          rawQuery: `
-                    query Me {
-                        me {
-                            id,
-                            name,
-                            email,
-                            phone,
-                            jobTitle,
-                            timezone
-                            avatarUrl
-                        }
-                      }
-                `,
-        },
-      });
+    if (!accessToken) {
+      return undefined;
+    }
 
-      return data.me;
+    try {
+      const decodedToken = jwtDecode<CustomJwtPayload>(accessToken);
+      
+      return {
+        name: decodedToken.sub, // Using 'sub' as name
+        email: decodedToken.email,
+        roles: decodedToken.roles,
+        // We don't have these in the token, but the component expects them
+        jobTitle: "", 
+        phone: "",
+        avatarUrl: "",
+      };
     } catch (error) {
       return undefined;
     }
