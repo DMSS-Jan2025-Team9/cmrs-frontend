@@ -29,7 +29,6 @@ import {
   RegistrationCreatePage,
   BatchJobUploadPage,
   RoleCreatePage,
-  RoleCreatePage,
   CourseListPage,
   CourseCreatePage,
   CourseEditPage,
