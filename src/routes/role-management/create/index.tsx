@@ -28,23 +28,48 @@ export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
 
   // Fetch available permissions on component mount
   useEffect(() => {
+    // Check if authentication is working properly
+    const checkAuth = async () => {
+      try {
+        const token = getAuthToken();
+        if (!token) {
+          console.log("No token found");
+          return;
+        }
+        
+        const response = await axios.get("http://localhost:8085/api/test/authorities", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type":"application/json"
+          }
+        });
+        
+        console.log("Auth check successful:", response.data);
+      } catch (error) {
+        console.error("Auth check failed:", error);
+      }
+    };
+    
+    checkAuth();
     fetchPermissions();
   }, []);
 
   const getAuthToken = () => {
     // Get the token from localStorage or wherever you store it after login
-    return localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+    return localStorage.getItem('access_token');
   };
+
+  const token = getAuthToken();
 
   const fetchPermissions = async () => {
     try {
       setLoading(true);
 
-      const token = getAuthToken();
+      console.log("Token BEFORE api call:", token);
 
       const response = await axios.get("http://localhost:8085/api/admin/permissions", {
         headers: {
-          Authorization: token
+          Authorization: `Bearer ${token}`
         }
       });
       if (response.data.success) {
@@ -91,8 +116,11 @@ export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
       permissions: permissionsToSend,
     };
 
-    axios
-      .post("http://localhost:8085/api/admin/roles", newRole)
+    axios.post("http://localhost:8085/api/admin/roles", newRole, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
       .then((response) => {
         // Reset the form after successful submission
         form.resetFields();

@@ -20,24 +20,23 @@ interface CustomJwtPayload{
   roles: string[];
 }
 
+import axios from "axios";
+
 export const authProvider: AuthProvider = {
   login: async ({ username, password }) => {
     try {
       // Using the JWT API with username and password
-      const response = await fetch("http://localhost:8085/api/auth/login", {
-        method: "POST",
+      const response = await axios.post("http://localhost:8085/api/auth/login", {
+        username,
+        password,
+      }, {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
       });
 
-      if (!response.ok) {
-        throw new Error("Login failed");
-      }
-
-      const data = await response.json();
-      localStorage.setItem("access_token", data.accessToken);
+      // Assuming the response contains accessToken
+      localStorage.setItem("access_token", response.data.accessToken);
 
       return {
         success: true,
@@ -55,6 +54,7 @@ export const authProvider: AuthProvider = {
       };
     }
   },
+
   logout: async () => {
     localStorage.removeItem("access_token");
 
@@ -65,6 +65,7 @@ export const authProvider: AuthProvider = {
   },
   onError: async (error) => {
     if (error.statusCode === "UNAUTHENTICATED") {
+      localStorage.removeItem("access_token");
       return {
         logout: true,
       };
