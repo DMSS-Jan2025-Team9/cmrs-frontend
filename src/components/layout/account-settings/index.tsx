@@ -1,19 +1,13 @@
 import { SaveButton, useForm } from "@refinedev/antd";
 import type { HttpError } from "@refinedev/core";
-import type { GetFields, GetVariables } from "@refinedev/nestjs-query";
-
+import { useGetIdentity } from "@refinedev/core";
 import { CloseOutlined } from "@ant-design/icons";
-import { Button, Card, Drawer, Form, Input, Spin } from "antd";
-
-import type {
-  UpdateUserMutation,
-  UpdateUserMutationVariables,
-} from "@/graphql/types";
+import { Button, Card, Drawer, Form, Input, Spin, Tag } from "antd";
 import { getNameInitials } from "@/utilities";
-
 import { CustomAvatar } from "../../custom-avatar";
 import { Text } from "../../text";
-import { UPDATE_USER_MUTATION } from "./queries";
+import { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode"; // You may need to install this
 
 type Props = {
   opened: boolean;
@@ -21,31 +15,61 @@ type Props = {
   userId: string;
 };
 
+type JwtPayload = {
+  permissions: string[];
+  roles: string[];
+  email: string;
+  sub: string;
+  iat: number;
+  exp: number;
+};
+
 export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
-  const {
-    saveButtonProps,
-    formProps,
-    query: queryResult,
-  } = useForm<
-    GetFields<UpdateUserMutation>,
-    HttpError,
-    GetVariables<UpdateUserMutationVariables>
-  >({
-    mutationMode: "optimistic",
-    resource: "users",
-    action: "edit",
-    id: userId,
-    meta: {
-      gqlMutation: UPDATE_USER_MUTATION,
-    },
-  });
-  const { avatarUrl, name } = queryResult?.data?.data || {};
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState<JwtPayload | null>(null);
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      setLoading(true);
+      try {
+        const accessToken = localStorage.getItem("access_token");
+        if (accessToken) {
+          const decoded = jwtDecode<JwtPayload>(accessToken);
+          setUserData(decoded);
+          
+          // Populate the form with data from JWT
+          form.setFieldsValue({
+            name: decoded.sub,
+            email: decoded.email,
+            roles: decoded.roles,
+            permissions: decoded.permissions
+          });
+        }
+      } catch (error) {
+        console.error("Error loading user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (opened) {
+      loadUserData();
+    }
+  }, [opened, form]);
+
+  const handleSave = async (values: any) => {
+    // In a real application, you would update the user profile here
+    // For now, we'll just close the modal
+    console.log("Would save values:", values);
+    setOpened(false);
+  };
 
   const closeModal = () => {
     setOpened(false);
   };
 
-  if (queryResult?.isLoading) {
+  if (loading) {
     return (
       <Drawer
         open={opened}
@@ -96,37 +120,42 @@ export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
         }}
       >
         <Card>
-          <Form {...formProps} layout="vertical">
+          <Form 
+            form={form}
+            layout="vertical"
+            onFinish={handleSave}
+          >
             <CustomAvatar
               shape="square"
-              src={avatarUrl}
-              name={getNameInitials(name || "")}
+              name={getNameInitials(userData?.sub || "")}
               style={{
                 width: 96,
                 height: 96,
                 marginBottom: "24px",
               }}
             />
-            <Form.Item label="Name" name="name">
-              <Input placeholder="Name" />
+            <Form.Item label="Username" name="name">
+              <Input disabled placeholder="Username" />
             </Form.Item>
             <Form.Item label="Email" name="email">
-              <Input placeholder="email" />
+              <Input disabled placeholder="Email" />
             </Form.Item>
-            <Form.Item label="Job title" name="jobTitle">
-              <Input placeholder="jobTitle" />
-            </Form.Item>
-            <Form.Item label="Phone" name="phone">
-              <Input placeholder="Timezone" />
+            <Form.Item label="Roles">
+              {userData?.roles.map(role => (
+                <Tag key={role} color="blue">{role}</Tag>
+              ))}
             </Form.Item>
           </Form>
-          <SaveButton
-            {...saveButtonProps}
+          <Button 
+            type="primary"
+            onClick={closeModal}
             style={{
               display: "block",
               marginLeft: "auto",
             }}
-          />
+          >
+            Close
+          </Button>
         </Card>
       </div>
     </Drawer>
