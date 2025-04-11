@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { List, CreateButton } from "@refinedev/antd";
-import { Table } from "antd";
+import { Table, Button } from "antd";
+import { useNavigate } from "react-router-dom";
 
 const { Column } = Table;
 
@@ -30,6 +30,8 @@ export const CourseClassList: React.FC = () => {
     const [classesMap, setClassesMap] = useState<{ [courseId: number]: Class[] }>({});
     const [loading, setLoading] = useState<boolean>(false);
 
+    const navigate = useNavigate();
+
     // Fetch courses from the specified URL
     useEffect(() => {
         setLoading(true);
@@ -58,7 +60,15 @@ export const CourseClassList: React.FC = () => {
     };
 
     return (
-        <List>
+        <div>
+            <div style={{ marginBottom: 16 }}>
+                <Button
+                    type="primary"
+                    onClick={() => navigate("/courseRegistration/myRegistration")}
+                >
+                    My Registration
+                </Button>
+            </div>
             <Table
                 dataSource={courses}
                 rowKey="courseId"
@@ -84,12 +94,16 @@ export const CourseClassList: React.FC = () => {
                                     title="Action"
                                     key="action"
                                     render={(_: any, cls: Class) => (
-                                        <CreateButton
-                                            resource="courseRegistration"
-                                            meta={{ classId: cls.classId }}
-                                        >
-                                            Register
-                                        </CreateButton>
+                                        <>
+                                            <Button
+                                                type="primary"
+                                                onClick={() =>
+                                                    navigate(`/courseRegistration/new/${cls.classId}`)
+                                                }
+                                            >
+                                                Register
+                                            </Button>
+                                        </>
                                     )}
                                 />
                             </Table>
@@ -108,7 +122,7 @@ export const CourseClassList: React.FC = () => {
                 <Column title="Course Code" dataIndex="courseCode" key="courseCode" />
                 <Column title="Description" dataIndex="courseDesc" key="courseDesc" />
             </Table>
-        </List>
+        </div>
     );
 };
 
