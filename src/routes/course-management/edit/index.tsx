@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Form, Input, Button, DatePicker, notification, InputNumber, Space, Select } from "antd";
+import { Form, Input, Button, DatePicker, notification, InputNumber, Space, Select, Spin } from "antd";
 import axios from "axios";
-import type { Course } from "@/models";
+import type { Course, Program } from "@/models";
 import moment from "moment";
 import { useGo } from "@refinedev/core";
 import { useParams } from "react-router-dom"; // Import useParams from react-router-dom
@@ -11,12 +11,46 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
 
   const [form] = Form.useForm(); // Create a reference to the form
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [loadingPrograms, setLoadingPrograms] = useState<boolean>(true);
+  const [initialLoad, setInitialLoad] = useState<boolean>(true);
 
   const courseStatus = [
     "active", "inactive"
   ];
-  // Fetch course data based on courseId
+
+  // Fetch programs list
   useEffect(() => {
+    fetchPrograms();
+  }, []);
+
+  // Function to fetch programs
+  const fetchPrograms = () => {
+    setLoadingPrograms(true);
+    axios
+      .get("http://localhost:8081/api/program")
+      .then((response) => {
+        setPrograms(response.data);
+        setLoadingPrograms(false);
+        
+        // After programs are loaded, fetch course data
+        if (initialLoad) {
+          fetchCourseData();
+          setInitialLoad(false);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching programs", error);
+        notification.error({
+          message: "Error",
+          description: "There was an issue fetching the programs list.",
+        });
+        setLoadingPrograms(false);
+      });
+  };
+
+  // Fetch course data based on courseId
+  const fetchCourseData = () => {
     if (courseId) {
       axios
         .get(`http://localhost:8081/api/courses/courseId/${courseId}`) // Fetch course data by ID
@@ -32,6 +66,7 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
             registrationStart: moment(courseData.registrationStart),
             registrationEnd: moment(courseData.registrationEnd),
             status: courseData.status,
+            programId: courseData.programId
           });
         })
         .catch((error) => {
@@ -42,7 +77,7 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
           });
         });
     }
-  }, [courseId, form]); // Add `form` to the dependency array
+  };
 
   // Format date to ISO 8601 string
   const formatDate = (date: any): string => {
@@ -56,6 +91,16 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
 
   function handleEdit(): void {
     const courseName = form.getFieldValue("courseName");
+    const programId = form.getFieldValue("programId");
+    
+    if (!programId) {
+      notification.error({
+        message: "Program Required",
+        description: "Please select a program for this course.",
+      });
+      return;
+    }
+    
     const updatedCourse: Course = {
       courseId: Number(courseId), // Add courseId to the updated course object
       courseName: courseName,
@@ -64,7 +109,8 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
       registrationEnd: formatDate(form.getFieldValue("registrationEnd")),
       maxCapacity: form.getFieldValue("maxCapacity"),
       courseDesc: form.getFieldValue("courseDesc"),
-      status: form.getFieldValue("status"), // Fixed: use "status" instead of (courseStatus)
+      status: form.getFieldValue("status"), 
+      programId: programId
     };
 
     axios
@@ -90,13 +136,14 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
         // Show error notification in case of failure
         notification.error({
           message: "Error Updating Course",
-          description: "There was an issue updating the course. Please try again.",
+          description: error.response?.data?.message || "There was an issue updating the course. Please try again.",
         });
       });
   }
 
   return (
     <div className="page-container">
+      <h1>Edit Course</h1>
       <Form layout="vertical" onFinish={handleEdit} form={form}>
         <Form.Item
           label="Course Name"
@@ -118,6 +165,30 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
           ]}
         >
           <Input allowClear />
+        </Form.Item>
+        
+        <Form.Item
+          label="Program"
+          name="programId"
+          rules={[{ required: true, message: "Program is required!" }]}
+        >
+          <Select
+            placeholder="Select a program"
+            loading={loadingPrograms}
+            style={{ width: '100%' }}
+          >
+            {loadingPrograms ? (
+              <Select.Option value="" disabled>
+                <Spin size="small" /> Loading programs...
+              </Select.Option>
+            ) : (
+              programs.map((program) => (
+                <Select.Option key={program.programId} value={program.programId}>
+                  {program.programName} - {program.programDesc}
+                </Select.Option>
+              ))
+            )}
+          </Select>
         </Form.Item>
 
         <Form.Item
@@ -173,13 +244,13 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
           name="courseDesc"
           rules={[{ required: true, message: "Course Description is required!" }]}
         >
-          <Input />
+          <Input.TextArea rows={4} />
         </Form.Item>
 
         <Form.Item>
           <Space size="middle">
             <Button type="primary" htmlType="submit">
-              Edit
+              Save Changes
             </Button>
             <Button
               onClick={() => {

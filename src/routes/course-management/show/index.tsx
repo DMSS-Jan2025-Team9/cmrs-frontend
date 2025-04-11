@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Card, Descriptions, Button, Spin, notification, Table, Space, Typography } from "antd";
 import axios from "axios";
-import type { Course } from "@/models";
+import type { Course, Program } from "@/models";
 import moment from "moment";
 import { useGo } from "@refinedev/core";
 import { useParams } from "react-router-dom";
+
 
 // Define ClassSchedule type
 interface ClassSchedule {
@@ -23,8 +24,10 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
   
   const [courseData, setCourseData] = useState<Course | null>(null);
+  const [programData, setProgramData] = useState<Program | null>(null);
   const [classSchedules, setClassSchedules] = useState<ClassSchedule[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [programLoading, setProgramLoading] = useState<boolean>(false);
   const [schedulesLoading, setSchedulesLoading] = useState<boolean>(true);
 
   const { Title } = Typography;
@@ -43,6 +46,11 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
         .then((response) => {
           setCourseData(response.data);
           setLoading(false);
+          
+          // If we have programId in the course data, fetch program details
+          if (response.data.programId) {
+            fetchProgramData(response.data.programId);
+          }
         })
         .catch((error) => {
           console.error("Error fetching course data", error);
@@ -54,6 +62,25 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
         });
     }
   }, [courseId]);
+
+  // Fetch program data based on programId
+  const fetchProgramData = (programId: number) => {
+    setProgramLoading(true);
+    axios
+      .get(`http://localhost:8081/api/program/${programId}`)
+      .then((response) => {
+        setProgramData(response.data);
+        setProgramLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching program data", error);
+        notification.error({
+          message: "Error",
+          description: "There was an issue fetching the program details.",
+        });
+        setProgramLoading(false);
+      });
+  };
 
   // Fetch class schedules for the course
   useEffect(() => {
@@ -176,6 +203,15 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
           {/* <Descriptions.Item label="Course ID">{courseData?.courseId}</Descriptions.Item> */}
           <Descriptions.Item label="Course Name">{courseData?.courseName}</Descriptions.Item>
           <Descriptions.Item label="Course Code">{courseData?.courseCode}</Descriptions.Item>
+          <Descriptions.Item label="Program">
+            {programLoading ? (
+              <Spin size="small" />
+            ) : programData ? (
+                <div>{programData.programName}</div>
+            ) : (
+              "Not assigned to a program"
+            )}
+          </Descriptions.Item>
           <Descriptions.Item label="Registration Start">
             {formatDate(courseData?.registrationStart || "")}
           </Descriptions.Item>
