@@ -7,11 +7,4 @@ export interface Course {
     maxCapacity: number;
     status: string; 
     courseDesc: string; 
-    programId: number;
-  }
-
-export interface Program {
-    programId: number;
-    programName: string;
-    programDesc: string;
   }
