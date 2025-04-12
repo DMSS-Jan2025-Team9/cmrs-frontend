@@ -2,12 +2,13 @@ import { SaveButton, useForm } from "@refinedev/antd";
 import type { HttpError } from "@refinedev/core";
 import { useGetIdentity } from "@refinedev/core";
 import { CloseOutlined } from "@ant-design/icons";
-import { Button, Card, Drawer, Form, Input, Spin, Tag } from "antd";
+import { Button, Card, Drawer, Form, Input, Spin, Tag, Row, Col, Descriptions } from "antd";
 import { getNameInitials } from "@/utilities";
 import { CustomAvatar } from "../../custom-avatar";
 import { Text } from "../../text";
 import { useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode"; // You may need to install this
+import { jwtDecode } from "jwt-decode";
+import { ExtendedUser } from "@/types";
 
 type Props = {
   opened: boolean;
@@ -15,35 +16,23 @@ type Props = {
   userId: string;
 };
 
-type JwtPayload = {
-  permissions: string[];
-  roles: string[];
-  email: string;
-  sub: string;
-  iat: number;
-  exp: number;
-};
-
 export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(true);
-  const [userData, setUserData] = useState<JwtPayload | null>(null);
+  const { data: user } = useGetIdentity<ExtendedUser>();
 
   useEffect(() => {
     const loadUserData = async () => {
       setLoading(true);
       try {
-        const accessToken = localStorage.getItem("access_token");
-        if (accessToken) {
-          const decoded = jwtDecode<JwtPayload>(accessToken);
-          setUserData(decoded);
-          
-          // Populate the form with data from JWT
+        if (user) {
+          // If we have the user data from useGetIdentity, use it to populate the form
           form.setFieldsValue({
-            name: decoded.sub,
-            email: decoded.email,
-            roles: decoded.roles,
-            permissions: decoded.permissions
+            name: user.name,
+            email: user.email,
+            roles: user.roles?.join(", "),
+            jobTitle: user.jobTitle || "",
+            userType: user.userType
           });
         }
       } catch (error) {
@@ -56,14 +45,7 @@ export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
     if (opened) {
       loadUserData();
     }
-  }, [opened, form]);
-
-  const handleSave = async (values: any) => {
-    // In a real application, you would update the user profile here
-    // For now, we'll just close the modal
-    console.log("Would save values:", values);
-    setOpened(false);
-  };
+  }, [opened, form, user]);
 
   const closeModal = () => {
     setOpened(false);
@@ -107,7 +89,7 @@ export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
           backgroundColor: "#fff",
         }}
       >
-        <Text strong>Account Settings</Text>
+        <Text strong>Account Details</Text>
         <Button
           type="text"
           icon={<CloseOutlined />}
@@ -120,42 +102,79 @@ export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
         }}
       >
         <Card>
-          <Form 
-            form={form}
+          <div style={{ marginBottom: "24px" }}>
+            <Row align="middle" gutter={16}>
+              <Col>
+                <CustomAvatar
+                  shape="square"
+                  name={user?.name || ""}
+                  style={{
+                    width: 96,
+                    height: 96,
+                  }}
+                />
+              </Col>
+              <Col>
+                <h2>{user?.name}</h2>
+                <Row>
+                <Text strong style={{ marginRight: "8px" }}>Roles:</Text>
+                  {user?.roles?.map(role => (
+                    <Tag key={role} color={role === "admin" ? "red" : "blue"}>
+                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                    </Tag>
+                  ))}
+                </Row>
+              </Col>
+            </Row>
+          </div>
+
+          <Descriptions
+            bordered
+            column={1}
             layout="vertical"
-            onFinish={handleSave}
+            title="User Information"
           >
-            <CustomAvatar
-              shape="square"
-              name={getNameInitials(userData?.sub || "")}
-              style={{
-                width: 96,
-                height: 96,
-                marginBottom: "24px",
-              }}
-            />
-            <Form.Item label="Username" name="name">
-              <Input disabled placeholder="Username" />
-            </Form.Item>
-            <Form.Item label="Email" name="email">
-              <Input disabled placeholder="Email" />
-            </Form.Item>
-            <Form.Item label="Roles">
-              {userData?.roles.map(role => (
-                <Tag key={role} color="blue">{role}</Tag>
-              ))}
-            </Form.Item>
-          </Form>
-          <Button 
-            type="primary"
-            onClick={closeModal}
-            style={{
-              display: "block",
-              marginLeft: "auto",
-            }}
-          >
-            Close
-          </Button>
+            <Descriptions.Item label="Email">{user?.email}</Descriptions.Item>
+            <Descriptions.Item label="User Type">
+              <Tag color={user?.userType === "staff" ? "green" : "purple"}>
+                {user?.userType?.toUpperCase()}
+              </Tag>
+            </Descriptions.Item>
+            
+            {user?.userType === "student" && (
+              <>
+                <Descriptions.Item label="Program">
+                  {user?.jobTitle || "Not specified"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Username/Student ID">
+                  {user?.studentFullId}
+                </Descriptions.Item>
+              </>
+            )}
+            
+            {user?.userType === "staff" && (
+              <>
+                <Descriptions.Item label="Position">
+                  {user?.jobTitle || "Not specified"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Department">
+                  {user?.department || "Not specified"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Username/Staff ID">
+                  {user?.staffFullId}
+                </Descriptions.Item>
+              </>
+            )}
+          </Descriptions>
+
+          <div style={{ marginTop: "24px", textAlign: "right" }}>
+            <Button 
+              type="primary"
+              onClick={closeModal}
+            >
+              Close
+            </Button>
+          </div>
         </Card>
       </div>
     </Drawer>

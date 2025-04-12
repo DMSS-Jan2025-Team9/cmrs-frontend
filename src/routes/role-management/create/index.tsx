@@ -196,24 +196,23 @@ export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
             key={category}
             className="mb-4"
             size="small"
+            style={{ marginTop: 16 }}
           >
             {perms.map(permission => (
-              <div key={permission.permissionId} className="mb-2">
-                <Checkbox
+              <div key={permission.permissionId} className="mb-3">
+                <Checkbox style={{ marginBottom: 4 }}
                   checked={selectedPermissions.includes(permission.permissionId)}
                   onChange={() => handlePermissionChange(permission.permissionId)}
                 >
-                  <div>
-                    <strong>{permission.permissionName}</strong>
-                    <div className="text-sm text-gray-500">{permission.description}</div>
-                  </div>
+                  <strong className="font-medium">{permission.permissionName}</strong>
                 </Checkbox>
+                <div className="text-sm text-gray-500 ml-6 mt-1" style={{ marginLeft: 24 }}>{permission.description}</div>
               </div>
             ))}
           </Card>
         ))}
 
-        <Form.Item>
+        <Form.Item style={{ marginTop: 32 }}>
           <Space size="middle">
             <Button type="primary" htmlType="submit">
               Create Role

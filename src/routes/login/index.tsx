@@ -1,10 +1,10 @@
 import React from "react";
 import { useLogin } from "@refinedev/core";
-import { Card, Layout, Typography, Form, Input, Button, theme } from "antd";
+import { Card, Layout, Typography, Form, Input, Button, theme, Alert } from "antd";
 import { ThemedTitleV2 } from "@refinedev/antd";
 import { authCredentials } from "@/providers";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const { useToken } = theme;
 
 export const LoginPage: React.FC = () => {
@@ -61,6 +61,19 @@ export const LoginPage: React.FC = () => {
           >
             <Input.Password size="large" placeholder="Password" />
           </Form.Item>
+
+          <Alert
+            message="User Information"
+            description={
+              <Text>
+                Student users use format <Text strong>U######</Text> (e.g. U119713)<br />
+                Staff users use format <Text strong>S######</Text> (e.g. S124642)
+              </Text>
+            }
+            type="info"
+            showIcon
+            style={{ marginBottom: "16px" }}
+          />
 
           <Form.Item style={{ marginBottom: 0 }}>
             <Button
