@@ -106,7 +106,7 @@ export const authProvider: AuthProvider = {
         }
         
         // Store user details in localStorage for use across the app
-        // localStorage.setItem("user_details", JSON.stringify(userDetails));
+        localStorage.setItem("user_details", JSON.stringify(userDetails));
       } catch (error) {
         console.error("Error fetching user details:", error);
       }

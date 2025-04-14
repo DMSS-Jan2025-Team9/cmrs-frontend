@@ -10,7 +10,7 @@ import routerProvider, {
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
 
-import { App as AntdApp, ConfigProvider } from "antd";
+import { App as AntdApp, ConfigProvider, theme } from "antd";
 
 import { Layout } from "@/components";
 import { resources } from "@/config/resources";
@@ -28,7 +28,6 @@ import {
   CourseClassList,
   RegistrationCreatePage,
   BatchJobUploadPage,
-  RoleCreatePage,
   CourseListPage,
   CourseCreatePage,
   CourseEditPage,
@@ -37,7 +36,14 @@ import {
   ClassScheduleEditPage,
   ProgramsPage,
   StudentsByProgramPage,
-  MyRegistrationPage
+  MyRegistrationPage,
+  RoleCreatePage,
+  RoleListPage,
+  RoleViewPage,
+  RoleEditPage,
+  PermissionListPage,
+  PermissionCreatePage,
+  PermissionEditPage
 } from "@/routes";
 
 
@@ -45,10 +51,28 @@ import {
 import "@refinedev/antd/dist/reset.css";
 const REGISTRATION_API_URL = "http://localhost:8083/api";
 
+// Create a custom theme that extends the Refine Blue theme
+const customTheme = {
+  ...RefineThemes.Blue,
+  components: {
+    ...RefineThemes.Blue.components,
+    Menu: {
+      ...RefineThemes.Blue.components?.Menu,
+      itemHeight: 50, // Increase menu item height
+      itemMarginInline: 14, // Add more horizontal spacing
+    },
+    Layout: {
+      ...RefineThemes.Blue.components?.Layout,
+      siderWidth: 260, // Increase sider width only when expanded
+      // Default collapsed width remains the same (80px)
+    }
+  }
+};
+
 const App = () => {
   return (
     <BrowserRouter>
-      <ConfigProvider theme={RefineThemes.Blue}>
+      <ConfigProvider theme={customTheme}>
         <AntdApp>
           <DevtoolsProvider>
             <Refine
@@ -125,8 +149,18 @@ const App = () => {
                   </Route>
 
                   <Route path="/roleManagement">
+                    <Route index element={<RoleListPage />} />
                     <Route path="new" element={<RoleCreatePage />} />
+                    <Route path="view/:roleId" element={<RoleViewPage />} />
+                    <Route path="edit/:roleId" element={<RoleEditPage />} />
                   </Route>
+
+                  <Route path="/permissionManagement">
+                    <Route index element={<PermissionListPage />} />
+                    <Route path="new" element={<PermissionCreatePage />} />
+                    <Route path="edit/:permissionId" element={<PermissionEditPage />} />
+                  </Route>
+                  
                   <Route path="/programs" element={<ProgramsPage />} />
 
                   <Route path="/students">

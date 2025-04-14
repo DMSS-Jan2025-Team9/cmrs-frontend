@@ -2,18 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Form, Input, Button, notification, Space, Checkbox, Card, Divider } from "antd";
 import axios from "axios";
 import { useGo } from "@refinedev/core";
+import type { Role_Creation, Permission } from "@/models/index";
 
-interface Permission {
-  permissionId: number;
-  permissionName: string;
-  description: string;
-}
-
-interface Role {
-  roleName: string;
-  description: string;
-  permissions: Permission[];
-}
 
 export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
@@ -110,7 +100,7 @@ export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
         description: permission.description
       }));
 
-    const newRole: Role = {
+    const newRole: Role_Creation = {
       roleName,
       description,
       permissions: permissionsToSend,
