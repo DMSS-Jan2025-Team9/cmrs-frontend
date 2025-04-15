@@ -43,7 +43,12 @@ import {
   RoleEditPage,
   PermissionListPage,
   PermissionCreatePage,
-  PermissionEditPage
+  PermissionEditPage,
+  PermissionViewPage,
+  UserListPage,
+  UserCreatePage,
+  UserViewPage,
+  UserEditPage
 } from "@/routes";
 
 
@@ -158,7 +163,15 @@ const App = () => {
                   <Route path="/permissionManagement">
                     <Route index element={<PermissionListPage />} />
                     <Route path="new" element={<PermissionCreatePage />} />
+                    <Route path="view/:permissionId" element={<PermissionViewPage />} />
                     <Route path="edit/:permissionId" element={<PermissionEditPage />} />
+                  </Route>
+
+                  <Route path="/staffStudentManagement">
+                    <Route index element={<UserListPage />} />
+                    <Route path="create" element={<UserCreatePage />} />
+                    <Route path="view/:type/:id" element={<UserViewPage />} />
+                    <Route path="edit/:type/:id" element={<UserEditPage />} />
                   </Route>
                   
                   <Route path="/programs" element={<ProgramsPage />} />

@@ -8,3 +8,4 @@ export * from "./class-scheduling";
 export * from "./user-management";
 export * from "./role-management";
 export * from "./permission-management";
+export * from "./staff-student-management";

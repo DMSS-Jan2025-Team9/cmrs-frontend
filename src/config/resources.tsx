@@ -8,7 +8,8 @@ import {
   UserAddOutlined,
   FileAddOutlined,
   TagOutlined,
-  LockOutlined
+  LockOutlined,
+  UserOutlined
 } from "@ant-design/icons";
 
 export const resources: IResourceItem[] = [
@@ -58,7 +59,7 @@ export const resources: IResourceItem[] = [
     show: "/courseRegistration/show/:id",
     create: "/courseRegistration/new/:classId",
     meta: {
-      label: "Course Registration",
+      label: "Registration",
       icon: <FileAddOutlined />,
       dataProviderName: "courseRegistration", 
       liveMode: "off",
@@ -71,7 +72,7 @@ export const resources: IResourceItem[] = [
     create: "/roleManagement/new",
     edit: "/roleManagement/edit/:id",
     meta: {
-      label: "Role Management",
+      label: "Roles",
       icon: <TagOutlined/>,
     },
   },
@@ -82,8 +83,19 @@ export const resources: IResourceItem[] = [
     create: "/permissionManagement/new",
     edit: "/permissionManagement/edit/:id",
     meta: {
-      label: "Permission Management",
+      label: "Permissions",
       icon: <LockOutlined/>,
+    },
+  },
+  {
+    name: "staffStudentManagement",
+    list: "/staffStudentManagement",
+    create: "/staffStudentManagement/create",
+    edit: "/staffStudentManagement/edit/:type/:id",
+    show: "/staffStudentManagement/view/:type/:id",
+    meta: {
+      label: "Users",
+      icon: <UserOutlined />,
     },
   },
   {
