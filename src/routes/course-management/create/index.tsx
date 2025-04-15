@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { Form, Input, Button, DatePicker, notification, InputNumber, Space } from "antd";
+import React, { useState, useEffect } from "react";
+import { Form, Input, Button, DatePicker, notification, InputNumber, Space, Select, Spin } from "antd";
 import axios from "axios";
-import type { Course } from "@/models";
+import type { Course, Program } from "@/models";
 import moment from "moment";
 import { useGo } from "@refinedev/core";
 
@@ -14,8 +14,36 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
   const [maxCapacity, setMaxCapacity] = useState<number>(0);
   const [registrationStart, setRegistrationStart] = useState<moment.Moment | null>(null);
   const [registrationEnd, setRegistrationEnd] = useState<moment.Moment | null>(null);
+  const [programId, setProgramId] = useState<number | null>(null);
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [loadingPrograms, setLoadingPrograms] = useState<boolean>(true);
 
   const [form] = Form.useForm(); // Create a reference to the form
+  const { Option } = Select;
+
+  // Fetch programs on component mount
+  useEffect(() => {
+    fetchPrograms();
+  }, []);
+
+  // Function to fetch programs from API
+  const fetchPrograms = () => {
+    setLoadingPrograms(true);
+    axios
+      .get("http://localhost:8081/api/program")
+      .then((response) => {
+        setPrograms(response.data);
+        setLoadingPrograms(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching programs", error);
+        notification.error({
+          message: "Error",
+          description: "There was an issue fetching the programs list.",
+        });
+        setLoadingPrograms(false);
+      });
+  };
 
   // Format date to ISO 8601 string
   const formatDate = (date: any): string => {
@@ -23,6 +51,14 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
   };
 
   function handleAdd(): void {
+    if (!programId) {
+      notification.error({
+        message: "Program Required",
+        description: "Please select a program for this course.",
+      });
+      return;
+    }
+
     const newCourse: Course = {
       courseName,
       courseCode,
@@ -31,6 +67,7 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
       maxCapacity,
       courseDesc,
       status: "active",
+      programId,
     };
 
     axios
@@ -45,6 +82,11 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
           description: `The course "${courseName}" has been added.`,
           duration: 3,
         });
+
+        // Navigate back to course list
+        go({
+          to: "/courseManagement",
+        });
       })
       .catch((error) => {
         console.error("There was an error adding the course!", error);
@@ -52,13 +94,14 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
         // Show error notification in case of failure
         notification.error({
           message: "Error Adding Course",
-          description: "There was an issue adding the course. Please try again.",
+          description: error.response?.data?.message || "There was an issue adding the course. Please try again.",
         });
       });
   }
 
   return (
     <div className="page-container">
+      <h1>Create New Course</h1>
       <Form layout="vertical" onFinish={handleAdd} form={form}> {/* Attach the form ref */}
         <Form.Item
           label="Course Name"
@@ -87,6 +130,31 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
             onChange={(e) => setCourseCode(e.target.value)}
             allowClear
           />
+        </Form.Item>
+        
+        <Form.Item
+          label="Program"
+          name="programId"
+          rules={[{ required: true, message: "Program is required!" }]}
+        >
+          <Select
+            placeholder="Select a program"
+            onChange={(value) => setProgramId(value)}
+            loading={loadingPrograms}
+            style={{ width: '100%' }}
+          >
+            {loadingPrograms ? (
+              <Option value="" disabled>
+                <Spin size="small" /> Loading programs...
+              </Option>
+            ) : (
+              programs.map((program) => (
+                <Option key={program.programId} value={program.programId}>
+                  {program.programName} - {program.programDesc}
+                </Option>
+              ))
+            )}
+          </Select>
         </Form.Item>
 
         <Form.Item
@@ -142,7 +210,8 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
           name="courseDesc"
           rules={[{ required: true, message: "Course Description is required!" }]}
         >
-          <Input
+          <Input.TextArea
+            rows={4}
             value={courseDesc}
             onChange={(e) => setCourseDesc(e.target.value)}
           />
@@ -150,18 +219,18 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
 
         <Form.Item>
           <Space size="middle">
-          <Button type="primary" htmlType="submit">
-            Add
-          </Button>
-          <Button
-            onClick={() => {
-              go({
-                to: "/courseManagement",
-              });
-            }}
-          >
-            Cancel
-          </Button>
+            <Button type="primary" htmlType="submit">
+              Add Course
+            </Button>
+            <Button
+              onClick={() => {
+                go({
+                  to: "/courseManagement",
+                });
+              }}
+            >
+              Cancel
+            </Button>
           </Space>
         </Form.Item>
       </Form>
