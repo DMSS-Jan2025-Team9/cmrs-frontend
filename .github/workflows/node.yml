@@ -2,9 +2,9 @@ name: Frontend CI/CD
 
 on:
   push:
-    branches: [ '**' ]
+    branches: ['feature/github-actions', 'main']
   pull_request:
-    branches: [ '**' ]
+    branches: ['feature/github-actions', 'main']
 
 jobs:
   build:
@@ -53,6 +53,7 @@ jobs:
       with:
         name: frontend-build
         path: frontend/target/*.jar
+        retention-days: 30
     
     - name: Upload linting reports
       uses: actions/upload-artifact@v4

@@ -3,9 +3,9 @@ name: Frontend SonarQube Analysis
 on:
   # Run on the same triggers as your main CI/CD workflow
   push:
-    branches: [ '**' ]
+    branches: ['feature/github-actions', 'main']
   pull_request:
-    branches: [ '**' ]
+    branches: ['feature/github-actions', 'main']
   workflow_dispatch:
 
 jobs:
@@ -31,13 +31,13 @@ jobs:
     - name: Test SonarQube Connection
       run: |
         echo "Testing connection to SonarQube server via ngrok..."
-        curl -s -o /dev/null -w "%{http_code}" "https://ec4f-116-89-50-222.ngrok-free.app/api/system/status"
+        curl -s -o /dev/null -w "%{http_code}" ${{ secrets.SONAR_HOST_URL }}
     
     - name: SonarQube Analysis
       uses: SonarSource/sonarqube-scan-action@master
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: https://ec4f-116-89-50-222.ngrok-free.app
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       with:
         args: >
           -Dsonar.projectKey=frontend
