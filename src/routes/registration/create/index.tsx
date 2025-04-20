@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Form, Input, Button, List, message } from "antd";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 interface CreateRegistrationDTO {
     classId: number;
@@ -37,18 +37,26 @@ export const RegistrationCreatePage: React.FC = () => {
         }
 
         try {
-            // Make the API call using axios
-            const response = await axios.post("http://localhost:8083/api/courseRegistration", values);
+            const response = await axios.post(
+              "http://localhost:8083/api/courseRegistration",
+              values
+            );
             if (response.status === 201) {
-                message.success("Registration created successfully!");
-                navigate("/courseRegistration"); // Redirect to the list page
+              message.success("Registration created successfully!");
+              navigate("/courseRegistration");
             } else {
-                message.error("Failed to create registration.");
+              message.error("Failed to create registration.");
             }
-        } catch (error) {
-            message.error("An error occurred while creating the registration.");
-        }
-    };
+          } catch (err) {
+            // Check if it's an AxiosError with a response payload
+            const axiosErr = err as AxiosError<{ message?: string }>;
+            const serverMessage =
+              axiosErr.response?.data?.message 
+              axiosErr.message;             
+        
+            message.error(serverMessage);
+          }
+        };
 
     return (
         <div>
