@@ -1,23 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Card, Descriptions, Button, Spin, notification, Table, Space, Typography } from "antd";
 import axios from "axios";
-import type { Course, Program } from "@/models";
+import type { Course, Program, ClassSchedule } from "@/models";
 import moment from "moment";
 import { useGo } from "@refinedev/core";
 import { useParams } from "react-router-dom";
-
-
-// Define ClassSchedule type
-interface ClassSchedule {
-  classId: number;
-  courseId: number;
-  dayOfWeek: string;
-  startTime: string;
-  endTime: string;
-  classroom: string;
-  instructor: string;
-  capacity: number;
-}
 
 export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
   const { courseId } = useParams();

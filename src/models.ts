@@ -15,3 +15,14 @@ export interface Program {
   programName: string;
   programDesc: string;
 }
+
+export interface ClassSchedule {
+  classId: number;
+  courseId: number;
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+  classroom: string;
+  instructor: string;
+  capacity: number;
+}
