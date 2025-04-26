@@ -1,4 +1,5 @@
 import type { IResourceItem } from "@refinedev/core";
+import { jwtDecode} from "jwt-decode";
 
 import {
   DashboardOutlined,
@@ -11,6 +12,10 @@ import {
   LockOutlined,
   UserOutlined
 } from "@ant-design/icons";
+interface DecodedToken {
+  role: string;
+  // other fields if necessary
+}
 
 export const resources: IResourceItem[] = [
   {
@@ -99,14 +104,6 @@ export const resources: IResourceItem[] = [
     },
   },
   {
-    name: "batchJobUpload",
-    list: "/batchjob/upload",
-    meta: {
-      label: "Add Students",
-      icon: <UserAddOutlined />,
-    },
-  },
-  {
     name: "programs",
     list: "/programs",
     show: "/programs/:id",
@@ -116,3 +113,11 @@ export const resources: IResourceItem[] = [
     },
   },
 ];
+
+export const getResourcesByRole = (role: string): IResourceItem[] => {
+  if (role === "student") {
+    return resources.filter(resource => resource.name === "courseRegistration");
+  }
+
+  return resources; // other roles see everything
+};

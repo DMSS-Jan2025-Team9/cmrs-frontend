@@ -23,39 +23,35 @@ interface CustomJwtPayload {
 
 interface StaffResponse {
   staffId: number;
-  name: string;
+  userId: number;
+  username: string;
+  email: string;
   firstName: string;
   lastName: string;
+  name: string;
   staffFullId: string;
   department: string;
   position: string;
-  user: {
-    userId: number;
-    username: string;
-    email: string;
-    roles: Array<{
-      roleName: string;
-      description: string;
-    }>;
-  };
+  roles: Array<{
+    roleName: string;
+  }>;
 }
 
 interface StudentResponse {
   studentId: number;
-  studentFullId: string;
+  userId: number;
+  username: string;
+  email: string;
   name: string;
+  studentIdNumber: string;
+  studentFullId: string;
+  programName: string;
   firstName: string;
   lastName: string;
-  programName: string;
-  user: {
-    userId: number;
-    username: string;
-    email: string;
-    roles: Array<{
-      roleName: string;
-      description: string;
-    }>;
-  };
+  roles: Array<{
+    roleName: string;
+    description: string;
+  }>;
 }
 
 export const authProvider: AuthProvider = {
@@ -95,7 +91,7 @@ export const authProvider: AuthProvider = {
           localStorage.setItem("user_type", "staff");
         } else {
           // Fetch student data
-          const studentResponse = await axios.get(`http://localhost:8085/api/students/byUserId/${userId}`, {
+          const studentResponse = await axios.get(`http://localhost:8085/api/students/secure/${userId}`, {
             headers: {
               "accept": "*/*",
               "Authorization": `Bearer ${response.data.accessToken}`
@@ -198,9 +194,9 @@ export const authProvider: AuthProvider = {
       if (userType === "staff") {
         const staffDetails = details as StaffResponse;
         return {
-          id: staffDetails.user.userId.toString(),
+          id: staffDetails.userId.toString(),
           name: `${staffDetails.firstName} ${staffDetails.lastName}`,
-          email: staffDetails.user.email,
+          email: staffDetails.email,
           roles: decodedToken.roles,
           jobTitle: staffDetails.position,
           department: staffDetails.department,
@@ -212,9 +208,9 @@ export const authProvider: AuthProvider = {
       } else {
         const studentDetails = details as StudentResponse;
         return {
-          id: studentDetails.user.userId.toString(),
+          id: studentDetails.userId.toString(),
           name: `${studentDetails.firstName} ${studentDetails.lastName}`,
-          email: studentDetails.user.email,
+          email: studentDetails.email,
           roles: decodedToken.roles,
           jobTitle: studentDetails.programName,
           userType: "student",

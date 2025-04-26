@@ -12,6 +12,14 @@ interface Role {
 interface Program {
   programId: number;
   programName: string;
+  programDesc: string;
+  courses: Course[];
+}
+
+interface Course {
+  courseId: number;
+  courseName: string;
+  courseDesc: string;
 }
 
 interface StudentCreateFormProps {
@@ -70,15 +78,15 @@ export const StudentCreateForm: React.FC<StudentCreateFormProps> = ({ onBack }) 
     setLoading(true);
     try {
       const accessToken = localStorage.getItem("access_token");
-      const response = await axios.get("http://localhost:8085/api/programs", {
+      const response = await axios.get("http://localhost:8081/api/program", {
         headers: {
           "Authorization": `Bearer ${accessToken}`,
           "Accept": "*/*"
         }
       });
-      
-      if (response.data.success) {
-        setPrograms(response.data.data);
+
+      if (response.data !== null) {
+        setPrograms(response.data);
       } else {
         notification.error({
           message: "Error",

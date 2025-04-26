@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   Card, 
   Button, 
@@ -9,117 +9,106 @@ import {
   Divider, 
   Descriptions, 
   Select,
-  Space
+  Space,
+  message
 } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import axios from "axios";
 import moment from "moment";
 import { useGo } from "@refinedev/core";
 import { useParams } from "react-router-dom";
+import { staffService, studentService } from "../services";
+import { Staff, Student, Role, StaffUpdateRequest, StudentUpdateRequest } from "../models";
 
-interface User {
-  userId: number;
-  username: string;
-  email: string;
-  createdAt: string;
-  updatedAt: string;
-  roles: Role[];
-}
-
-interface Staff extends User {
-  staffId: number;
-  staffFullId: string;
-  firstName: string;
-  lastName: string;
-  department: string;
-  position: string;
-}
-
-interface Student extends User {
-  studentId: number;
-  studentFullId: string;
-  firstName: string;
-  lastName: string;
-  programId: number;
-  programName: string;
-  enrolledAt: string;
-}
-
-interface Role {
-  roleId: number;
-  roleName: string;
-  description: string;
+// Extend the models to include created/updated dates if they're missing
+interface UserWithDates {
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export const UserEditPage = ({ children }: React.PropsWithChildren) => {
   const { type, id } = useParams<{ type: string; id: string }>();
   const go = useGo();
   const [form] = Form.useForm();
+  const formInitialized = useRef(false);
   
-  const [userData, setUserData] = useState<Staff | Student | null>(null);
+  const [userData, setUserData] = useState<(Staff | Student) & UserWithDates | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [rolesLoaded, setRolesLoaded] = useState<boolean>(false);
+  const [formKey, setFormKey] = useState<number>(0); // Key to force re-render
 
   const { Title } = Typography;
   const { Option } = Select;
 
-  // Fetch user data and all available roles
-  useEffect(() => {
-    if (id && type) {
-      Promise.all([
-        fetchUserData(),
-        fetchRoles()
-      ]);
-    }
-  }, [id, type]);
-
-  const fetchUserData = async () => {
-    setLoading(true);
-    try {
-      const accessToken = localStorage.getItem("access_token");
-      const url = type === "staff" 
-        ? `http://localhost:8085/api/staff/${id}`
-        : `http://localhost:8085/api/students/${id}`;
-      
-      const response = await axios.get(url, {
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "Accept": "*/*"
-        }
-      });
-      
-      if (response.data) {
-        const userData = response.data;
-        setUserData(userData);
-        
-        // Set the selected roles
-        const roleIds = userData.roles.map((role: Role) => role.roleId);
-        setSelectedRoleIds(roleIds);
-        
-        // Initialize form fields
-        form.setFieldsValue({
-          roleIds: roleIds
-        });
-      } else {
-        notification.error({
-          message: "Error",
-          description: `Failed to fetch ${type} details`,
-        });
-      }
-    } catch (error) {
-      console.error(`Error fetching ${type} data`, error);
-      notification.error({
-        message: "Error",
-        description: `There was an issue fetching the ${type} details.`,
-      });
-    } finally {
-      setLoading(false);
-    }
+  // Navigate back function
+  const handleBack = () => {
+    go({
+      to: type && id ? `/staffStudentManagement/view/${type}/${id}` : "/staffStudentManagement",
+    });
   };
 
-  const fetchRoles = async () => {
+  // Fetch user data and roles on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      if (id && type) {
+        setLoading(true);
+        
+        // Load roles first
+        const roleData = await fetchRoles();
+        
+        // Then load user data
+        let userData = null;
+        if (type === "staff") {
+          userData = await staffService.getStaffById(parseInt(id, 10));
+        } else {
+          userData = await studentService.getStudentById(parseInt(id, 10));
+        }
+        
+        if (userData && roleData && roleData.length > 0) {
+          console.log("User data:", userData);
+          console.log("Roles data:", roleData);
+          setUserData(userData);
+          
+          // Process role data to match user roles with available roles
+          if (userData.roles && Array.isArray(userData.roles)) {
+            const userRoleNames = userData.roles.map((role: any) => 
+              typeof role === 'string' ? role : role.roleName
+            ).filter(Boolean);
+            
+            console.log("User role names:", userRoleNames);
+            
+            // Find matching role IDs
+            const matchedRoleIds = roleData
+              .filter((role: Role) => userRoleNames.includes(role.roleName))
+              .map((role: Role) => role.roleId)
+              .filter((id: number | undefined): id is number => id !== undefined);
+            
+            console.log("Matched role IDs:", matchedRoleIds);
+            
+            // Set the selected roles
+            setSelectedRoleIds(matchedRoleIds);
+            
+            // Update the form values directly and force re-render
+            setTimeout(() => {
+              form.setFieldsValue({ roleIds: matchedRoleIds });
+              console.log("Form values set:", matchedRoleIds);
+              formInitialized.current = true;
+              setFormKey(prev => prev + 1); // Increment key to force re-render
+            }, 100);
+          }
+        }
+        
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+  }, [id, type]);
+
+  const fetchRoles = async (): Promise<Role[]> => {
     try {
       const accessToken = localStorage.getItem("access_token");
       const response = await axios.get("http://localhost:8085/api/admin/roles", {
@@ -130,7 +119,11 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
       });
       
       if (response.data.success) {
-        setRoles(response.data.data);
+        console.log("Fetched roles:", response.data.data);
+        const roleData = response.data.data;
+        setRoles(roleData);
+        setRolesLoaded(true);
+        return roleData;
       } else {
         notification.error({
           message: "Error",
@@ -144,10 +137,12 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
         description: "There was an issue fetching the available roles.",
       });
     }
+    return [];
   };
 
   // Format date
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
     return moment(dateString).format("YYYY-MM-DD HH:mm:ss");
   };
 
@@ -164,62 +159,59 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
 
   // Handle form submission - only updating roles
   const handleSubmit = async (values: { roleIds: number[] }) => {
-    if (!userData) return;
+    if (!userData || !id) return;
 
     setSubmitting(true);
+    console.log("Submitting role update:", values);
+    
     try {
-      const accessToken = localStorage.getItem("access_token");
-      const url = type === "staff" 
-        ? `http://localhost:8085/api/staff/${id}`
-        : `http://localhost:8085/api/students/${id}`;
+      // Get updated roles data with proper typings
+      const roleStrings: string[] = values.roleIds.map(roleId => {
+        const role = roles.find(r => r.roleId === roleId);
+        return role?.roleName || `Role ${roleId}`;
+      });
       
-      // For the update, we only send the roleIds to update
-      const response = await axios.put(
-        url,
-        {
-          roleIds: values.roleIds
-        },
-        {
-          headers: {
-            "Authorization": `Bearer ${accessToken}`,
-            "Accept": "*/*",
-            "Content-Type": "application/json"
-          }
-        }
-      );
+      let result;
+      if (type === "staff" && 'staffId' in userData) {
+        const updateData: StaffUpdateRequest = {
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          staffFullId: userData.staffFullId,
+          department: userData.department,
+          position: userData.position,
+          roles: roleStrings
+        };
+        
+        result = await staffService.updateStaff(parseInt(id, 10), updateData);
+      } else if (type === "student" && 'studentId' in userData) {
+        const updateData: StudentUpdateRequest = {
+          email: userData.email,
+          name: userData.name,
+          studentFullId: userData.studentFullId,
+          programName: userData.programName,
+          roles: roleStrings
+        };
+        
+        result = await studentService.updateStudent(parseInt(id, 10), updateData);
+      }
       
-      if (response.data && response.data.success !== false) {
-        notification.success({
-          message: "Success",
-          description: `${type === "staff" ? "Staff" : "Student"} updated successfully`,
-        });
+      if (result && result.success !== false) {
+        message.success(`${type === "staff" ? "Staff" : "Student"} roles updated successfully`);
         
         // Navigate back to user view
         go({
           to: `/staffStudentManagement/view/${type}/${id}`,
         });
       } else {
-        notification.error({
-          message: "Error",
-          description: response.data.message || `Failed to update ${type}`,
-        });
+        message.error(`Failed to update ${type} roles: ${result?.message || "Unknown error"}`);
       }
     } catch (error) {
       console.error(`Error updating ${type}:`, error);
-      notification.error({
-        message: "Error",
-        description: `There was an issue updating the ${type}.`,
-      });
+      message.error(`There was an error updating the ${type}. Please try again.`);
     } finally {
       setSubmitting(false);
     }
-  };
-
-  // Navigate back to user view page
-  const handleBack = () => {
-    go({
-      to: `/staffStudentManagement/view/${type}/${id}`,
-    });
   };
 
   // Staff-specific information section
@@ -258,6 +250,13 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
     );
   }
 
+  // Log current state for debugging
+  console.log("Current state on render:", {
+    selectedRoleIds,
+    formInitialized: formInitialized.current,
+    formKey
+  });
+
   return (
     <div className="page-container">
       <Card
@@ -292,10 +291,12 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
             <Divider orientation="left">Edit User Roles</Divider>
             
             <Form
+              key={formKey} // Key to force re-render when roles change
               form={form}
               layout="vertical"
               onFinish={handleSubmit}
               disabled={submitting}
+              initialValues={{ roleIds: selectedRoleIds }}
             >
               <Form.Item
                 name="roleIds"
@@ -307,10 +308,12 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
                   placeholder="Select roles"
                   style={{ width: '100%' }}
                   optionFilterProp="children"
+                  loading={!rolesLoaded}
+                  defaultValue={selectedRoleIds}
                 >
                   {getFilteredRoles().map(role => (
                     <Option key={role.roleId} value={role.roleId}>
-                      {role.roleName} - {role.description}
+                      {role.roleName} {role.description ? `- ${role.description}` : ''}
                     </Option>
                   ))}
                 </Select>

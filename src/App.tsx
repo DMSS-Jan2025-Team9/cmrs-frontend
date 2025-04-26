@@ -54,6 +54,7 @@ import {
 
 
 import "@refinedev/antd/dist/reset.css";
+import { getResourcesByRole } from './config/resources';
 const REGISTRATION_API_URL = "http://localhost:8083/api";
 
 // Create a custom theme that extends the Refine Blue theme

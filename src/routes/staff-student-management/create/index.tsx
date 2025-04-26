@@ -48,7 +48,7 @@ export const UserCreatePage = ({ children }: React.PropsWithChildren) => {
             style={{ minWidth: 200, height: 100, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
           >
             <div>Staff</div>
-            <div style={{ fontSize: '12px', marginTop: '8px' }}>Create staff user with department and position</div>
+            <div style={{ fontSize: '12px', marginTop: '8px' }}>Create a staff user</div>
           </Button>
           
           <Button 
@@ -59,7 +59,7 @@ export const UserCreatePage = ({ children }: React.PropsWithChildren) => {
             style={{ minWidth: 200, height: 100, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
           >
             <div>Student</div>
-            <div style={{ fontSize: '12px', marginTop: '8px' }}>Create student user with program information</div>
+            <div style={{ fontSize: '12px', marginTop: '8px' }}>Create a student user</div>
           </Button>
         </Space>
       </div>
