@@ -29,18 +29,34 @@ export const UserListPage = ({ children }: React.PropsWithChildren) => {
       },
     });
   };
-
+  
+  const handleMassEnrollStudents = () => {
+    go({
+      to: "/batchjob/upload",
+    });
+  };
+  
   return (
     <Card
       title="User Management"
       extra={
-        <Button 
-          type="primary" 
-          icon={<UserAddOutlined />} 
-          onClick={handleCreateUser}
-        >
-          Create User
-        </Button>
+        <>
+          <Button
+            type="primary"
+            icon={<UserAddOutlined />}
+            onClick={handleCreateUser}
+            style={{ marginRight: 8 }}
+          >
+            Create User
+          </Button>
+          <Button
+            type="primary"
+            icon={<UserAddOutlined />}
+            onClick={handleMassEnrollStudents}
+          >
+            Mass Enroll Students
+          </Button>
+        </>
       }
     >
       <Tabs 

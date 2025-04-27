@@ -174,6 +174,10 @@ const App = () => {
                     <Route path="view/:type/:id" element={<UserViewPage />} />
                     <Route path="edit/:type/:id" element={<UserEditPage />} />
                   </Route>
+
+                  <Route path="/batchjob/upload">
+                    <Route index element={<BatchJobUploadPage />} />
+                  </Route>  
                   
                   <Route path="/programs" element={<ProgramsPage />} />
 
