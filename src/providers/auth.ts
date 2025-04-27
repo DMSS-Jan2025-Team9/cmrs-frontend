@@ -4,36 +4,112 @@ import type { User } from "@/graphql/schema.types";
 
 import { API_URL, dataProvider } from "./data";
 
-/**
- * For demo purposes and to make it easier to test the app, you can use the following credentials:
- */
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+
 export const authCredentials = {
-  email: "michael.scott@dundermifflin.com",
-  password: "demodemo",
+  username: "", 
+  password: "",
+
 };
 
+interface CustomJwtPayload {
+  sub: string;
+  roles: string[];
+  userId: number;
+  iat: number;
+  exp: number;
+}
+
+interface StaffResponse {
+  staffId: number;
+  name: string;
+  firstName: string;
+  lastName: string;
+  staffFullId: string;
+  department: string;
+  position: string;
+  user: {
+    userId: number;
+    username: string;
+    email: string;
+    roles: Array<{
+      roleName: string;
+      description: string;
+    }>;
+  };
+}
+
+interface StudentResponse {
+  studentId: number;
+  studentFullId: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  programName: string;
+  user: {
+    userId: number;
+    username: string;
+    email: string;
+    roles: Array<{
+      roleName: string;
+      description: string;
+    }>;
+  };
+}
+
 export const authProvider: AuthProvider = {
-  login: async ({ email }) => {
+  login: async ({ username, password }) => {
     try {
-      const { data } = await dataProvider.custom({
-        url: API_URL,
-        method: "post",
-        headers: {},
-        meta: {
-          variables: { email },
-          rawQuery: `
-                mutation Login($email: String!) {
-                    login(loginInput: {
-                      email: $email
-                    }) {
-                      accessToken,
-                    }
-                  }
-                `,
+      // Using the JWT API with username and password
+      const response = await axios.post("http://localhost:8085/api/auth/login", {
+        username,
+        password,
+      }, {
+        headers: {
+          "Content-Type": "application/json",
         },
       });
 
-      localStorage.setItem("access_token", data.login.accessToken);
+      // Assuming the response contains accessToken
+      localStorage.setItem("access_token", response.data.accessToken);
+
+      // Decode token to get user type and info
+      const decodedToken = jwtDecode<CustomJwtPayload>(response.data.accessToken);
+      const userId = decodedToken.userId;
+      
+      // Store user info for quick access
+      try {
+        let userDetails = null;
+        const isAdmin = decodedToken.roles.includes("admin");
+        
+        // If admin or staff role, fetch staff data
+        if (isAdmin || decodedToken.roles.includes("staff")) {
+          const staffResponse = await axios.get(`http://localhost:8085/api/staff/${userId}`, {
+            headers: {
+              "accept": "*/*",
+              "Authorization": `Bearer ${response.data.accessToken}`
+            }
+          });
+          userDetails = staffResponse.data;
+          localStorage.setItem("user_type", "staff");
+        } else {
+          // Fetch student data
+          const studentResponse = await axios.get(`http://localhost:8085/api/students/byUserId/${userId}`, {
+            headers: {
+              "accept": "*/*",
+              "Authorization": `Bearer ${response.data.accessToken}`
+            }
+          });
+          userDetails = studentResponse.data;
+          localStorage.setItem("user_type", "student");
+        }
+        
+        // Store user details in localStorage for use across the app
+        // localStorage.setItem("user_details", JSON.stringify(userDetails));
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
 
       return {
         success: true,
@@ -46,13 +122,16 @@ export const authProvider: AuthProvider = {
         success: false,
         error: {
           message: "message" in error ? error.message : "Login failed",
-          name: "name" in error ? error.name : "Invalid email or password",
+          name: "name" in error ? error.name : "Invalid username or password",
         },
       };
     }
   },
+
   logout: async () => {
     localStorage.removeItem("access_token");
+    localStorage.removeItem("user_details");
+    localStorage.removeItem("user_type");
 
     return {
       success: true,
@@ -61,6 +140,9 @@ export const authProvider: AuthProvider = {
   },
   onError: async (error) => {
     if (error.statusCode === "UNAUTHENTICATED") {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user_details");
+      localStorage.removeItem("user_type");
       return {
         logout: true,
       };
@@ -69,25 +151,29 @@ export const authProvider: AuthProvider = {
     return { error };
   },
   check: async () => {
-    try {
-      await dataProvider.custom({
-        url: API_URL,
-        method: "post",
-        headers: {},
-        meta: {
-          rawQuery: `
-                    query Me {
-                        me {
-                          name
-                        }
-                      }
-                `,
-        },
-      });
+    const accessToken = localStorage.getItem("access_token");
+    
+    if (!accessToken) {
+      return {
+        authenticated: false,
+        redirectTo: "/login",
+      };
+    }
 
+    try {
+      // Just verify the token format or check expiration if needed
+      const decodedToken = jwtDecode<CustomJwtPayload>(accessToken);
+      const currentTime = Math.floor(Date.now() / 1000);
+      
+      if (decodedToken.exp && decodedToken.exp < currentTime) {
+        return {
+          authenticated: false,
+          redirectTo: "/login",
+        };
+      }
+      
       return {
         authenticated: true,
-        redirectTo: "/",
       };
     } catch (error) {
       return {
@@ -98,35 +184,47 @@ export const authProvider: AuthProvider = {
   },
   getIdentity: async () => {
     const accessToken = localStorage.getItem("access_token");
+    const userDetails = localStorage.getItem("user_details");
+    const userType = localStorage.getItem("user_type");
+
+    if (!accessToken || !userDetails) {
+      return undefined;
+    }
 
     try {
-      const { data } = await dataProvider.custom<{ me: User }>({
-        url: API_URL,
-        method: "post",
-        headers: accessToken
-          ? {
-              Authorization: `Bearer ${accessToken}`,
-            }
-          : {},
-        meta: {
-          rawQuery: `
-                    query Me {
-                        me {
-                            id,
-                            name,
-                            email,
-                            phone,
-                            jobTitle,
-                            timezone
-                            avatarUrl
-                        }
-                      }
-                `,
-        },
-      });
-
-      return data.me;
+      const decodedToken = jwtDecode<CustomJwtPayload>(accessToken);
+      const details = JSON.parse(userDetails);
+      
+      if (userType === "staff") {
+        const staffDetails = details as StaffResponse;
+        return {
+          id: staffDetails.user.userId.toString(),
+          name: `${staffDetails.firstName} ${staffDetails.lastName}`,
+          email: staffDetails.user.email,
+          roles: decodedToken.roles,
+          jobTitle: staffDetails.position,
+          department: staffDetails.department,
+          userType: "staff",
+          staffId: staffDetails.staffId,
+          staffFullId: staffDetails.staffFullId,
+          avatarUrl: "", // You can add a default avatar or generate one based on name
+        };
+      } else {
+        const studentDetails = details as StudentResponse;
+        return {
+          id: studentDetails.user.userId.toString(),
+          name: `${studentDetails.firstName} ${studentDetails.lastName}`,
+          email: studentDetails.user.email,
+          roles: decodedToken.roles,
+          jobTitle: studentDetails.programName,
+          userType: "student",
+          studentId: studentDetails.studentId,
+          studentFullId: studentDetails.studentFullId,
+          avatarUrl: "", // You can add a default avatar or generate one based on name
+        };
+      }
     } catch (error) {
+      console.error("Error in getIdentity:", error);
       return undefined;
     }
   },

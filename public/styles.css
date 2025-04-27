@@ -1,0 +1,12 @@
+/* User dropdown styles */
+.user-name {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .user-name {
+    display: inline;
+  }
+}
+
+/* Add other global styles below */ 

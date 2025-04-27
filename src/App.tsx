@@ -28,6 +28,7 @@ import {
   CourseClassList,
   RegistrationCreatePage,
   BatchJobUploadPage,
+  RoleCreatePage,
   CourseListPage,
   CourseCreatePage,
   CourseEditPage,
@@ -123,6 +124,9 @@ const App = () => {
                     <Route index element={<BatchJobUploadPage />} />
                   </Route>
 
+                  <Route path="/roleManagement">
+                    <Route path="new" element={<RoleCreatePage />} />
+                  </Route>
                   <Route path="/programs" element={<ProgramsPage />} />
 
                   <Route path="/students">
