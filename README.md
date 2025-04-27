@@ -3,6 +3,8 @@ Frontend source code for Course Management and Registration System (CMRS)
 
 Reference source code: https://github.com/refinedev/refine/tree/master/examples/app-crm-minimal
 
+# CloudFront URL: https://d1x5otaft5jht9.cloudfront.net/
+
 ## Build and compile source code
 
 ### Local development

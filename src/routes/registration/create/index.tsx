@@ -1,54 +1,62 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Form, Input, Button, List, message } from "antd";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 interface CreateRegistrationDTO {
     classId: number;
-    studentIds: string[];
+    studentFullIds: string[];
 }
 
 export const RegistrationCreatePage: React.FC = () => {
     const { classId } = useParams<{ classId: string }>();
-    const [studentIds, setStudentIds] = useState<string[]>([]);
+    const [studentFullIds, setStudentFullIds] = useState<string[]>([]);
     const [form] = Form.useForm();
     const navigate = useNavigate();
 
     const handleAddStudent = () => {
-        if (studentIds.length < 5) {
-            setStudentIds([...studentIds, ""]);
+        if (studentFullIds.length < 5) {
+            setStudentFullIds([...studentFullIds, ""]);
         } else {
             message.warning("You can only register up to 5 students.");
         }
     };
 
     const handleStudentIdChange = (index: number, value: string) => {
-        const newStudentIds = [...studentIds];
+        const newStudentIds = [...studentFullIds];
         newStudentIds[index] = value;
-        setStudentIds(newStudentIds);
+        setStudentFullIds(newStudentIds);
     };
 
     const onFinish = async (values: any) => {
         // Add the studentIds to the form values
-        values.studentIds = studentIds.filter(id => id.trim() !== "");
-        if (values.studentIds.length === 0) {
+        values.studentFullIds = studentFullIds.filter(id => id.trim() !== "");
+        if (values.studentFullIds.length === 0) {
             message.error("Please enter at least one student ID.");
             return;
         }
 
         try {
-            // Make the API call using axios
-            const response = await axios.post("http://localhost:8083/api/courseRegistration", values);
+            const response = await axios.post(
+              "http://localhost:8083/api/courseRegistration",
+              values
+            );
             if (response.status === 201) {
-                message.success("Registration created successfully!");
-                navigate("/courseRegistration"); // Redirect to the list page
+              message.success("Registration created successfully!");
+              navigate("/courseRegistration");
             } else {
-                message.error("Failed to create registration.");
+              message.error("Failed to create registration.");
             }
-        } catch (error) {
-            message.error("An error occurred while creating the registration.");
-        }
-    };
+          } catch (err) {
+            // Check if it's an AxiosError with a response payload
+            const axiosErr = err as AxiosError<{ message?: string }>;
+            const serverMessage =
+              axiosErr.response?.data?.message 
+              axiosErr.message;             
+        
+            message.error(serverMessage);
+          }
+        };
 
     return (
         <div>
@@ -62,7 +70,7 @@ export const RegistrationCreatePage: React.FC = () => {
                 {/* Student ID Fields */}
                 <List
                     header={<div>Student</div>}
-                    dataSource={studentIds}
+                    dataSource={studentFullIds}
                     renderItem={(id, index) => (
                         <List.Item>
                             <Form.Item
