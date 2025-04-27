@@ -23,39 +23,35 @@ interface CustomJwtPayload {
 
 interface StaffResponse {
   staffId: number;
-  name: string;
+  userId: number;
+  username: string;
+  email: string;
   firstName: string;
   lastName: string;
+  name: string;
   staffFullId: string;
   department: string;
   position: string;
-  user: {
-    userId: number;
-    username: string;
-    email: string;
-    roles: Array<{
-      roleName: string;
-      description: string;
-    }>;
-  };
+  roles: Array<{
+    roleName: string;
+  }>;
 }
 
 interface StudentResponse {
   studentId: number;
-  studentFullId: string;
+  userId: number;
+  username: string;
+  email: string;
   name: string;
+  studentIdNumber: string;
+  studentFullId: string;
+  programName: string;
   firstName: string;
   lastName: string;
-  programName: string;
-  user: {
-    userId: number;
-    username: string;
-    email: string;
-    roles: Array<{
-      roleName: string;
-      description: string;
-    }>;
-  };
+  roles: Array<{
+    roleName: string;
+    description: string;
+  }>;
 }
 
 export const authProvider: AuthProvider = {
@@ -93,9 +89,10 @@ export const authProvider: AuthProvider = {
           });
           userDetails = staffResponse.data;
           localStorage.setItem("user_type", "staff");
+          localStorage.setItem("user_roles", JSON.stringify(decodedToken.roles));
         } else {
           // Fetch student data
-          const studentResponse = await axios.get(`http://localhost:8085/api/students/byUserId/${userId}`, {
+          const studentResponse = await axios.get(`http://localhost:8085/api/students/secure/${userId}`, {
             headers: {
               "accept": "*/*",
               "Authorization": `Bearer ${response.data.accessToken}`
@@ -103,10 +100,24 @@ export const authProvider: AuthProvider = {
           });
           userDetails = studentResponse.data;
           localStorage.setItem("user_type", "student");
+          localStorage.setItem("user_roles", JSON.stringify(decodedToken.roles));
         }
         
         // Store user details in localStorage for use across the app
         localStorage.setItem("user_details", JSON.stringify(userDetails));
+        
+        // Determine redirect path based on user role
+        let redirectPath = "/";
+        if (decodedToken.roles.includes("student")) {
+          redirectPath = "/courseRegistration";
+        } else if (decodedToken.roles.includes("admin")) {
+          redirectPath = "/";
+        }
+        
+        return {
+          success: true,
+          redirectTo: redirectPath,
+        };
       } catch (error) {
         console.error("Error fetching user details:", error);
       }
@@ -132,6 +143,7 @@ export const authProvider: AuthProvider = {
     localStorage.removeItem("access_token");
     localStorage.removeItem("user_details");
     localStorage.removeItem("user_type");
+    localStorage.removeItem("user_roles");
 
     return {
       success: true,
@@ -143,6 +155,7 @@ export const authProvider: AuthProvider = {
       localStorage.removeItem("access_token");
       localStorage.removeItem("user_details");
       localStorage.removeItem("user_type");
+      localStorage.removeItem("user_roles");
       return {
         logout: true,
       };
@@ -198,9 +211,9 @@ export const authProvider: AuthProvider = {
       if (userType === "staff") {
         const staffDetails = details as StaffResponse;
         return {
-          id: staffDetails.user.userId.toString(),
+          id: staffDetails.userId.toString(),
           name: `${staffDetails.firstName} ${staffDetails.lastName}`,
-          email: staffDetails.user.email,
+          email: staffDetails.email,
           roles: decodedToken.roles,
           jobTitle: staffDetails.position,
           department: staffDetails.department,
@@ -212,9 +225,9 @@ export const authProvider: AuthProvider = {
       } else {
         const studentDetails = details as StudentResponse;
         return {
-          id: studentDetails.user.userId.toString(),
+          id: studentDetails.userId.toString(),
           name: `${studentDetails.firstName} ${studentDetails.lastName}`,
-          email: studentDetails.user.email,
+          email: studentDetails.email,
           roles: decodedToken.roles,
           jobTitle: studentDetails.programName,
           userType: "student",
