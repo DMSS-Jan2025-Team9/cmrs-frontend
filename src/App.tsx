@@ -113,12 +113,12 @@ const App = () => {
               authProvider={{
                 ...authProvider,
                 // Override the logout method to also refresh resources
-                logout: async () => {
-                  const result = await authProvider.logout();
-                  // Dispatch a storage event to trigger resource update
-                  window.dispatchEvent(new Event("storage"));
-                  return result;
-                },
+                // logout: async () => {
+                //   const result = await authProvider.logout();
+                //   // Dispatch a storage event to trigger resource update
+                //   window.dispatchEvent(new Event("storage"));
+                //   return result;
+                // },
                 // Override the login method to also refresh resources
                 login: async (params) => {
                   const result = await authProvider.login(params);
