@@ -7,7 +7,8 @@ import {
   ShopOutlined,
   UserAddOutlined,
   FileAddOutlined,
-  TagOutlined
+  TagOutlined,
+  LockOutlined
 } from "@ant-design/icons";
 
 export const resources: IResourceItem[] = [
@@ -65,10 +66,24 @@ export const resources: IResourceItem[] = [
   },
   {
     name: "roleManagement",
+    list: "/roleManagement",
+    show: "/roleManagement/view/:id",
     create: "/roleManagement/new",
+    edit: "/roleManagement/edit/:id",
     meta: {
       label: "Role Management",
       icon: <TagOutlined/>,
+    },
+  },
+  {
+    name: "permissionManagement",
+    list: "/permissionManagement",
+    show: "/permissionManagement/view/:id",
+    create: "/permissionManagement/new",
+    edit: "/permissionManagement/edit/:id",
+    meta: {
+      label: "Permission Management",
+      icon: <LockOutlined/>,
     },
   },
   {
