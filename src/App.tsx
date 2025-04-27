@@ -13,7 +13,7 @@ import routerProvider, {
 import { App as AntdApp, ConfigProvider, theme } from "antd";
 
 import { Layout } from "@/components";
-import { resources } from "@/config/resources";
+import { resources, getResourcesByRole } from "@/config/resources";
 import { authProvider, dataProvider, liveProvider } from "@/providers";
 import dataProviders from "@refinedev/simple-rest";
 import {
@@ -51,10 +51,9 @@ import {
   UserEditPage
 } from "@/routes";
 
-
-
 import "@refinedev/antd/dist/reset.css";
-import { getResourcesByRole } from './config/resources';
+import { useEffect, useState } from "react";
+
 const REGISTRATION_API_URL = "http://localhost:8083/api";
 
 // Create a custom theme that extends the Refine Blue theme
@@ -76,6 +75,28 @@ const customTheme = {
 };
 
 const App = () => {
+  // Using state to manage resources so they update when user logs in/out
+  const [visibleResources, setVisibleResources] = useState(getResourcesByRole());
+  
+  // Listen for changes to user roles in localStorage
+  useEffect(() => {
+    // Update resources when component mounts
+    setVisibleResources(getResourcesByRole());
+    
+    // Set up event listener for storage changes (like login/logout)
+    const handleStorageChange = () => {
+      setVisibleResources(getResourcesByRole());
+    };
+    
+    // Create a custom event listener for auth changes
+    window.addEventListener("storage", handleStorageChange);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
   return (
     <BrowserRouter>
       <ConfigProvider theme={customTheme}>
@@ -87,11 +108,26 @@ const App = () => {
                 default: dataProvider,
                 courseRegistration: dataProviders(REGISTRATION_API_URL),
               }}
-            
               liveProvider={liveProvider}
               notificationProvider={useNotificationProvider}
-              authProvider={authProvider}
-              resources={resources}
+              authProvider={{
+                ...authProvider,
+                // Override the logout method to also refresh resources
+                logout: async () => {
+                  const result = await authProvider.logout();
+                  // Dispatch a storage event to trigger resource update
+                  window.dispatchEvent(new Event("storage"));
+                  return result;
+                },
+                // Override the login method to also refresh resources
+                login: async (params) => {
+                  const result = await authProvider.login(params);
+                  // Dispatch a storage event to trigger resource update
+                  window.dispatchEvent(new Event("storage"));
+                  return result;
+                }
+              }}
+              resources={visibleResources}
               options={{
                 syncWithLocation: true,
                 warnWhenUnsavedChanges: true,

@@ -89,6 +89,7 @@ export const authProvider: AuthProvider = {
           });
           userDetails = staffResponse.data;
           localStorage.setItem("user_type", "staff");
+          localStorage.setItem("user_roles", JSON.stringify(decodedToken.roles));
         } else {
           // Fetch student data
           const studentResponse = await axios.get(`http://localhost:8085/api/students/secure/${userId}`, {
@@ -99,10 +100,24 @@ export const authProvider: AuthProvider = {
           });
           userDetails = studentResponse.data;
           localStorage.setItem("user_type", "student");
+          localStorage.setItem("user_roles", JSON.stringify(decodedToken.roles));
         }
         
         // Store user details in localStorage for use across the app
         localStorage.setItem("user_details", JSON.stringify(userDetails));
+        
+        // Determine redirect path based on user role
+        let redirectPath = "/";
+        if (decodedToken.roles.includes("student")) {
+          redirectPath = "/courseRegistration";
+        } else if (decodedToken.roles.includes("admin")) {
+          redirectPath = "/";
+        }
+        
+        return {
+          success: true,
+          redirectTo: redirectPath,
+        };
       } catch (error) {
         console.error("Error fetching user details:", error);
       }
@@ -128,6 +143,7 @@ export const authProvider: AuthProvider = {
     localStorage.removeItem("access_token");
     localStorage.removeItem("user_details");
     localStorage.removeItem("user_type");
+    localStorage.removeItem("user_roles");
 
     return {
       success: true,
@@ -139,6 +155,7 @@ export const authProvider: AuthProvider = {
       localStorage.removeItem("access_token");
       localStorage.removeItem("user_details");
       localStorage.removeItem("user_type");
+      localStorage.removeItem("user_roles");
       return {
         logout: true,
       };
