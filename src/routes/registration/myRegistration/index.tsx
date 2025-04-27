@@ -1,480 +1,292 @@
+// src/pages/MyRegistrationPage.tsx
+
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { Table, Typography, Spin, Button, message } from "antd";
 
-interface RegistrationDTO {
-    registrationId: number;
-    studentId: number;
-    classId: number;
-    registrationStatus: string;
-    groupRegistrationId?: number | null;
+interface RawRegistration {
+  registrationId:       number;
+  studentId:            number;
+  classId:              number;
+  registrationStatus:   string;
+  groupRegistrationId?: number | null;
 }
 
-interface GroupRegistration {
-    groupId: number;
-    registrations: RegistrationDTO[];
-}
-
-interface ClassDetails {
-    dayOfWeek: string;
-    startTime: string;
-    endTime: string;
-    vacancy: number;
+interface EnrichedRegistration {
+  registrationId:       number;
+  studentId:            number;
+  registrationStatus:   string;
+  groupRegistrationId?: number | null;
+  groupRegistration:    boolean;
+  dayOfWeek:            string;
+  startTime:            string;
+  endTime:              string;
+  courseName:           string;
+  members:              string;
+  vacancy:              number;
+  groupSize:            number;
 }
 
 export const MyRegistrationPage: React.FC = () => {
-    const [loading, setLoading] = useState<boolean>(false);
-    // Registered data
-    const [registeredIndividual, setRegisteredIndividual] = useState<RegistrationDTO[]>([]);
-    const [registeredGroup, setRegisteredGroup] = useState<GroupRegistration[]>([]);
-    // Waitlisted data
-    const [waitlistedIndividual, setWaitlistedIndividual] = useState<RegistrationDTO[]>([]);
-    const [waitlistedGroup, setWaitlistedGroup] = useState<GroupRegistration[]>([]);
-    // Caches for student names
-    const [studentNames, setStudentNames] = useState<{ [key: number]: string }>({});
-    // Cache full class details (including dayOfWeek, startTime, endTime, vacancy)
-    const [classDetails, setClassDetails] = useState<{ [key: number]: ClassDetails }>({});
-    // Track unenrolled group registration IDs for highlighting (for current user)
-    const [unenrolledGroupRegistrationIds, setUnenrolledGroupRegistrationIds] = useState<number[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [registrations, setRegistrations] = useState<EnrichedRegistration[]>([]);
 
-    // Hard-coded student ID
-    const hardCodedStudentId = 1;
+  // helper to reload everything
+  const fetchAll = async () => {
+    setLoading(true);
+    try {
+      
+      const { data: rawRegs } = await axios.get<RawRegistration[]>(
+        "http://localhost:8083/api/courseRegistration",
+        { params: { studentId: 1 } } //hardcode
+      );
+      const regs = rawRegs.map(r => ({
+        ...r,
+        groupRegistration: r.groupRegistrationId != null,
+      }));
 
-    // Fetch registrations and split them by status and type
-    useEffect(() => {
-        setLoading(true);
-        fetch(`http://localhost:8083/api/courseRegistration?studentId=${hardCodedStudentId}`)
-            .then((res) => res.json())
-            .then((data: RegistrationDTO[]) => {
-                // Split registrations by status
-                const registered = data.filter(
-                    (reg) => reg.registrationStatus === "Registered"
-                );
-                const waitlisted = data.filter(
-                    (reg) => reg.registrationStatus === "Waitlisted"
-                );
+      const classIds = Array.from(new Set(regs.map(r => r.classId)));
+      const classResponses = await Promise.all(
+        classIds.map(id =>
+          axios.get<{
+            classId: number;
+            courseId: number;
+            dayOfWeek: string;
+            startTime: string;
+            endTime: string;
+            vacancy: number;
+          }>(`http://localhost:8081/api/classes/${id}`)
+        )
+      );
+      const classesMap: Record<
+        number,
+        { courseId: number; dayOfWeek: string; startTime: string; endTime: string; vacancy: number }
+      > = {};
+      classResponses.forEach(({ data: c }) => {
+        classesMap[c.classId] = {
+          courseId: c.courseId,
+          dayOfWeek: c.dayOfWeek,
+          startTime: c.startTime,
+          endTime: c.endTime,
+          vacancy: c.vacancy,
+        };
+      });
 
-                // Registered Individual
-                setRegisteredIndividual(registered.filter((reg) => !reg.groupRegistrationId));
-                // Registered Group
-                const regGroupIds = Array.from(
-                    new Set(
-                        registered
-                            .filter((reg) => reg.groupRegistrationId != null)
-                            .map((reg) => reg.groupRegistrationId as number)
-                    )
-                );
-                Promise.all(
-                    regGroupIds.map((groupId) =>
-                        fetch(`http://localhost:8083/api/courseRegistration?groupRegistrationId=${groupId}`)
-                            .then((res) => res.json())
-                    )
-                )
-                    .then((groupDataArray: RegistrationDTO[][]) => {
-                        const groups: GroupRegistration[] = regGroupIds.map((groupId, index) => ({
-                            groupId,
-                            registrations: groupDataArray[index],
-                        }));
-                        setRegisteredGroup(groups);
-                    })
-                    .catch((error) => {
-                        console.error("Error fetching registered group registrations:", error);
-                        message.error("Error fetching registered group registrations.");
-                    });
+      // courses
+      const courseIds = Array.from(
+        new Set(classResponses.map(r => r.data.courseId))
+      );
+      const courseResponses = await Promise.all(
+        courseIds.map(cid =>
+          axios.get<{ courseId: number; courseName: string }>(
+            `http://localhost:8081/api/courses/courseId/${cid}`
+          )
+        )
+      );
+      const coursesMap: Record<number, string> = {};
+      courseResponses.forEach(({ data: c }) => {
+        coursesMap[c.courseId] = c.courseName;
+      });
 
-                // Waitlisted Individual
-                setWaitlistedIndividual(waitlisted.filter((reg) => !reg.groupRegistrationId));
-                // Waitlisted Group
-                const waitGroupIds = Array.from(
-                    new Set(
-                        waitlisted
-                            .filter((reg) => reg.groupRegistrationId != null)
-                            .map((reg) => reg.groupRegistrationId as number)
-                    )
-                );
-                Promise.all(
-                    waitGroupIds.map((groupId) =>
-                        fetch(`http://localhost:8083/api/courseRegistration?groupRegistrationId=${groupId}`)
-                            .then((res) => res.json())
-                    )
-                )
-                    .then((groupDataArray: RegistrationDTO[][]) => {
-                        const groups: GroupRegistration[] = waitGroupIds.map((groupId, index) => ({
-                            groupId,
-                            registrations: groupDataArray[index],
-                        }));
-                        setWaitlistedGroup(groups);
-                    })
-                    .catch((error) => {
-                        console.error("Error fetching waitlisted group registrations:", error);
-                        message.error("Error fetching waitlisted group registrations.");
-                    });
+      // 4) group members
+      const groupIds = Array.from(
+        new Set(
+          regs
+            .filter(r => r.groupRegistration)
+            .map(r => r.groupRegistrationId as number)
+        )
+      );
+      const groupMembersMap: Record<number, { studentId: number; name: string }[]> = {};
+      await Promise.all(
+        groupIds.map(async gid => {
+          const { data: groupRegs } = await axios.get<RawRegistration[]>(
+            "http://localhost:8083/api/courseRegistration",
+            { params: { groupRegistrationId: gid } }
+          );
+          const uniqueSids = Array.from(
+            new Set(groupRegs.map(gr => gr.studentId))
+          );
+          const members = await Promise.all(
+            uniqueSids.map(async sid => {
+              const { data: s } = await axios.get<{ studentId: number; name: string }>(
+                `http://localhost:8085/api/students/${sid}`
+              );
+              return { studentId: s.studentId, name: s.name };
             })
-            .catch((error) => {
-                console.error("Error fetching registrations:", error);
-                message.error("Error fetching registrations.");
-            })
-            .finally(() => setLoading(false));
-    }, []);
-
-    // Fetch student names for group registrations
-    useEffect(() => {
-        const studentIdsToFetch = new Set<number>();
-        [...registeredGroup, ...waitlistedGroup].forEach((group) => {
-            group.registrations.forEach((reg) => {
-                if (!studentNames[reg.studentId]) {
-                    studentIdsToFetch.add(reg.studentId);
-                }
-            });
-        });
-        studentIdsToFetch.forEach((studentId) => {
-            fetch(`http://localhost:8085/api/students/${studentId}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    // Assuming the returned data has a "name" property
-                    setStudentNames((prev) => ({ ...prev, [studentId]: data.name }));
-                })
-                .catch((err) =>
-                    console.error(`Error fetching student ${studentId}:`, err)
-                );
-        });
-    }, [registeredGroup, waitlistedGroup, studentNames]);
-
-    // Fetch full class details (dayOfWeek, startTime, endTime, vacancy) for all relevant class IDs
-    useEffect(() => {
-        const classIdsToFetch = new Set<number>();
-        // Check individual registrations (registered & waitlisted)
-        [...registeredIndividual, ...waitlistedIndividual].forEach((reg) => {
-            if (!classDetails[reg.classId]) {
-                classIdsToFetch.add(reg.classId);
-            }
-        });
-        // Check group registrations
-        registeredGroup.forEach((group) => {
-            const classId = group.registrations[0]?.classId;
-            if (classId && !classDetails[classId]) {
-                classIdsToFetch.add(classId);
-            }
-        });
-        waitlistedGroup.forEach((group) => {
-            const classId = group.registrations[0]?.classId;
-            if (classId && !classDetails[classId]) {
-                classIdsToFetch.add(classId);
-            }
-        });
-        classIdsToFetch.forEach((classId) => {
-            fetch(`http://localhost:8081/api/classes/${classId}`)
-                .then((res) => res.json())
-                .then((data: ClassDetails) => {
-                    // Assume data includes dayOfWeek, startTime, endTime, vacancy
-                    setClassDetails((prev) => ({ ...prev, [classId]: data }));
-                })
-                .catch((err) =>
-                    console.error("Error fetching class details:", err)
-                );
-        });
-    }, [registeredIndividual, waitlistedIndividual, registeredGroup, waitlistedGroup, classDetails]);
-
-    // Unenroll function (for both individual and group - uses same API)
-    const handleUnenroll = (registrationId: number) => {
-        fetch(`http://localhost:8083/api/courseRegistration/unenroll/${registrationId}`, {
-            method: "PUT",
+          );
+          groupMembersMap[gid] = members;
         })
-            .then((response) => {
-                if (response.ok) {
-                    message.success("Unenrolled successfully");
-                    // Refresh the page after unenrollment
-                    window.location.reload();
-                } else {
-                    message.error("Failed to unenroll");
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-                message.error("Error during unenrollment");
-            });
-    };
+      );
 
-    // For group registrations, highlight the current student's name if unenrolled
-    const handleGroupUnenroll = (registrationId: number) => {
-        fetch(`http://localhost:8083/api/courseRegistration/unenroll/${registrationId}`, {
-            method: "PUT",
-        })
-            .then((response) => {
-                if (response.ok) {
-                    message.success("Unenrolled successfully");
-                    setUnenrolledGroupRegistrationIds((prev) => [...prev, registrationId]);
-                } else {
-                    message.error("Failed to unenroll");
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-                message.error("Error during unenrollment");
-            });
-    };
+      // 5) enrich
+      const enriched = regs.map(r => {
+        const cls = classesMap[r.classId];
+        const courseName = coursesMap[cls.courseId];
+        const membersList = r.groupRegistration
+          ? groupMembersMap[r.groupRegistrationId as number]
+          : [];
+        const membersStr = membersList
+          .filter(m => m.studentId !== r.studentId)
+          .map(m => m.name)
+          .join(", ");
+        const groupSize = r.groupRegistration ? membersList.length : 1;
 
-    // Registered Individual Columns (Registration ID hidden)
-    const registeredIndividualColumns = [
-        {
-            title: "Day",
-            key: "dayOfWeek",
-            render: (_: any, reg: RegistrationDTO) => {
-                const details = classDetails[reg.classId];
-                return details ? details.dayOfWeek : "Loading...";
-            },
-        },
-        {
-            title: "Start Time",
-            key: "startTime",
-            render: (_: any, reg: RegistrationDTO) => {
-                const details = classDetails[reg.classId];
-                return details ? details.startTime : "Loading...";
-            },
-        },
-        {
-            title: "End Time",
-            key: "endTime",
-            render: (_: any, reg: RegistrationDTO) => {
-                const details = classDetails[reg.classId];
-                return details ? details.endTime : "Loading...";
-            },
-        },
-        {
-            title: "Action",
-            key: "action",
-            render: (_: any, reg: RegistrationDTO) => (
-                <Button onClick={() => handleUnenroll(reg.registrationId)}>
-                    Unenroll
-                </Button>
-            ),
-        },
-    ];
+        return {
+          registrationId:     r.registrationId,
+          studentId:          r.studentId,
+          registrationStatus: r.registrationStatus,
+          groupRegistrationId: r.groupRegistrationId,
+          groupRegistration:  r.groupRegistration,
+          dayOfWeek:          cls.dayOfWeek,
+          startTime:          cls.startTime,
+          endTime:            cls.endTime,
+          courseName,
+          members:            membersStr,
+          vacancy:            cls.vacancy,
+          groupSize,
+        };
+      });
 
-    // Registered Group Columns (Group Registration ID hidden)
-    const registeredGroupColumns = [
-        {
-            title: "Day",
-            key: "dayOfWeek",
-            render: (_: any, record: GroupRegistration) => {
-                const classId = record.registrations[0]?.classId;
-                const details = classId ? classDetails[classId] : undefined;
-                return details ? details.dayOfWeek : "Loading...";
-            },
-        },
-        {
-            title: "Start Time",
-            key: "startTime",
-            render: (_: any, record: GroupRegistration) => {
-                const classId = record.registrations[0]?.classId;
-                const details = classId ? classDetails[classId] : undefined;
-                return details ? details.startTime : "Loading...";
-            },
-        },
-        {
-            title: "End Time",
-            key: "endTime",
-            render: (_: any, record: GroupRegistration) => {
-                const classId = record.registrations[0]?.classId;
-                const details = classId ? classDetails[classId] : undefined;
-                return details ? details.endTime : "Loading...";
-            },
-        },
-        {
-            title: "Students",
-            key: "students",
-            render: (_: any, record: GroupRegistration) => {
-                return record.registrations.map((reg, index) => (
-                    <span
-                        key={reg.registrationId}
-                        style={
-                            unenrolledGroupRegistrationIds.includes(reg.registrationId)
-                                ? { color: "red", fontWeight: "bold" }
-                                : {}
-                        }
-                    >
-                        {studentNames[reg.studentId] || "Loading..."}
-                        {index < record.registrations.length - 1 ? ", " : ""}
-                    </span>
-                ));
-            },
-        },
-        {
-            title: "Action",
-            key: "action",
-            render: (_: any, record: GroupRegistration) => {
-                const myRegistration = record.registrations.find(
-                    (reg) => reg.studentId === hardCodedStudentId
-                );
-                if (myRegistration) {
-                    return (
-                        <Button onClick={() => handleGroupUnenroll(myRegistration.registrationId)}>
-                            Unenroll
-                        </Button>
-                    );
-                }
-                return null;
-            },
-        },
-    ];
+      setRegistrations(enriched);
+    } catch (err) {
+      console.error(err);
+      message.error("Could not load your registrations");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Waitlisted Individual Columns (Registration ID hidden)
-    const individualWaitlistedColumns = [
-        {
-            title: "Day",
-            key: "dayOfWeek",
-            render: (_: any, reg: RegistrationDTO) => {
-                const details = classDetails[reg.classId];
-                return details ? details.dayOfWeek : "Loading...";
-            },
-        },
-        {
-            title: "Start Time",
-            key: "startTime",
-            render: (_: any, reg: RegistrationDTO) => {
-                const details = classDetails[reg.classId];
-                return details ? details.startTime : "Loading...";
-            },
-        },
-        {
-            title: "End Time",
-            key: "endTime",
-            render: (_: any, reg: RegistrationDTO) => {
-                const details = classDetails[reg.classId];
-                return details ? details.endTime : "Loading...";
-            },
-        },
-        {
-            title: "Action",
-            key: "action",
-            render: (_: any, reg: RegistrationDTO) => {
-                const details = classDetails[reg.classId];
-                const vacancy = details ? details.vacancy : undefined;
-                if (vacancy !== undefined && vacancy >= 1) {
-                    return (
-                        <Button onClick={() => handleUnenroll(reg.registrationId)}>
-                            Registered
-                        </Button>
-                    );
-                }
-                return null;
-            },
-        },
-    ];
+  useEffect(() => {
+    fetchAll();
+  }, []);
 
-    // Waitlisted Group Columns (Group Registration ID hidden)
-    const groupWaitlistedColumns = [
-        {
-            title: "Day",
-            key: "dayOfWeek",
-            render: (_: any, record: GroupRegistration) => {
-                const classId = record.registrations[0]?.classId;
-                const details = classId ? classDetails[classId] : undefined;
-                return details ? details.dayOfWeek : "Loading...";
-            },
-        },
-        {
-            title: "Start Time",
-            key: "startTime",
-            render: (_: any, record: GroupRegistration) => {
-                const classId = record.registrations[0]?.classId;
-                const details = classId ? classDetails[classId] : undefined;
-                return details ? details.startTime : "Loading...";
-            },
-        },
-        {
-            title: "End Time",
-            key: "endTime",
-            render: (_: any, record: GroupRegistration) => {
-                const classId = record.registrations[0]?.classId;
-                const details = classId ? classDetails[classId] : undefined;
-                return details ? details.endTime : "Loading...";
-            },
-        },
-        {
-            title: "Students",
-            key: "students",
-            render: (_: any, record: GroupRegistration) => {
-                return record.registrations.map((reg, index) => (
-                    <span key={reg.registrationId}>
-                        {studentNames[reg.studentId] || "Loading..."}
-                        {index < record.registrations.length - 1 ? ", " : ""}
-                    </span>
-                ));
-            },
-        },
-        {
-            title: "Action",
-            key: "action",
-            render: (_: any, record: GroupRegistration) => {
-                const classId = record.registrations[0]?.classId;
-                const details = classId ? classDetails[classId] : undefined;
-                if (classId && details && details.vacancy >= record.registrations.length) {
-                    const myRegistration = record.registrations.find(
-                        (reg) => reg.studentId === hardCodedStudentId
-                    );
-                    if (myRegistration) {
-                        return (
-                            <Button onClick={() => handleUnenroll(myRegistration.registrationId)}>
-                                Registered
-                            </Button>
-                        );
-                    }
-                }
-                return null;
-            },
-        },
-    ];
+  const handleUnenroll = async (registrationId: number) => {
+    try {
+      await axios.put(
+        `http://localhost:8083/api/courseRegistration/unenroll/${registrationId}`
+      );
+      message.success("Unenrolled successfully");
+      fetchAll();
+    } catch {
+      message.error("Failed to unenroll");
+    }
+  };
 
+  const handleEnroll = async (idRegistration: number, identifier: number) => {
+    try {
+      await axios.put(
+        "http://localhost:8083/api/courseRegistration/status",
+        {
+          id: idRegistration,
+          newStatus: "Registered",
+          identifier,
+        }
+      );
+      message.success("Enrolled successfully");
+      fetchAll();
+    } catch {
+      message.error("Failed to enroll");
+    }
+  };
+
+  const columns = [
+    { title: "Course Name",        dataIndex: "courseName",        key: "courseName" },
+    { title: "Day",                dataIndex: "dayOfWeek",         key: "dayOfWeek" },
+    { title: "Start Time",         dataIndex: "startTime",         key: "startTime" },
+    { title: "End Time",           dataIndex: "endTime",           key: "endTime" },
+    {
+      title: "Members",
+      dataIndex: "members",
+      key: "members",
+      render: (m: string) => m || "—",
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (_: any, record: EnrichedRegistration) => {
+        if (record.registrationStatus === "Registered") {
+          return (
+            <Button danger onClick={() => handleUnenroll(record.registrationId)}>
+              Unenroll
+            </Button>
+          );
+        }
+        if (
+          record.registrationStatus === "Waitlisted" &&
+          record.vacancy >= record.groupSize
+        ) {
+          const idFlag = record.groupRegistration ? 2 : 1;
+          const idRegistration = record.groupRegistration ? record.groupRegistrationId! : record.registrationId;
+          return (
+            <Button
+              type="primary"
+              onClick={() => handleEnroll(idRegistration, idFlag)}
+            >
+              Enroll
+            </Button>
+          );
+        }
+        return null;
+      },
+    },
+  ];
+
+  if (loading) {
     return (
-        <div style={{ padding: 24 }}>
-            <Typography.Title level={2}>My Registrations</Typography.Title>
-            {loading ? (
-                <Spin />
-            ) : (
-                <>
-                    {/* Registered Section */}
-                    <Typography.Title level={3}>Registered</Typography.Title>
-                    <Typography.Title level={4}>Individual Registrations</Typography.Title>
-                    <Table
-                        dataSource={registeredIndividual}
-                        rowKey="registrationId"
-                        columns={registeredIndividualColumns}
-                        pagination={false}
-                    />
-                    <Typography.Title level={4} style={{ marginTop: 24 }}>
-                        Group Registrations
-                    </Typography.Title>
-                    <Table
-                        dataSource={registeredGroup}
-                        rowKey="groupId"
-                        columns={registeredGroupColumns}
-                        pagination={false}
-                    />
-
-                    {/* Waitlisted Section */}
-                    <Typography.Title level={3} style={{ marginTop: 48 }}>
-                        Waitlisted
-                    </Typography.Title>
-                    <Typography.Title level={4}>Individual Registrations</Typography.Title>
-                    <Table
-                        dataSource={waitlistedIndividual}
-                        rowKey="registrationId"
-                        columns={individualWaitlistedColumns}
-                        pagination={false}
-                    />
-                    <Typography.Title level={4} style={{ marginTop: 24 }}>
-                        Group Registrations
-                    </Typography.Title>
-                    <Table
-                        dataSource={waitlistedGroup}
-                        rowKey="groupId"
-                        columns={groupWaitlistedColumns}
-                        pagination={false}
-                    />
-                </>
-            )}
-        </div>
+      <div style={{ textAlign: "center", padding: 50 }}>
+        <Spin size="large" />
+      </div>
     );
-};
+  }
 
-export default MyRegistrationPage;
+  return (
+    <div style={{ padding: 24 }}>
+        <Typography.Title level={3}>Registered</Typography.Title>
+      <Typography.Title level={5}>Individual</Typography.Title>
+      <Table
+        rowKey="registrationId"
+        columns={columns}
+        dataSource={registrations.filter(
+          r => r.registrationStatus === "Registered" && !r.groupRegistration
+        )}
+        pagination={false}
+      />
+
+      <Typography.Title level={5} style={{ marginTop: 32 }}>
+        Group
+      </Typography.Title>
+      <Table
+        rowKey="registrationId"
+        columns={columns}
+        dataSource={registrations.filter(
+          r => r.registrationStatus === "Registered" && r.groupRegistration
+        )}
+        pagination={false}
+      />
+        <Typography.Title level={3} style={{ marginTop: 32 }}>Waitlisted</Typography.Title>
+      <Typography.Title level={5} style={{ marginTop: 32 }}>
+        Individual
+      </Typography.Title>
+      <Table
+        rowKey="registrationId"
+        columns={columns}
+        dataSource={registrations.filter(
+          r => r.registrationStatus === "Waitlisted" && !r.groupRegistration
+        )}
+        pagination={false}
+      />
+
+      <Typography.Title level={5} style={{ marginTop: 32 }}>
+        Group
+      </Typography.Title>
+      <Table
+        rowKey="registrationId"
+        columns={columns}
+        dataSource={registrations.filter(
+          r => r.registrationStatus === "Waitlisted" && r.groupRegistration
+        )}
+        pagination={false}
+      />
+    </div>
+  );
+};

@@ -35,7 +35,7 @@ export const CourseClassList: React.FC = () => {
     // Fetch courses from the specified URL
     useEffect(() => {
         setLoading(true);
-        fetch("http://localhost:8081/api/courses")
+        fetch("http://localhost:8081/api/courses/getActiveCourses")
             .then((res) => res.json())
             .then((data: Course[]) => {
                 setCourses(data);
