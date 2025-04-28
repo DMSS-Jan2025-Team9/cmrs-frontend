@@ -73,7 +73,7 @@ export const resources: IResourceItem[] = [
   {
     name: "programs",
     list: "/programs",
-    show: "/programs/:id",
+    show: "/programs/show/:id",
     meta: {
       label: "Programs",
       icon: <ScheduleOutlined />,

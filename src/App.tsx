@@ -42,6 +42,7 @@ import {
 
 
 import "@refinedev/antd/dist/reset.css";
+import { ProgramViewPage } from "./routes/program-management";
 const REGISTRATION_API_URL = "http://localhost:8083/api";
 
 const App = () => {
@@ -123,7 +124,10 @@ const App = () => {
                     <Route index element={<BatchJobUploadPage />} />
                   </Route>
 
-                  <Route path="/programs" element={<ProgramsPage />} />
+                  <Route path="/programs">
+                    <Route index element={<ProgramsPage />} />
+                    <Route path="view/:programId" element={<ProgramViewPage />} />
+                  </Route>
 
                   <Route path="/students">
                     <Route path="program/:programName" element={<StudentsByProgramPage />} />

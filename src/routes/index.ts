@@ -6,3 +6,4 @@ export * from "./course-management";
 export * from "./registration";
 export * from "./class-scheduling";
 export * from "./user-management";
+export * from "./program-management";

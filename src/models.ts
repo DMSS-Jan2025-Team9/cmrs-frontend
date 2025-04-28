@@ -14,6 +14,7 @@ export interface Program {
   programId: number;
   programName: string;
   programDesc: string;
+  studentCount?: number; 
 }
 
 export interface ClassSchedule {
