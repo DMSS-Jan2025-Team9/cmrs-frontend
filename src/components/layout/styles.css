@@ -1,0 +1,44 @@
+/* Custom sidebar styles */
+/* .ant-layout-sider:not(.ant-layout-sider-collapsed) {
+  min-width: 260px !important;
+  width: 260px !important;
+  max-width: 260px !important;
+} */
+
+/* Fix for menu items text getting cut off - only when expanded */
+.ant-layout-sider:not(.ant-layout-sider-collapsed) .ant-menu-title-content {
+  white-space: normal !important;
+  display: inline-block;
+  line-height: 1.5;
+  padding: 8px 0;
+  width: 100%;
+  overflow: visible;
+}
+
+/* Menu item styles - only when expanded */ 
+.ant-layout-sider:not(.ant-layout-sider-collapsed) .ant-menu-item {
+  height: auto !important;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+/* Menu item icons alignment - only when expanded */
+.ant-layout-sider:not(.ant-layout-sider-collapsed) .ant-menu-item .anticon {
+  margin-top: 2px;
+  margin-right: 12px !important;
+  font-size: 16px;
+}
+
+/* Ensure text doesn't get cut off by showing ellipsis properly */
+.ant-menu-item-selected .ant-menu-title-content {
+  font-weight: 500;
+}
+
+/* Improve submenu styles - only when expanded */
+.ant-layout-sider:not(.ant-layout-sider-collapsed) .ant-menu-submenu-title {
+  height: auto !important;
+  min-height: 48px;
+  padding: 8px 16px !important;
+  line-height: 1.5 !important;
+}

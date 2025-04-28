@@ -68,6 +68,8 @@ export const BatchJobUploadPage: React.FC = () => {
         setCsvContents(data);
     };
 
+    const accessToken = localStorage.getItem("access_token");
+
     const handleBatchJobSubmit = async (values: BatchJobUploadFormValues) => {
         if (!file) {
             message.error("Please upload a CSV file before submitting.");
@@ -84,6 +86,8 @@ export const BatchJobUploadPage: React.FC = () => {
             const response = await axios.post("http://localhost:8085/jobs/importStudents", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
+                    "Authorization": `Bearer ${accessToken}`,
+                    "Accept": "*/*"
                 },
             });
 

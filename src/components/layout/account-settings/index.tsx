@@ -1,19 +1,14 @@
 import { SaveButton, useForm } from "@refinedev/antd";
 import type { HttpError } from "@refinedev/core";
-import type { GetFields, GetVariables } from "@refinedev/nestjs-query";
-
+import { useGetIdentity } from "@refinedev/core";
 import { CloseOutlined } from "@ant-design/icons";
-import { Button, Card, Drawer, Form, Input, Spin } from "antd";
-
-import type {
-  UpdateUserMutation,
-  UpdateUserMutationVariables,
-} from "@/graphql/types";
+import { Button, Card, Drawer, Form, Input, Spin, Tag, Row, Col, Descriptions } from "antd";
 import { getNameInitials } from "@/utilities";
-
 import { CustomAvatar } from "../../custom-avatar";
 import { Text } from "../../text";
-import { UPDATE_USER_MUTATION } from "./queries";
+import { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
+import { ExtendedUser } from "@/types";
 
 type Props = {
   opened: boolean;
@@ -22,30 +17,41 @@ type Props = {
 };
 
 export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
-  const {
-    saveButtonProps,
-    formProps,
-    query: queryResult,
-  } = useForm<
-    GetFields<UpdateUserMutation>,
-    HttpError,
-    GetVariables<UpdateUserMutationVariables>
-  >({
-    mutationMode: "optimistic",
-    resource: "users",
-    action: "edit",
-    id: userId,
-    meta: {
-      gqlMutation: UPDATE_USER_MUTATION,
-    },
-  });
-  const { avatarUrl, name } = queryResult?.data?.data || {};
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(true);
+  const { data: user } = useGetIdentity<ExtendedUser>();
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      setLoading(true);
+      try {
+        if (user) {
+          // If we have the user data from useGetIdentity, use it to populate the form
+          form.setFieldsValue({
+            name: user.name,
+            email: user.email,
+            roles: user.roles?.join(", "),
+            jobTitle: user.jobTitle || "",
+            userType: user.userType
+          });
+        }
+      } catch (error) {
+        console.error("Error loading user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (opened) {
+      loadUserData();
+    }
+  }, [opened, form, user]);
 
   const closeModal = () => {
     setOpened(false);
   };
 
-  if (queryResult?.isLoading) {
+  if (loading) {
     return (
       <Drawer
         open={opened}
@@ -83,7 +89,7 @@ export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
           backgroundColor: "#fff",
         }}
       >
-        <Text strong>Account Settings</Text>
+        <Text strong>Account Details</Text>
         <Button
           type="text"
           icon={<CloseOutlined />}
@@ -96,37 +102,79 @@ export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
         }}
       >
         <Card>
-          <Form {...formProps} layout="vertical">
-            <CustomAvatar
-              shape="square"
-              src={avatarUrl}
-              name={getNameInitials(name || "")}
-              style={{
-                width: 96,
-                height: 96,
-                marginBottom: "24px",
-              }}
-            />
-            <Form.Item label="Name" name="name">
-              <Input placeholder="Name" />
-            </Form.Item>
-            <Form.Item label="Email" name="email">
-              <Input placeholder="email" />
-            </Form.Item>
-            <Form.Item label="Job title" name="jobTitle">
-              <Input placeholder="jobTitle" />
-            </Form.Item>
-            <Form.Item label="Phone" name="phone">
-              <Input placeholder="Timezone" />
-            </Form.Item>
-          </Form>
-          <SaveButton
-            {...saveButtonProps}
-            style={{
-              display: "block",
-              marginLeft: "auto",
-            }}
-          />
+          <div style={{ marginBottom: "24px" }}>
+            <Row align="middle" gutter={16}>
+              <Col>
+                <CustomAvatar
+                  shape="square"
+                  name={user?.name || ""}
+                  style={{
+                    width: 96,
+                    height: 96,
+                  }}
+                />
+              </Col>
+              <Col>
+                <h2>{user?.name}</h2>
+                <Row>
+                <Text strong style={{ marginRight: "8px" }}>Roles:</Text>
+                  {user?.roles?.map(role => (
+                    <Tag key={role} color={role === "admin" ? "red" : "blue"}>
+                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                    </Tag>
+                  ))}
+                </Row>
+              </Col>
+            </Row>
+          </div>
+
+          <Descriptions
+            bordered
+            column={1}
+            layout="vertical"
+            title="User Information"
+          >
+            <Descriptions.Item label="Email">{user?.email}</Descriptions.Item>
+            <Descriptions.Item label="User Type">
+              <Tag color={user?.userType === "staff" ? "green" : "purple"}>
+                {user?.userType?.toUpperCase()}
+              </Tag>
+            </Descriptions.Item>
+            
+            {user?.userType === "student" && (
+              <>
+                <Descriptions.Item label="Program">
+                  {user?.jobTitle || "Not specified"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Username/Student ID">
+                  {user?.studentFullId}
+                </Descriptions.Item>
+              </>
+            )}
+            
+            {user?.userType === "staff" && (
+              <>
+                <Descriptions.Item label="Position">
+                  {user?.jobTitle || "Not specified"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Department">
+                  {user?.department || "Not specified"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Username/Staff ID">
+                  {user?.staffFullId}
+                </Descriptions.Item>
+              </>
+            )}
+          </Descriptions>
+
+          <div style={{ marginTop: "24px", textAlign: "right" }}>
+            <Button 
+              type="primary"
+              onClick={closeModal}
+            >
+              Close
+            </Button>
+          </div>
         </Card>
       </div>
     </Drawer>

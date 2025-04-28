@@ -7,3 +7,7 @@ export * from "./registration";
 export * from "./class-scheduling";
 export * from "./user-management";
 export * from "./program-management";
+export * from "./role-management";
+export * from "./permission-management";
+export * from "./staff-student-management";
+export { default as ForbiddenPage } from "./forbidden";

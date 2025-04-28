@@ -44,3 +44,4 @@ jobs:
       with:
         name: frontend-build
         path: frontend/target/*.jar
+        retention-days: 3

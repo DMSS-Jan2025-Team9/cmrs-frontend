@@ -70,8 +70,15 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
       programId,
     };
 
+    const accessToken = localStorage.getItem("access_token");
+
     axios
-      .post("http://localhost:8081/api/courses/addCourse", newCourse)
+      .post("http://localhost:8081/api/courses/addCourse", newCourse, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type":"application/json"
+        }
+      })
       .then((response) => {
         // Reset the form after successful submission
         form.resetFields(); // Reset the form using form's resetFields()
