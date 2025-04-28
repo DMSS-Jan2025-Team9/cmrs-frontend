@@ -22,10 +22,10 @@ export const RegistrationCreatePage: React.FC = () => {
         }
     };
 
-    const handleStudentIdChange = (index: number, value: string) => {
-        const newStudentIds = [...studentFullIds];
-        newStudentIds[index] = value;
-        setStudentFullIds(newStudentIds);
+    const handleStudentFullIdChange = (index: number, value: string) => {
+        const newStudentFullIds = [...studentFullIds];
+        newStudentFullIds[index] = value;
+        setStudentFullIds(newStudentFullIds);
     };
 
     const onFinish = async (values: any) => {
@@ -75,13 +75,13 @@ export const RegistrationCreatePage: React.FC = () => {
                         <List.Item>
                             <Form.Item
                                 label={`Student ID ${index + 1}`}
-                                name={`studentIds[${index}]`}
+                                name={`studentFullIds[${index}]`}
                                 rules={[{ required: true, message: "Please enter a student ID" }]}
                             >
                                 <Input
                                     placeholder="Enter student ID"
                                     value={id}
-                                    onChange={(e) => handleStudentIdChange(index, e.target.value)}
+                                    onChange={(e) => handleStudentFullIdChange(index, e.target.value)}
                                 />
                             </Form.Item>
                         </List.Item>
