@@ -25,5 +25,6 @@ export interface ClassSchedule {
   endTime: string;
   classroom: string;
   instructor: string;
-  capacity: number;
+  maxCapacity: number;
+  vacancy: number;
 }
