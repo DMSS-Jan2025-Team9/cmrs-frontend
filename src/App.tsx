@@ -348,14 +348,14 @@ const App = () => {
                   </Route>
 
                   {/* Programs routes with protection */}
-                  <Route 
-                    path="/programs" 
-                    element={
-                      <ProtectedRoute requiredRoles={getRequiredRolesForPath("/programs")}>
-                        <ProgramsPage />
-                      </ProtectedRoute>
-                    } 
-                  />
+                  <Route path="/programs" element={
+                    <ProtectedRoute requiredRoles={getRequiredRolesForPath("/programs")}>
+                      <Outlet />
+                    </ProtectedRoute>
+                  }>
+                    <Route index element={<ProgramsPage />} />
+                    <Route path="view/:programId" element={<ProgramViewPage />} />
+                  </Route>
 
                   {/* Students routes with protection */}
                   <Route path="/students" element={
