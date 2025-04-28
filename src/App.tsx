@@ -55,6 +55,7 @@ import {
 import "@refinedev/antd/dist/reset.css";
 import { useEffect, useState } from "react";
 
+import { ProgramViewPage } from "./routes/program-management";
 const REGISTRATION_API_URL = "http://localhost:8083/api";
 
 // Create a custom theme that extends the Refine Blue theme
@@ -347,14 +348,14 @@ const App = () => {
                   </Route>
 
                   {/* Programs routes with protection */}
-                  <Route 
-                    path="/programs" 
-                    element={
-                      <ProtectedRoute requiredRoles={getRequiredRolesForPath("/programs")}>
-                        <ProgramsPage />
-                      </ProtectedRoute>
-                    } 
-                  />
+                  <Route path="/programs" element={
+                    <ProtectedRoute requiredRoles={getRequiredRolesForPath("/programs")}>
+                      <Outlet />
+                    </ProtectedRoute>
+                  }>
+                    <Route index element={<ProgramsPage />} />
+                    <Route path="view/:programId" element={<ProgramViewPage />} />
+                  </Route>
 
                   {/* Students routes with protection */}
                   <Route path="/students" element={

@@ -30,9 +30,10 @@ export interface Course {
 }
 
 export interface Program {
-programId: number;
-programName: string;
-programDesc: string;
+  programId: number;
+  programName: string;
+  programDesc: string;
+  studentCount?: number; 
 }
 
 export interface ClassSchedule {
@@ -43,5 +44,6 @@ startTime: string;
 endTime: string;
 classroom: string;
 instructor: string;
-capacity: number;
+maxCapacity: number;
+vacancy: number;
 }

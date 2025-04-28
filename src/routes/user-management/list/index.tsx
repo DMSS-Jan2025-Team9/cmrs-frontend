@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { Table, Typography } from "antd";
+import { Typography, Collapse, Button, Space, Spin } from "antd";
+import { Program } from "@/models"; 
 
-interface Program {
-    programName: string;
-    studentCount: number;  // If you want to show count
-}
+const { Panel } = Collapse;
 
 export const ProgramsPage: React.FC = () => {
     const [programs, setPrograms] = useState<Program[]>([]);
@@ -25,24 +23,38 @@ export const ProgramsPage: React.FC = () => {
             });
     }, []);
 
-    const columns = [
-        {
-            title: "Program Name",
-            dataIndex: "programName",
-            key: "programName",
-            render: (text: string) => <Link to={`/students/program/${encodeURIComponent(text)}`}>{text}</Link>,
-        },
-        // {
-        //     title: "Total Students",
-        //     dataIndex: "studentCount",
-        //     key: "studentCount",
-        // }
-    ];
+    if (loading) {
+        return (
+            <div style={{ textAlign: "center", padding: "50px" }}>
+                <Spin size="large" />
+            </div>
+        );
+    }
 
     return (
         <div>
             <Typography.Title level={2}>Programs</Typography.Title>
-            <Table dataSource={programs} columns={columns} rowKey="programName" loading={loading} />
+            <Collapse accordion>
+                {programs.map((program) => (
+                    <Panel 
+                        header={program.programName} 
+                        key={program.programName}
+                    >
+                        <Space direction="horizontal">
+                            <Button type="primary">
+                                <Link to={`/students/program/${encodeURIComponent(program.programName)}`}>
+                                    View Students
+                                </Link>
+                            </Button>
+                            <Button>
+                                <Link to={`/programs/view/${encodeURIComponent(program.programId)}`}>
+                                    Program Details
+                                </Link>
+                            </Button>
+                        </Space>
+                    </Panel>
+                ))}
+            </Collapse>
         </div>
     );
 };

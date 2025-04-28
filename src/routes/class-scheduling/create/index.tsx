@@ -132,8 +132,8 @@ export const ClassScheduleCreatePage = ({ children }: React.PropsWithChildren) =
 
         // Show error notification in case of failure
         notification.error({
-          message: "Error Adding Class Schedule",
-          description: "There was an issue adding the class schedule. Please try again.",
+          message: error.response?.data?.error || "Error",
+          description: error.response?.data?.message || "Failed to add class schedule. Please try again.",
         });
       });
   };
