@@ -119,9 +119,17 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
       status: form.getFieldValue("status"), 
       programId: programId
     };
+    const accessToken = localStorage.getItem("access_token");
 
     axios
-      .put(`http://localhost:8081/api/courses/editCourse/${courseId}`, updatedCourse) // Update course with the courseId
+      .put(`http://localhost:8081/api/courses/editCourse/${courseId}`, 
+        updatedCourse,{
+          headers: {
+            "Authorization": `Bearer ${accessToken}`,
+            "Content-Type":"application/json"
+          }
+        }
+      ) // Update course with the courseId
       .then((response) => {
         form.resetFields(); // Reset the form
 
