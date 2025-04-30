@@ -1,44 +1,60 @@
-// src/pages/MyRegistrationPage.tsx
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Table, Typography, Spin, Button, message } from "antd";
 
 interface RawRegistration {
-  registrationId:       number;
-  studentId:            number;
-  classId:              number;
-  registrationStatus:   string;
+  registrationId: number;
+  studentId: number;
+  classId: number;
+  registrationStatus: string;
   groupRegistrationId?: number | null;
 }
 
 interface EnrichedRegistration {
-  registrationId:       number;
-  studentId:            number;
-  registrationStatus:   string;
+  registrationId: number;
+  studentId: number;
+  registrationStatus: string;
   groupRegistrationId?: number | null;
-  groupRegistration:    boolean;
-  dayOfWeek:            string;
-  startTime:            string;
-  endTime:              string;
-  courseName:           string;
-  members:              string;
-  vacancy:              number;
-  groupSize:            number;
+  groupRegistration: boolean;
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+  courseName: string;
+  members: string;
+  vacancy: number;
+  groupSize: number;
 }
 
 export const MyRegistrationPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [registrations, setRegistrations] = useState<EnrichedRegistration[]>([]);
+  const [studentId, setStudentId] = useState<number | null>(null);
+
+  // Get studentId from localStorage
+  useEffect(() => {
+    const userDetails = localStorage.getItem("user_details");
+    if (userDetails) {
+      const user = JSON.parse(userDetails);
+      if (user.studentId) {
+        setStudentId(user.studentId);
+        console.log(studentId);
+
+      }
+    }
+  }, []);
 
   // helper to reload everything
   const fetchAll = async () => {
+    if (!studentId) {
+      console.log("fetchAll called but studentId is null");
+      return;
+    }
+    console.log("Fetching registrations for studentId:", studentId);
     setLoading(true);
     try {
-      
       const { data: rawRegs } = await axios.get<RawRegistration[]>(
         "http://localhost:8083/api/courseRegistration",
-        { params: { studentId: 1 } } //hardcode
+        { params: { studentId } } // Use the studentId from state
       );
       const regs = rawRegs.map(r => ({
         ...r,
@@ -132,17 +148,17 @@ export const MyRegistrationPage: React.FC = () => {
         const groupSize = r.groupRegistration ? membersList.length : 1;
 
         return {
-          registrationId:     r.registrationId,
-          studentId:          r.studentId,
+          registrationId: r.registrationId,
+          studentId: r.studentId,
           registrationStatus: r.registrationStatus,
           groupRegistrationId: r.groupRegistrationId,
-          groupRegistration:  r.groupRegistration,
-          dayOfWeek:          cls.dayOfWeek,
-          startTime:          cls.startTime,
-          endTime:            cls.endTime,
+          groupRegistration: r.groupRegistration,
+          dayOfWeek: cls.dayOfWeek,
+          startTime: cls.startTime,
+          endTime: cls.endTime,
           courseName,
-          members:            membersStr,
-          vacancy:            cls.vacancy,
+          members: membersStr,
+          vacancy: cls.vacancy,
           groupSize,
         };
       });
@@ -157,8 +173,10 @@ export const MyRegistrationPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchAll();
-  }, []);
+    if (studentId) {
+      fetchAll();
+    }
+  }, [studentId]);
 
   const handleUnenroll = async (registrationId: number) => {
     try {
@@ -190,10 +208,10 @@ export const MyRegistrationPage: React.FC = () => {
   };
 
   const columns = [
-    { title: "Course Name",        dataIndex: "courseName",        key: "courseName" },
-    { title: "Day",                dataIndex: "dayOfWeek",         key: "dayOfWeek" },
-    { title: "Start Time",         dataIndex: "startTime",         key: "startTime" },
-    { title: "End Time",           dataIndex: "endTime",           key: "endTime" },
+    { title: "Course Name", dataIndex: "courseName", key: "courseName" },
+    { title: "Day", dataIndex: "dayOfWeek", key: "dayOfWeek" },
+    { title: "Start Time", dataIndex: "startTime", key: "startTime" },
+    { title: "End Time", dataIndex: "endTime", key: "endTime" },
     {
       title: "Members",
       dataIndex: "members",
@@ -231,6 +249,14 @@ export const MyRegistrationPage: React.FC = () => {
     },
   ];
 
+  if (!studentId) {
+    return (
+      <div style={{ textAlign: "center", padding: 50 }}>
+        <Typography.Text>Please log in as a student to view registrations</Typography.Text>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div style={{ textAlign: "center", padding: 50 }}>
@@ -241,7 +267,7 @@ export const MyRegistrationPage: React.FC = () => {
 
   return (
     <div style={{ padding: 24 }}>
-        <Typography.Title level={3}>Registered</Typography.Title>
+      <Typography.Title level={3}>Registered</Typography.Title>
       <Typography.Title level={5}>Individual</Typography.Title>
       <Table
         rowKey="registrationId"
@@ -263,7 +289,7 @@ export const MyRegistrationPage: React.FC = () => {
         )}
         pagination={false}
       />
-        <Typography.Title level={3} style={{ marginTop: 32 }}>Waitlisted</Typography.Title>
+      <Typography.Title level={3} style={{ marginTop: 32 }}>Waitlisted</Typography.Title>
       <Typography.Title level={5} style={{ marginTop: 32 }}>
         Individual
       </Typography.Title>

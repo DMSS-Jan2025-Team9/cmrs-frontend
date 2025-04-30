@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Descriptions, Button, Spin, notification, Table, Space, Typography } from "antd";
+import { Card, Descriptions, Button, Spin, notification, Table, Space, Typography, Popconfirm } from "antd";
 import axios from "axios";
 import type { Course, Program, ClassSchedule } from "@/models";
 import moment from "moment";
@@ -16,6 +16,7 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [programLoading, setProgramLoading] = useState<boolean>(false);
   const [schedulesLoading, setSchedulesLoading] = useState<boolean>(true);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
   const { Title } = Typography;
 
@@ -23,6 +24,8 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
   const capitalizeFirstLetter = (string: string): string => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
+
+  const accessToken = localStorage.getItem("access_token");
 
   // Fetch course data based on courseId
   useEffect(() => {
@@ -70,7 +73,7 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
   };
 
   // Fetch class schedules for the course
-  useEffect(() => {
+  const fetchClassSchedules = () => {
     if (courseId) {
       setSchedulesLoading(true);
       axios
@@ -88,6 +91,10 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
           setSchedulesLoading(false);
         });
     }
+  };
+
+  useEffect(() => {
+    fetchClassSchedules();
   }, [courseId]);
 
   // Format date for display
@@ -107,6 +114,39 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
     });
   };
 
+  const handleDeleteCourse = () => {
+    setDeleteLoading(true);
+    axios
+      .delete(`http://localhost:8081/api/courses/deleteCourse/${courseId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Accept": "*/*"
+          }
+        }
+      )
+      .then(() => {
+        notification.success({
+          message: "Success",
+          description: "Course deleted successfully.",
+        });
+        // Navigate back to course management page after successful deletion
+        go({
+          to: "/courseManagement",
+        });
+      })
+      .catch((error) => {
+        console.error("Error deleting course", error);
+        notification.error({
+          message: "Error",
+          description: "There was an issue deleting the course.",
+        });
+      })
+      .finally(() => {
+        setDeleteLoading(false);
+      });
+  };
+
   // Navigate to add class schedule page
   const handleAddClassSchedule = () => {
     go({
@@ -119,6 +159,38 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
     go({
       to: `/classScheduling/edit/${classId}`,
     });
+  };
+
+  // Delete class schedule
+  const handleDeleteClassSchedule = (classId: number) => {
+    setDeleteLoading(true);
+    axios
+      .delete(`http://localhost:8081/api/classSchedule/deleteClassSchedule/${classId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Accept": "*/*"
+          }
+        }
+      )
+      .then(() => {
+        notification.success({
+          message: "Success",
+          description: "Class schedule deleted successfully.",
+        });
+        // Refresh the class schedules list
+        fetchClassSchedules();
+      })
+      .catch((error) => {
+        console.error("Error deleting class schedule", error);
+        notification.error({
+          message: "Error",
+          description: "There was an issue deleting the class schedule.",
+        });
+      })
+      .finally(() => {
+        setDeleteLoading(false);
+      });
   };
 
   // Navigate back to course management page
@@ -148,6 +220,11 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
       render: (text: string) => formatTime(text),
     },
     {
+      title: 'Max Capacity',
+      dataIndex: 'maxCapacity',
+      key: 'maxCapacity',
+    },
+    {
       title: 'Vacancy',
       dataIndex: 'vacancy',
       key: 'vacancy',
@@ -156,9 +233,22 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
       title: 'Actions',
       key: 'actions',
       render: (_: any, record: ClassSchedule) => (
-        <Button size="small" onClick={() => handleEditClassSchedule(record.classId)}>
-          Edit
-        </Button>
+        <Space>
+          <Button size="small" onClick={() => handleEditClassSchedule(record.classId)}>
+            Edit
+          </Button>
+          <Popconfirm
+            title="Delete class schedule"
+            description="Are you sure you want to delete this class schedule?"
+            onConfirm={() => handleDeleteClassSchedule(record.classId)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button size="small" danger loading={deleteLoading}>
+              Delete
+            </Button>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
@@ -183,6 +273,17 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
             <Button type="primary" onClick={handleAddClassSchedule}>
               Add Class Schedule
             </Button>
+            <Popconfirm
+              title="Delete course"
+              description="Are you sure you want to delete this course? This action cannot be undone."
+              onConfirm={handleDeleteCourse}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button type="primary" danger loading={deleteLoading}>
+                Delete Course
+              </Button>
+            </Popconfirm>
           </Space>
         }
       >

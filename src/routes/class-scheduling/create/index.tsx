@@ -45,6 +45,8 @@ export const ClassScheduleCreatePage = ({ children }: React.PropsWithChildren) =
     "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
   ];
 
+  const accessToken = localStorage.getItem("access_token");
+
   // Fetch the specific course details if courseId is provided
   useEffect(() => {
     if (courseId) {
@@ -110,7 +112,12 @@ export const ClassScheduleCreatePage = ({ children }: React.PropsWithChildren) =
       vacancy: values.maxCapacity, // Initial vacancy equals max capacity
     };
 
-    axios.post("http://localhost:8081/api/classSchedule/addClassSchedule", newClassSchedule)
+    axios.post("http://localhost:8081/api/classSchedule/addClassSchedule", newClassSchedule,{
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+        "Content-Type":"application/json"
+      }
+    })
       .then((response) => {
         // Reset the form after successful submission
         form.resetFields();
@@ -132,8 +139,8 @@ export const ClassScheduleCreatePage = ({ children }: React.PropsWithChildren) =
 
         // Show error notification in case of failure
         notification.error({
-          message: "Error Adding Class Schedule",
-          description: "There was an issue adding the class schedule. Please try again.",
+          message: error.response?.data?.error || "Error",
+          description: error.response?.data?.message || "Failed to add class schedule. Please try again.",
         });
       });
   };

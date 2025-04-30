@@ -53,11 +53,11 @@ jobs:
       with:
         name: frontend-build
         path: frontend/target/*.jar
-        retention-days: 30
+        retention-days: 3
     
     - name: Upload linting reports
       uses: actions/upload-artifact@v4
       with:
         name: linting-reports
         path: reports/
-        retention-days: 30
+        retention-days: 3

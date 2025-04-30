@@ -5,33 +5,33 @@ import axios, { AxiosError } from "axios";
 
 interface CreateRegistrationDTO {
     classId: number;
-    studentIds: string[];
+    studentFullIds: string[];
 }
 
 export const RegistrationCreatePage: React.FC = () => {
     const { classId } = useParams<{ classId: string }>();
-    const [studentIds, setStudentIds] = useState<string[]>([]);
+    const [studentFullIds, setStudentFullIds] = useState<string[]>([]);
     const [form] = Form.useForm();
     const navigate = useNavigate();
 
     const handleAddStudent = () => {
-        if (studentIds.length < 5) {
-            setStudentIds([...studentIds, ""]);
+        if (studentFullIds.length < 5) {
+            setStudentFullIds([...studentFullIds, ""]);
         } else {
             message.warning("You can only register up to 5 students.");
         }
     };
 
-    const handleStudentIdChange = (index: number, value: string) => {
-        const newStudentIds = [...studentIds];
-        newStudentIds[index] = value;
-        setStudentIds(newStudentIds);
+    const handleStudentFullIdChange = (index: number, value: string) => {
+        const newStudentFullIds = [...studentFullIds];
+        newStudentFullIds[index] = value;
+        setStudentFullIds(newStudentFullIds);
     };
 
     const onFinish = async (values: any) => {
         // Add the studentIds to the form values
-        values.studentIds = studentIds.filter(id => id.trim() !== "");
-        if (values.studentIds.length === 0) {
+        values.studentFullIds = studentFullIds.filter(id => id.trim() !== "");
+        if (values.studentFullIds.length === 0) {
             message.error("Please enter at least one student ID.");
             return;
         }
@@ -70,18 +70,18 @@ export const RegistrationCreatePage: React.FC = () => {
                 {/* Student ID Fields */}
                 <List
                     header={<div>Student</div>}
-                    dataSource={studentIds}
+                    dataSource={studentFullIds}
                     renderItem={(id, index) => (
                         <List.Item>
                             <Form.Item
                                 label={`Student ID ${index + 1}`}
-                                name={`studentIds[${index}]`}
+                                name={`studentFullIds[${index}]`}
                                 rules={[{ required: true, message: "Please enter a student ID" }]}
                             >
                                 <Input
                                     placeholder="Enter student ID"
                                     value={id}
-                                    onChange={(e) => handleStudentIdChange(index, e.target.value)}
+                                    onChange={(e) => handleStudentFullIdChange(index, e.target.value)}
                                 />
                             </Form.Item>
                         </List.Item>
