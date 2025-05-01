@@ -40,6 +40,8 @@ export const ClassScheduleEditPage = ({ children }: React.PropsWithChildren) => 
     "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
   ];
 
+  const accessToken = localStorage.getItem("access_token");
+
   // Fetch courses for the dropdown
   useEffect(() => {
     axios.get("http://localhost:8081/api/courses")
@@ -121,7 +123,14 @@ export const ClassScheduleEditPage = ({ children }: React.PropsWithChildren) => 
       vacancy: newVacancy >= 0 ? newVacancy : 0, // Ensure vacancy is not negative
     };
 
-    axios.put(`http://localhost:8081/api/classSchedule/editClassSchedule/${classId}`, updatedClassSchedule)
+    axios.put(`http://localhost:8081/api/classSchedule/editClassSchedule/${classId}`, updatedClassSchedule,
+      {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "Content-Type":"application/json"
+        }
+      }
+    )
       .then((response) => {
         // Show success notification
         notification.success({

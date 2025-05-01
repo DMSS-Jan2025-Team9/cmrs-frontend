@@ -25,6 +25,8 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
 
+  const accessToken = localStorage.getItem("access_token");
+
   // Fetch course data based on courseId
   useEffect(() => {
     if (courseId) {
@@ -115,7 +117,14 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
   const handleDeleteCourse = () => {
     setDeleteLoading(true);
     axios
-      .delete(`http://localhost:8081/api/courses/deleteCourse/${courseId}`)
+      .delete(`http://localhost:8081/api/courses/deleteCourse/${courseId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Accept": "*/*"
+          }
+        }
+      )
       .then(() => {
         notification.success({
           message: "Success",
@@ -156,7 +165,14 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
   const handleDeleteClassSchedule = (classId: number) => {
     setDeleteLoading(true);
     axios
-      .delete(`http://localhost:8081/api/classSchedule/deleteClassSchedule/${classId}`)
+      .delete(`http://localhost:8081/api/classSchedule/deleteClassSchedule/${classId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Accept": "*/*"
+          }
+        }
+      )
       .then(() => {
         notification.success({
           message: "Success",

@@ -45,6 +45,8 @@ export const ClassScheduleCreatePage = ({ children }: React.PropsWithChildren) =
     "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
   ];
 
+  const accessToken = localStorage.getItem("access_token");
+
   // Fetch the specific course details if courseId is provided
   useEffect(() => {
     if (courseId) {
@@ -110,7 +112,12 @@ export const ClassScheduleCreatePage = ({ children }: React.PropsWithChildren) =
       vacancy: values.maxCapacity, // Initial vacancy equals max capacity
     };
 
-    axios.post("http://localhost:8081/api/classSchedule/addClassSchedule", newClassSchedule)
+    axios.post("http://localhost:8081/api/classSchedule/addClassSchedule", newClassSchedule,{
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+        "Content-Type":"application/json"
+      }
+    })
       .then((response) => {
         // Reset the form after successful submission
         form.resetFields();

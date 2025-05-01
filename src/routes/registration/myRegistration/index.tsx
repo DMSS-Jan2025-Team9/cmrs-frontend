@@ -71,7 +71,9 @@ export const MyRegistrationPage: React.FC = () => {
             startTime: string;
             endTime: string;
             vacancy: number;
-          }>(`http://localhost:8081/api/classes/${id}`)
+          }>(`http://localhost:8081/api/classSchedule/classId/${id}`,
+            {headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
+          )
         )
       );
       const classesMap: Record<
