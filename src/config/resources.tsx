@@ -10,7 +10,8 @@ import {
   FileAddOutlined,
   TagOutlined,
   LockOutlined,
-  UserOutlined
+  UserOutlined,
+  BellOutlined
 } from "@ant-design/icons";
 interface DecodedToken {
   role: string;
@@ -70,6 +71,14 @@ export const resources: IResourceItem[] = [
       liveMode: "off",
     },
   },
+  // {
+  //   name: "notifications",
+  //   list: "/notifications",
+  //   meta: {
+  //     label: "Notifications",
+  //     icon: <BellOutlined />,
+  //   },
+  // },
   {
     name: "roleManagement",
     list: "/roleManagement",
@@ -146,6 +155,11 @@ const hasAccessToResource = (resourceName: string, userRoles: string[]): boolean
     "courseRegistration",
   ];
 
+  // Resources available only to students
+  const studentResources = [
+    "notifications"
+  ];
+
   // Admin has access to everything
   if (userRoles.includes("admin")) {
     return true;
@@ -156,9 +170,9 @@ const hasAccessToResource = (resourceName: string, userRoles: string[]): boolean
     return !adminOnlyResources.includes(resourceName) || staffResources.includes(resourceName) || commonResources.includes(resourceName);
   }
 
-  // Student has access only to common resources
+  // Student has access only to common resources and student-specific resources
   if (userRoles.includes("student")) {
-    return commonResources.includes(resourceName);
+    return commonResources.includes(resourceName) || studentResources.includes(resourceName);
   }
 
   return false;
