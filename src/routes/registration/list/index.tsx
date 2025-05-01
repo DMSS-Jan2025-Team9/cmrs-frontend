@@ -1,33 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button } from "antd";
 import { useNavigate } from "react-router-dom";
+import { Course, ClassSchedule } from "@/models";
 
 const { Column } = Table;
 
-interface Course {
-    courseId: number;
-    courseName: string;
-    courseCode: string;
-    registrationStart: string;
-    registrationEnd: string;
-    maxCapacity: number;
-    status: string;
-    courseDesc: string;
-}
-
-interface Class {
-    classId: number;
-    course: number; // With JsonIdentityReference on the backend, this is just the courseId.
-    dayOfWeek: string;
-    startTime: string;
-    endTime: string;
-    maxCapacity: number;
-    vacancy: number;
-}
-
 export const CourseClassList: React.FC = () => {
     const [courses, setCourses] = useState<Course[]>([]);
-    const [classesMap, setClassesMap] = useState<{ [courseId: number]: Class[] }>({});
+    const [classesMap, setClassesMap] = useState<{ [courseId: number]: ClassSchedule[] }>({});
     const [loading, setLoading] = useState<boolean>(false);
 
     const navigate = useNavigate();
@@ -51,8 +31,8 @@ export const CourseClassList: React.FC = () => {
     const fetchClassesForCourse = async (courseId: number) => {
         if (classesMap[courseId]) return;
         try {
-            const res = await fetch(`http://localhost:8081/api/classes?courseId=${courseId}`);
-            const data: Class[] = await res.json();
+            const res = await fetch(`http://localhost:8081/api/classSchedule?courseId=${courseId}`);
+            const data: ClassSchedule[] = await res.json();
             setClassesMap((prev) => ({ ...prev, [courseId]: data }));
         } catch (error) {
             console.error("Error fetching classes:", error);
@@ -76,8 +56,8 @@ export const CourseClassList: React.FC = () => {
                 expandable={{
                     expandedRowRender: (record: Course) => {
                         // Fetch classes when a course row is expanded
-                        fetchClassesForCourse(record.courseId);
-                        const classesData = classesMap[record.courseId];
+                        fetchClassesForCourse(record.courseId!);
+                        const classesData = classesMap[record.courseId!];
                         return classesData ? (
                             <Table
                                 dataSource={classesData}
@@ -93,7 +73,7 @@ export const CourseClassList: React.FC = () => {
                                 <Column
                                     title="Action"
                                     key="action"
-                                    render={(_: any, cls: Class) => (
+                                    render={(_: any, cls: ClassSchedule) => (
                                         <>
                                             <Button
                                                 type="primary"
@@ -113,7 +93,7 @@ export const CourseClassList: React.FC = () => {
                     },
                     onExpand: (expanded, record: Course) => {
                         if (expanded) {
-                            fetchClassesForCourse(record.courseId);
+                            fetchClassesForCourse(record.courseId!);
                         }
                     },
                 }}
