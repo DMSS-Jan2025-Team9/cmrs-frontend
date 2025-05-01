@@ -17,14 +17,8 @@ import { resources, getResourcesByRole } from "@/config/resources";
 import { authProvider, dataProvider, liveProvider } from "@/providers";
 import dataProviders from "@refinedev/simple-rest";
 import {
-  CompanyCreatePage,
-  CompanyEditPage,
-  CompanyListPage,
   DashboardPage,
   LoginPage,
-  TasksCreatePage,
-  TasksEditPage,
-  TasksListPage,
   CourseClassList,
   RegistrationCreatePage,
   BatchJobUploadPage,
@@ -49,13 +43,15 @@ import {
   UserCreatePage,
   UserViewPage,
   UserEditPage,
-  ForbiddenPage
+  ForbiddenPage,
+  NotificationPage
 } from "@/routes";
 
 import "@refinedev/antd/dist/reset.css";
 import { useEffect, useState } from "react";
 
 import { ProgramViewPage } from "./routes/program-management";
+import { NotificationProvider } from "./contexts/NotificationContext";
 const REGISTRATION_API_URL = "http://localhost:8083/api";
 
 // Create a custom theme that extends the Refine Blue theme
@@ -193,199 +189,185 @@ const App = () => {
       <ConfigProvider theme={customTheme}>
         <AntdApp>
           <DevtoolsProvider>
-            <Refine
-              routerProvider={routerProvider}
-              dataProvider={{
-                default: dataProvider,
-                courseRegistration: dataProviders(REGISTRATION_API_URL),
-              }}
-              liveProvider={liveProvider}
-              notificationProvider={useNotificationProvider}
-              authProvider={{
-                ...authProvider,
-                // Override the login method to also refresh resources
-                login: async (params) => {
-                  const result = await authProvider.login(params);
-                  // Dispatch a storage event to trigger resource update
-                  window.dispatchEvent(new Event("storage"));
-                  setVisibleResources(getResourcesByRole());
-                  return result;
-                },
-                // Override logout with our custom implementation
-                logout: handleLogout
-              }}
-              resources={visibleResources}
-              options={{
-                syncWithLocation: true,
-                warnWhenUnsavedChanges: true,
-                liveMode: "auto",
-                useNewQueryKeys: true,
-              }}
-            >
-              <Routes>
-                <Route
-                  element={
-                    <Authenticated
-                      key="authenticated-layout"
-                      fallback={<CatchAllNavigate to="/login" />}
-                    >
-                      <Layout>
-                        <Outlet />
-                      </Layout>
-                    </Authenticated>
-                  }
-                >
-                  {/* Dashboard route with admin and staff access */}
-                  <Route 
-                    index 
+            <NotificationProvider>
+              <Refine
+                routerProvider={routerProvider}
+                dataProvider={{
+                  default: dataProvider,
+                  courseRegistration: dataProviders(REGISTRATION_API_URL),
+                }}
+                liveProvider={liveProvider}
+                notificationProvider={useNotificationProvider}
+                authProvider={{
+                  ...authProvider,
+                  // Override the login method to also refresh resources
+                  login: async (params) => {
+                    const result = await authProvider.login(params);
+                    // Dispatch a storage event to trigger resource update
+                    window.dispatchEvent(new Event("storage"));
+                    setVisibleResources(getResourcesByRole());
+                    return result;
+                  },
+                  // Override logout with our custom implementation
+                  logout: handleLogout
+                }}
+                resources={visibleResources}
+                options={{
+                  syncWithLocation: true,
+                  warnWhenUnsavedChanges: true,
+                  liveMode: "auto",
+                  useNewQueryKeys: true,
+                }}
+              >
+                <Routes>
+                  <Route
                     element={
-                      <ProtectedRoute requiredRoles={["admin", "staff"]}>
-                        <DashboardPage />
+                      <Authenticated
+                        key="authenticated-layout"
+                        fallback={<CatchAllNavigate to="/login" />}
+                      >
+                        <Layout>
+                          <Outlet />
+                        </Layout>
+                      </Authenticated>
+                    }
+                  >
+                    {/* Dashboard route with admin and staff access */}
+                    <Route 
+                      index 
+                      element={
+                        <ProtectedRoute requiredRoles={["admin", "staff"]}>
+                          <DashboardPage />
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    {/* Forbidden page - accessible to all authenticated users */}
+                    <Route path="/forbidden" element={<ForbiddenPage />} />
+
+                    {/* Notifications page - accessible to all users */}
+                    <Route path="/notifications" element={
+                      <ProtectedRoute requiredRoles={["admin", "staff", "student"]}>
+                        <NotificationPage />
                       </ProtectedRoute>
-                    } 
-                  />
+                    } />
 
-                  {/* Forbidden page - accessible to all authenticated users */}
-                  <Route path="/forbidden" element={<ForbiddenPage />} />
-
-                  {/* Tasks routes with protection */}
-                  <Route path="/tasks" element={
-                    <ProtectedRoute requiredRoles={["admin"]}>
-                      <TasksListPage>
+                    {/* Course Registration routes with protection */}
+                    <Route path="/courseRegistration" element={
+                      <ProtectedRoute requiredRoles={getRequiredRolesForPath("/courseRegistration")}>
                         <Outlet />
-                      </TasksListPage>
-                    </ProtectedRoute>
-                  }>
-                    <Route path="new" element={<TasksCreatePage />} />
-                    <Route path="edit/:id" element={<TasksEditPage />} />
+                      </ProtectedRoute>
+                    }>
+                      <Route index element={<CourseClassList/>} />
+                      <Route path="new/:classId" element={<RegistrationCreatePage />} />
+                      <Route path="MyRegistration" element={<MyRegistrationPage />} />
+                    </Route>
+
+                    {/* Course Management routes with protection */}
+                    <Route path="/courseManagement" element={
+                      <ProtectedRoute requiredRoles={getRequiredRolesForPath("/courseManagement")}>
+                        <Outlet />
+                      </ProtectedRoute>
+                    }>
+                      <Route index element={<CourseListPage />} />
+                      <Route path="new" element={<CourseCreatePage />} />
+                      <Route path="view/:courseId" element={<CourseViewPage />} />
+                      <Route path="edit/:courseId" element={<CourseEditPage />} />
+                    </Route>
+
+                    {/* Class Scheduling routes with protection */}
+                    <Route path="/classScheduling" element={
+                      <ProtectedRoute requiredRoles={["admin", "staff"]}>
+                        <Outlet />
+                      </ProtectedRoute>
+                    }>
+                      <Route path="new" element={<ClassScheduleCreatePage />} />
+                      <Route path="edit/:classId" element={<ClassScheduleEditPage />} />
+                    </Route>
+    
+                    {/* Batch Job routes with protection */}
+                    <Route path="/batchjob/upload" element={
+                      <ProtectedRoute requiredRoles={["admin", "staff"]}>
+                        <BatchJobUploadPage />
+                      </ProtectedRoute>
+                    } />
+
+                    {/* Role Management routes with protection */}
+                    <Route path="/roleManagement" element={
+                      <ProtectedRoute requiredRoles={getRequiredRolesForPath("/roleManagement")}>
+                        <Outlet />
+                      </ProtectedRoute>
+                    }>
+                      <Route index element={<RoleListPage />} />
+                      <Route path="new" element={<RoleCreatePage />} />
+                      <Route path="view/:roleId" element={<RoleViewPage />} />
+                      <Route path="edit/:roleId" element={<RoleEditPage />} />
+                    </Route>
+
+                    {/* Permission Management routes with protection */}
+                    <Route path="/permissionManagement" element={
+                      <ProtectedRoute requiredRoles={getRequiredRolesForPath("/permissionManagement")}>
+                        <Outlet />
+                      </ProtectedRoute>
+                    }>
+                      <Route index element={<PermissionListPage />} />
+                      <Route path="new" element={<PermissionCreatePage />} />
+                      <Route path="view/:permissionId" element={<PermissionViewPage />} />
+                      <Route path="edit/:permissionId" element={<PermissionEditPage />} />
+                    </Route>
+
+                    {/* Staff Student Management routes with protection */}
+                    <Route path="/staffStudentManagement" element={
+                      <ProtectedRoute requiredRoles={getRequiredRolesForPath("/staffStudentManagement")}>
+                        <Outlet />
+                      </ProtectedRoute>
+                    }>
+                      <Route index element={<UserListPage />} />
+                      <Route path="create" element={<UserCreatePage />} />
+                      <Route path="view/:type/:id" element={<UserViewPage />} />
+                      <Route path="edit/:type/:id" element={<UserEditPage />} />
+                    </Route>
+
+                    {/* Programs routes with protection */}
+                    <Route path="/programs" element={
+                      <ProtectedRoute requiredRoles={getRequiredRolesForPath("/programs")}>
+                        <Outlet />
+                      </ProtectedRoute>
+                    }>
+                      <Route index element={<ProgramsPage />} />
+                      <Route path="view/:programId" element={<ProgramViewPage />} />
+                    </Route>
+
+                    {/* Students routes with protection */}
+                    <Route path="/students" element={
+                      <ProtectedRoute requiredRoles={getRequiredRolesForPath("/students")}>
+                        <Outlet />
+                      </ProtectedRoute>
+                    }>
+                      <Route path="program/:programName" element={<StudentsByProgramPage />} />
+                    </Route>
+
+                    <Route path="*" element={<ErrorComponent />} />
                   </Route>
 
-                  {/* Companies routes with protection */}
-                  <Route path="/companies" element={
-                    <ProtectedRoute requiredRoles={["admin"]}>
-                      <Outlet />
-                    </ProtectedRoute>
-                  }>
-                    <Route index element={<CompanyListPage />} />
-                    <Route path="new" element={<CompanyCreatePage />} />
-                    <Route path="edit/:id" element={<CompanyEditPage />} />
+                  <Route
+                    element={
+                      <Authenticated
+                        key="authenticated-auth"
+                        fallback={<Outlet />}
+                      >
+                        <NavigateToResource resource="dashboard" />
+                      </Authenticated>
+                    }
+                  >
+                    <Route path="/login" element={<LoginPage />} />
                   </Route>
-
-                  {/* Course Registration routes with protection */}
-                  <Route path="/courseRegistration" element={
-                    <ProtectedRoute requiredRoles={getRequiredRolesForPath("/courseRegistration")}>
-                      <Outlet />
-                    </ProtectedRoute>
-                  }>
-                    <Route index element={<CourseClassList/>} />
-                    <Route path="new/:classId" element={<RegistrationCreatePage />} />
-                    <Route path="MyRegistration" element={<MyRegistrationPage />} />
-                  </Route>
-
-                  {/* Course Management routes with protection */}
-                  <Route path="/courseManagement" element={
-                    <ProtectedRoute requiredRoles={getRequiredRolesForPath("/courseManagement")}>
-                      <Outlet />
-                    </ProtectedRoute>
-                  }>
-                    <Route index element={<CourseListPage />} />
-                    <Route path="new" element={<CourseCreatePage />} />
-                    <Route path="view/:courseId" element={<CourseViewPage />} />
-                    <Route path="edit/:courseId" element={<CourseEditPage />} />
-                  </Route>
-
-                  {/* Class Scheduling routes with protection */}
-                  <Route path="/classScheduling" element={
-                    <ProtectedRoute requiredRoles={["admin", "staff"]}>
-                      <Outlet />
-                    </ProtectedRoute>
-                  }>
-                    <Route path="new" element={<ClassScheduleCreatePage />} />
-                    <Route path="edit/:classId" element={<ClassScheduleEditPage />} />
-                  </Route>
-  
-                  {/* Batch Job routes with protection */}
-                  <Route path="/batchjob/upload" element={
-                    <ProtectedRoute requiredRoles={["admin", "staff"]}>
-                      <BatchJobUploadPage />
-                    </ProtectedRoute>
-                  } />
-
-                  {/* Role Management routes with protection */}
-                  <Route path="/roleManagement" element={
-                    <ProtectedRoute requiredRoles={getRequiredRolesForPath("/roleManagement")}>
-                      <Outlet />
-                    </ProtectedRoute>
-                  }>
-                    <Route index element={<RoleListPage />} />
-                    <Route path="new" element={<RoleCreatePage />} />
-                    <Route path="view/:roleId" element={<RoleViewPage />} />
-                    <Route path="edit/:roleId" element={<RoleEditPage />} />
-                  </Route>
-
-                  {/* Permission Management routes with protection */}
-                  <Route path="/permissionManagement" element={
-                    <ProtectedRoute requiredRoles={getRequiredRolesForPath("/permissionManagement")}>
-                      <Outlet />
-                    </ProtectedRoute>
-                  }>
-                    <Route index element={<PermissionListPage />} />
-                    <Route path="new" element={<PermissionCreatePage />} />
-                    <Route path="view/:permissionId" element={<PermissionViewPage />} />
-                    <Route path="edit/:permissionId" element={<PermissionEditPage />} />
-                  </Route>
-
-                  {/* Staff Student Management routes with protection */}
-                  <Route path="/staffStudentManagement" element={
-                    <ProtectedRoute requiredRoles={getRequiredRolesForPath("/staffStudentManagement")}>
-                      <Outlet />
-                    </ProtectedRoute>
-                  }>
-                    <Route index element={<UserListPage />} />
-                    <Route path="create" element={<UserCreatePage />} />
-                    <Route path="view/:type/:id" element={<UserViewPage />} />
-                    <Route path="edit/:type/:id" element={<UserEditPage />} />
-                  </Route>
-
-                  {/* Programs routes with protection */}
-                  <Route path="/programs" element={
-                    <ProtectedRoute requiredRoles={getRequiredRolesForPath("/programs")}>
-                      <Outlet />
-                    </ProtectedRoute>
-                  }>
-                    <Route index element={<ProgramsPage />} />
-                    <Route path="view/:programId" element={<ProgramViewPage />} />
-                  </Route>
-
-                  {/* Students routes with protection */}
-                  <Route path="/students" element={
-                    <ProtectedRoute requiredRoles={getRequiredRolesForPath("/students")}>
-                      <Outlet />
-                    </ProtectedRoute>
-                  }>
-                    <Route path="program/:programName" element={<StudentsByProgramPage />} />
-                  </Route>
-
-                  <Route path="*" element={<ErrorComponent />} />
-                </Route>
-
-                <Route
-                  element={
-                    <Authenticated
-                      key="authenticated-auth"
-                      fallback={<Outlet />}
-                    >
-                      <NavigateToResource resource="dashboard" />
-                    </Authenticated>
-                  }
-                >
-                  <Route path="/login" element={<LoginPage />} />
-                </Route>
-              </Routes>
-              <UnsavedChangesNotifier />
-              <DocumentTitleHandler />
-            </Refine>
-            <DevtoolsPanel />
+                </Routes>
+                <UnsavedChangesNotifier />
+                <DocumentTitleHandler />
+              </Refine>
+              <DevtoolsPanel />
+            </NotificationProvider>
           </DevtoolsProvider>
         </AntdApp>
       </ConfigProvider>

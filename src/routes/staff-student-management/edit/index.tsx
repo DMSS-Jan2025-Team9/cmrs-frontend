@@ -280,8 +280,6 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
               <Descriptions.Item label="Name">{`${userData.firstName} ${userData.lastName}`}</Descriptions.Item>
               <Descriptions.Item label="Username">{userData.username}</Descriptions.Item>
               <Descriptions.Item label="Email">{userData.email}</Descriptions.Item>
-              <Descriptions.Item label="Created At">{formatDate(userData.createdAt)}</Descriptions.Item>
-              <Descriptions.Item label="Updated At">{formatDate(userData.updatedAt)}</Descriptions.Item>
             </Descriptions>
             
             <Divider orientation="left">{type === "staff" ? "Staff Information" : "Student Information"}</Divider>

@@ -1,7 +1,5 @@
-export * from "./companies";
 export * from "./dashboard";
 export * from "./login";
-export * from "./tasks";
 export * from "./course-management";
 export * from "./registration";
 export * from "./class-scheduling";
@@ -10,4 +8,5 @@ export * from "./program-management";
 export * from "./role-management";
 export * from "./permission-management";
 export * from "./staff-student-management";
-export { default as ForbiddenPage } from "./forbidden";
+export * from "./forbidden";
+export * from "./notifications";

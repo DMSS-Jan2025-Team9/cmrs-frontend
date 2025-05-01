@@ -5,6 +5,10 @@ import tsconfigPaths from "vite-tsconfig-paths";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [tsconfigPaths({ root: __dirname }), react()],
+  define: {
+    // Fix for SockJS which expects global to be defined
+    global: 'window',
+  },
   build: {
     rollupOptions: {
       output: {
@@ -14,4 +18,19 @@ export default defineConfig({
       },
     },
   },
+  server: {
+    proxy: {
+      // Proxy WebSocket requests
+      '/ws': {
+        target: 'http://localhost:8084',
+        ws: true,
+        changeOrigin: true,
+      },
+      // Proxy API requests
+      '/api/notifications': {
+        target: 'http://localhost:8084',
+        changeOrigin: true,
+      }
+    }
+  }
 });
