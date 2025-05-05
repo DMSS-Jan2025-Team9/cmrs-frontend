@@ -36,13 +36,14 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: 📦 Install dependencies
+      - name: 🚮 Remove node_modules and reinstall dependencies
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+          rm package-lock.json
+          rm -rf node_modules
+          npm install
+
+      - name: 📦 Install dependencies (via npm ci)
+        run: npm ci
 
       - name: 🧹 Lint with ESLint
         run: npm run lint
