@@ -3,6 +3,7 @@ import type { AuthProvider } from "@refinedev/core";
 import type { User } from "@/graphql/schema.types";
 
 import { API_URL, dataProvider } from "./data";
+import { logError } from "@/utilities/logger";
 
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
@@ -119,7 +120,7 @@ export const authProvider: AuthProvider = {
           redirectTo: redirectPath,
         };
       } catch (error) {
-        console.error("Error fetching user details:", error);
+        logError("Error fetching user details:", error);
       }
 
       return {
@@ -237,7 +238,7 @@ export const authProvider: AuthProvider = {
         };
       }
     } catch (error) {
-      console.error("Error in getIdentity:", error);
+      logError("Error in getIdentity:", error);
       return undefined;
     }
   },

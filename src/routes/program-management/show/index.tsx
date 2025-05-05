@@ -5,6 +5,7 @@ import type { Course, Program } from "@/models";
 import moment from "moment";
 import { useGo } from "@refinedev/core";
 import { useParams } from "react-router-dom";
+import { logError } from "@/utilities/logger";
 
 export const ProgramViewPage = ({ children }: React.PropsWithChildren) => {
   const { programId } = useParams();
@@ -33,7 +34,7 @@ export const ProgramViewPage = ({ children }: React.PropsWithChildren) => {
           setLoading(false);
         })
         .catch((error) => {
-          console.error("Error fetching program data", error);
+          logError("Error fetching program data", error);
           notification.error({
             message: "Error",
             description: "There was an issue fetching the program details.",

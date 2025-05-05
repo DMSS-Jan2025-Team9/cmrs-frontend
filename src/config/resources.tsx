@@ -1,5 +1,6 @@
 import type { IResourceItem } from "@refinedev/core";
 import { jwtDecode} from "jwt-decode";
+import { logError } from "@/utilities/logger";
 
 import {
   DashboardOutlined,
@@ -130,7 +131,7 @@ const getUserRoles = (): string[] => {
     try {
       return JSON.parse(rolesString);
     } catch (e) {
-      console.error("Error parsing user roles:", e);
+      logError("Error parsing user roles:", e);
     }
   }
   return [];

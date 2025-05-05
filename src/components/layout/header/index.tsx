@@ -29,7 +29,7 @@ export const Header = () => {
   //     try {
   //       return JSON.parse(rolesString);
   //     } catch (e) {
-  //       console.error("Error parsing user roles:", e);
+  //       logError("Error parsing user roles:", e);
   //     }
   //   }
   //   return [];

@@ -13,6 +13,7 @@ import {
 import { useNotifications } from '../../contexts/NotificationContext';
 import { NotificationType, Notification } from '../../services/notificationService';
 import { useNavigate } from 'react-router-dom';
+import { logError } from "@/utilities/logger";
 
 const { Text, Title } = Typography;
 const { TabPane } = Tabs;
@@ -39,7 +40,7 @@ export const NotificationPage: React.FC = () => {
         const roles = JSON.parse(rolesString);
         return roles.includes("admin") || roles.includes("staff");
       } catch (e) {
-        console.error("Error parsing user roles:", e);
+        logError("Error parsing user roles:", e);
       }
     }
     return false;

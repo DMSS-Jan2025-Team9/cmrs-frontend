@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Student, StudentUpdateRequest, ApiResponse } from "../models";
+import { logError, logInfo } from "@/utilities/logger";
 
 const API_URL = "http://localhost:8085/api";
 
@@ -19,7 +20,7 @@ export const studentService = {
    */
   getAllStudents: async (): Promise<Student[]> => {
     try {
-      console.log("Fetching all students");
+      logInfo("Fetching all students");
       
       // Try the admin endpoint first
       try {
@@ -27,7 +28,7 @@ export const studentService = {
           headers: getAuthHeaders()
         });
         
-        console.log("Students response format:", response.data);
+        logInfo("Students response format:", response.data);
         
         // Ensure we're handling the response properly and returning an array
         if (Array.isArray(response.data)) {
@@ -52,7 +53,7 @@ export const studentService = {
       
       return [];
     } catch (error) {
-      console.error("Error fetching all students:", error);
+      logError("Error fetching all students:", error);
       return [];
     }
   },
@@ -62,22 +63,22 @@ export const studentService = {
    */
   getStudentById: async (userId: number): Promise<Student | null> => {
     try {
-      console.log(`Fetching student with userId: ${userId}`);
+      logInfo(`Fetching student with userId: ${userId}`);
       
       const response = await axios.get(`${API_URL}/students/secure/${userId}`, {
         headers: getAuthHeaders()
       });
       
-      console.log("Student by ID response:", response.data);
+      logInfo("Student by ID response:", response.data);
       
       // Check if roles is missing or not an array, and set a default
       if (response.data) {
         const studentData = response.data;
         if (!studentData.roles) {
-          console.log("Roles missing, setting empty array");
+          logInfo("Roles missing, setting empty array");
           studentData.roles = [];
         } else if (!Array.isArray(studentData.roles)) {
-          console.log("Roles not an array, converting to array:", studentData.roles);
+          logInfo("Roles not an array, converting to array:", studentData.roles);
           studentData.roles = [studentData.roles];
         }
         
@@ -86,25 +87,25 @@ export const studentService = {
           studentData.name = `${studentData.firstName} ${studentData.lastName}`;
         }
         
-        console.log("Processed student data:", studentData);
+        logInfo("Processed student data:", studentData);
         return studentData;
       }
       
-      console.log("No data returned for student with ID:", userId);
+      logInfo("No data returned for student with ID:", userId);
       return null;
     } catch (error: any) {
-      console.error(`Error fetching student with ID ${userId}:`, error);
-      console.error("Error details:", error.response?.data || error.message);
+      logError(`Error fetching student with ID ${userId}:`, error);
+      logError("Error details:", error.response?.data || error.message);
       
       // Try alternative endpoint if secure endpoint fails
       try {
-        console.log(`Trying alternative endpoint for student with userId: ${userId}`);
+        logInfo(`Trying alternative endpoint for student with userId: ${userId}`);
         const altResponse = await axios.get(`${API_URL}/students/${userId}`, {
           headers: getAuthHeaders()
         });
         
         if (altResponse.data) {
-          console.log("Alternative endpoint success:", altResponse.data);
+          logInfo("Alternative endpoint success:", altResponse.data);
           const studentData = altResponse.data;
           if (!studentData.roles) {
             studentData.roles = [];
@@ -114,7 +115,7 @@ export const studentService = {
           return studentData;
         }
       } catch (altError) {
-        console.error("Alternative endpoint also failed:", altError);
+        logError("Alternative endpoint also failed:", altError);
       }
       
       return null; // Return null instead of throwing to prevent component crashes
@@ -132,7 +133,7 @@ export const studentService = {
     }
     
     try {
-      console.log(`Updating student with userId: ${userId}`, formattedData);
+      logInfo(`Updating student with userId: ${userId}`, formattedData);
       
       const response = await axios.put(
         `${API_URL}/students/update/${userId}`,
@@ -142,7 +143,7 @@ export const studentService = {
         }
       );
       
-      console.log("Update student response:", response);
+      logInfo("Update student response:", response);
       
       if (response.data && typeof response.data === 'object') {
         return {
@@ -158,7 +159,7 @@ export const studentService = {
         data: response.data
       };
     } catch (error) {
-      console.error(`Error updating student with ID ${userId}:`, error);
+      logError(`Error updating student with ID ${userId}:`, error);
       throw error;
     }
   },
@@ -168,7 +169,7 @@ export const studentService = {
    */
   deleteStudent: async (userId: number): Promise<ApiResponse<any>> => {
     try {
-      console.log(`Deleting student with userId: ${userId}`);
+      logInfo(`Deleting student with userId: ${userId}`);
       
       const response = await axios.delete(
         `${API_URL}/students/${userId}`,
@@ -177,7 +178,7 @@ export const studentService = {
         }
       );
       
-      console.log("Delete student response:", response);
+      logInfo("Delete student response:", response);
       
       return {
         success: true,
@@ -185,7 +186,7 @@ export const studentService = {
         data: response.data
       };
     } catch (error) {
-      console.error(`Error deleting student with ID ${userId}:`, error);
+      logError(`Error deleting student with ID ${userId}:`, error);
       throw error;
     }
   },
@@ -195,7 +196,7 @@ export const studentService = {
    */
   createStudent: async (studentData: any): Promise<ApiResponse<any>> => {
     try {
-      console.log("Creating new student:", studentData);
+      logInfo("Creating new student:", studentData);
       
       const response = await axios.post(
         `${API_URL}/auth/register/student`,
@@ -205,7 +206,7 @@ export const studentService = {
         }
       );
       
-      console.log("Create student response:", response);
+      logInfo("Create student response:", response);
       
       return {
         success: response.status >= 200 && response.status < 300,
@@ -213,7 +214,7 @@ export const studentService = {
         data: response.data
       };
     } catch (error) {
-      console.error("Error creating student:", error);
+      logError("Error creating student:", error);
       throw error;
     }
   }

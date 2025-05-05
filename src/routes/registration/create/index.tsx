@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Form, Input, Button, List, message } from "antd";
 import axios, { AxiosError } from "axios";
+import { logError } from "@/utilities/logger";
 
 interface CreateRegistrationDTO {
     classId: number;
@@ -51,7 +52,7 @@ export const RegistrationCreatePage: React.FC = () => {
             // Check if it's an AxiosError with a response payload
             const axiosErr = err as AxiosError<{ message?: string }>;
             const serverMessage =
-              axiosErr.response?.data?.message 
+              axiosErr.response?.data?.message; 
               axiosErr.message;             
         
             message.error(serverMessage);

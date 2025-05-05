@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Form, Input, Button, notification, Space, Select, Divider } from "antd";
 import axios from "axios";
 import { useGo } from "@refinedev/core";
+import { logError } from "@/utilities/logger";
 
 interface Role {
   roleId: number;
@@ -66,7 +67,7 @@ export const StudentCreateForm: React.FC<StudentCreateFormProps> = ({ onBack }) 
         });
       }
     } catch (error) {
-      console.error("Error fetching roles:", error);
+      logError("Error fetching roles:", error);
       notification.error({
         message: "Error",
         description: "There was an issue fetching the available roles.",
@@ -94,7 +95,7 @@ export const StudentCreateForm: React.FC<StudentCreateFormProps> = ({ onBack }) 
         });
       }
     } catch (error) {
-      console.error("Error fetching programs:", error);
+      logError("Error fetching programs:", error);
       notification.error({
         message: "Error",
         description: "There was an issue fetching the available programs.",
@@ -151,7 +152,7 @@ export const StudentCreateForm: React.FC<StudentCreateFormProps> = ({ onBack }) 
         });
       }
     } catch (error) {
-      console.error("Error creating student:", error);
+      logError("Error creating student:", error);
       notification.error({
         message: "Error",
         description: "There was an issue creating the student.",

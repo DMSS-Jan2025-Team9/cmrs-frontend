@@ -5,6 +5,7 @@ import type { Course, Program, ClassSchedule } from "@/models";
 import moment from "moment";
 import { useGo } from "@refinedev/core";
 import { useParams } from "react-router-dom";
+import { logError } from "@/utilities/logger";
 
 export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
   const { courseId } = useParams();
@@ -43,7 +44,7 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
           }
         })
         .catch((error) => {
-          console.error("Error fetching course data", error);
+          logError("Error fetching course data", error);
           notification.error({
             message: "Error",
             description: "There was an issue fetching the course details.",
@@ -63,7 +64,7 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
         setProgramLoading(false);
       })
       .catch((error) => {
-        console.error("Error fetching program data", error);
+        logError("Error fetching program data", error);
         notification.error({
           message: "Error",
           description: "There was an issue fetching the program details.",
@@ -83,7 +84,7 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
           setSchedulesLoading(false);
         })
         .catch((error) => {
-          console.error("Error fetching class schedules", error);
+          logError("Error fetching class schedules", error);
           notification.error({
             message: "Error",
             description: "There was an issue fetching the class schedules.",
@@ -136,7 +137,7 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
         });
       })
       .catch((error) => {
-        console.error("Error deleting course", error);
+        logError("Error deleting course", error);
         notification.error({
           message: "Error",
           description: "There was an issue deleting the course.",
@@ -182,7 +183,7 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
         fetchClassSchedules();
       })
       .catch((error) => {
-        console.error("Error deleting class schedule", error);
+        logError("Error deleting class schedule", error);
         notification.error({
           message: "Error",
           description: "There was an issue deleting the class schedule.",

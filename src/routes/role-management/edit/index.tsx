@@ -5,6 +5,7 @@ import axios from "axios";
 import { useGo } from "@refinedev/core";
 import { useParams } from "react-router-dom";
 import type { Role, Permission } from "@/models/index";
+import { logError } from "@/utilities/logger";
 
 export const RoleEditPage = ({ children }: React.PropsWithChildren) => {
     const { roleId } = useParams();
@@ -45,7 +46,7 @@ export const RoleEditPage = ({ children }: React.PropsWithChildren) => {
             });
         }
         } catch (error) {
-        console.error("Error fetching role data", error);
+        logError("Error fetching role data", error);
         notification.error({
             message: "Error",
             description: "There was an issue fetching the role details.",
@@ -103,7 +104,7 @@ export const RoleEditPage = ({ children }: React.PropsWithChildren) => {
         });
         }
     } catch (error) {
-        console.error("Error updating role:", error);
+        logError("Error updating role:", error);
         notification.error({
         message: "Error",
         description: "There was an issue updating the role.",

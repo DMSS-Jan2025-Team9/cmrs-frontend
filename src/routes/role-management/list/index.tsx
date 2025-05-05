@@ -7,6 +7,7 @@ import axios from "axios";
 import { useGo } from "@refinedev/core";
 import { PaginationTotal } from "@/components";
 import type { Role } from "@/models/index";
+import { logError } from "@/utilities/logger";
 
 export const RoleListPage = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
@@ -38,7 +39,7 @@ export const RoleListPage = ({ children }: React.PropsWithChildren) => {
         setTotal(filteredRoles.length);
       }
     } catch (error) {
-      console.error("Error fetching roles:", error);
+      logError("Error fetching roles:", error);
       message.error("Failed to load roles. Please try again.");
     } finally {
       setLoading(false);
@@ -68,7 +69,7 @@ export const RoleListPage = ({ children }: React.PropsWithChildren) => {
       message.success("Role deleted successfully");
       fetchRoles(); // Reload the roles after deletion
     } catch (error) {
-      console.error("Error deleting role:", error);
+      logError("Error deleting role:", error);
       message.error("Failed to delete role. Please try again.");
     }
   };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Form, Input, Button, notification, Space, Select, Divider } from "antd";
 import axios from "axios";
 import { useGo } from "@refinedev/core";
+import { logError } from "@/utilities/logger";
 
 interface Role {
   roleId: number;
@@ -49,7 +50,7 @@ export const StaffCreateForm: React.FC<StaffCreateFormProps> = ({ onBack }) => {
         });
       }
     } catch (error) {
-      console.error("Error fetching roles:", error);
+      logError("Error fetching roles:", error);
       notification.error({
         message: "Error",
         description: "There was an issue fetching the available roles.",
@@ -107,7 +108,7 @@ export const StaffCreateForm: React.FC<StaffCreateFormProps> = ({ onBack }) => {
         });
       }
     } catch (error) {
-      console.error("Error creating staff:", error);
+      logError("Error creating staff:", error);
       notification.error({
         message: "Error",
         description: "There was an issue creating the staff.",

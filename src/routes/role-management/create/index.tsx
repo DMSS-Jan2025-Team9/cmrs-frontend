@@ -3,7 +3,7 @@ import { Form, Input, Button, notification, Space, Checkbox, Card, Divider } fro
 import axios from "axios";
 import { useGo } from "@refinedev/core";
 import type { Role_Creation, Permission } from "@/models/index";
-
+import { logError, logInfo } from "@/utilities/logger";
 
 export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
@@ -23,7 +23,7 @@ export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
       try {
         const token = getAuthToken();
         if (!token) {
-          console.log("No token found");
+          logInfo("No token found");
           return;
         }
         
@@ -34,9 +34,9 @@ export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
           }
         });
         
-        console.log("Auth check successful:", response.data);
+        logInfo("Auth check successful:", response.data);
       } catch (error) {
-        console.error("Auth check failed:", error);
+        logError("Auth check failed:", error);
       }
     };
     
@@ -55,7 +55,7 @@ export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
     try {
       setLoading(true);
 
-      console.log("Token BEFORE api call:", token);
+      logInfo("Token BEFORE api call:", token);
 
       const response = await axios.get("http://localhost:8085/api/admin/permissions", {
         headers: {
@@ -71,7 +71,7 @@ export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
         });
       }
     } catch (error) {
-      console.error("Error fetching permissions:", error);
+      logError("Error fetching permissions:", error);
       notification.error({
         message: "Error Fetching Permissions",
         description: "There was an issue fetching permissions. Please try again.",
@@ -124,7 +124,7 @@ export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
         });
       })
       .catch((error) => {
-        console.error("There was an error adding the role!", error);
+        logError("There was an error adding the role!", error);
 
         // Show error notification in case of failure
         notification.error({

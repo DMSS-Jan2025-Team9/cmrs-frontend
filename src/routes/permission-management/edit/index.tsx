@@ -5,6 +5,7 @@ import axios from "axios";
 import { useGo } from "@refinedev/core";
 import { useParams } from "react-router-dom";
 import type { Permission } from "@/models/index";
+import { logError } from "@/utilities/logger";
 
 export const PermissionEditPage = ({ children }: React.PropsWithChildren) => {
   const { permissionId } = useParams();
@@ -45,7 +46,7 @@ export const PermissionEditPage = ({ children }: React.PropsWithChildren) => {
           });
         }
       } catch (error) {
-        console.error("Error fetching permission data", error);
+        logError("Error fetching permission data", error);
         notification.error({
           message: "Error",
           description: "There was an issue fetching the permission details.",
@@ -97,7 +98,7 @@ export const PermissionEditPage = ({ children }: React.PropsWithChildren) => {
         });
       }
     } catch (error) {
-      console.error("Error updating permission:", error);
+      logError("Error updating permission:", error);
       notification.error({
         message: "Error",
         description: "There was an issue updating the permission.",

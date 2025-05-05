@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Table, Button } from "antd";
 import { useNavigate } from "react-router-dom";
 import { Course, ClassSchedule } from "@/models";
+import { logError } from "@/utilities/logger";
 
 const { Column } = Table;
 
@@ -22,7 +23,7 @@ export const CourseClassList: React.FC = () => {
                 setLoading(false);
             })
             .catch((err) => {
-                console.error("Error fetching courses:", err);
+                logError("Error fetching courses:", err);
                 setLoading(false);
             });
     }, []);
@@ -35,7 +36,7 @@ export const CourseClassList: React.FC = () => {
             const data: ClassSchedule[] = await res.json();
             setClassesMap((prev) => ({ ...prev, [courseId]: data }));
         } catch (error) {
-            console.error("Error fetching classes:", error);
+            logError("Error fetching classes:", error);
         }
     };
 

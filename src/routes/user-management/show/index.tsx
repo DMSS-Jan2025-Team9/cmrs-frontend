@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import { Table, Typography, Button, Select } from "antd";
+import { logError } from "@/utilities/logger";
 
 interface Student {
     studentId: string;
@@ -26,7 +27,7 @@ export const StudentsByProgramPage: React.FC = () => {
                 setStudents(response.data || []);
             })
             .catch((error) => {
-                console.error("Failed to fetch students:", error);
+                logError("Failed to fetch students:", error);
             })
             .finally(() => {
                 setLoading(false);

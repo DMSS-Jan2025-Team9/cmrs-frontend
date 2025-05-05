@@ -5,6 +5,7 @@ import type { Course } from "@/models";
 import moment from "moment";
 import { useGo } from "@refinedev/core";
 import { useParams } from "react-router-dom"; // Import useParams from react-router-dom
+import { logError } from "@/utilities/logger";
 
 // Define Program interface
 interface Program {
@@ -47,7 +48,7 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
         }
       })
       .catch((error) => {
-        console.error("Error fetching programs", error);
+        logError("Error fetching programs", error);
         notification.error({
           message: "Error",
           description: "There was an issue fetching the programs list.",
@@ -77,7 +78,7 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
           });
         })
         .catch((error) => {
-          console.error("Error fetching course data", error);
+          logError("Error fetching course data", error);
           notification.error({
             message: "Error",
             description: "There was an issue fetching the course details.",
@@ -146,7 +147,7 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
         });
       })
       .catch((error) => {
-        console.error("There was an error updating the course!", error);
+        logError("There was an error updating the course!", error);
 
         // Show error notification in case of failure
         notification.error({

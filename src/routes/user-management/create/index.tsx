@@ -3,6 +3,7 @@ import { Create, useForm } from "@refinedev/antd";
 import { Form, Input, Button, Upload, message, Table, Typography } from "antd";
 import { RcFile } from "antd/es/upload";
 import axios from "axios";
+import { logError } from "@/utilities/logger";
 
 interface BatchJobUploadFormValues {
     csvFile: RcFile | undefined;
@@ -97,7 +98,7 @@ export const BatchJobUploadPage: React.FC = () => {
             message.success("Batch job started and completed successfully!");
         } catch (error) {
             message.error("Error starting batch job.");
-            console.error(error);
+            logError(error);
         } finally {
             setLoading(false);  // Stop loading state
         }

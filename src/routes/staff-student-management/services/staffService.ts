@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Staff, StaffUpdateRequest, ApiResponse } from "../models";
+import { logError, logInfo } from "@/utilities/logger";
 
 const API_URL = "http://localhost:8085/api";
 
@@ -29,10 +30,10 @@ export const staffService = {
       } else if (response.data && Array.isArray(response.data.data)) {
         return response.data.data;
       }
-      console.log("Staff response format:", response.data);
+      logInfo("Staff response format:", response.data);
       return [];
     } catch (error) {
-      console.error("Error fetching all staff:", error);
+      logError("Error fetching all staff:", error);
       return [];
     }
   },
@@ -43,22 +44,22 @@ export const staffService = {
   getStaffById: async (userId: number): Promise<Staff | null> => {
     try {
       // Log the request to debug
-      console.log(`Fetching staff with userId: ${userId}`);
+      logInfo(`Fetching staff with userId: ${userId}`);
       
       const response = await axios.get(`${API_URL}/staff/${userId}`, {
         headers: getAuthHeaders()
       });
       
-      console.log("Staff by ID response:", response.data);
+      logInfo("Staff by ID response:", response.data);
       
       // Check if roles is missing or not an array, and set a default
       if (response.data) {
         const staffData = response.data;
         if (!staffData.roles) {
-          console.log("Roles missing, setting empty array");
+          logInfo("Roles missing, setting empty array");
           staffData.roles = [];
         } else if (!Array.isArray(staffData.roles)) {
-          console.log("Roles not an array, converting to array:", staffData.roles);
+          logInfo("Roles not an array, converting to array:", staffData.roles);
           staffData.roles = [staffData.roles];
         }
         
@@ -67,15 +68,15 @@ export const staffService = {
           staffData.name = `${staffData.firstName} ${staffData.lastName}`;
         }
         
-        console.log("Processed staff data:", staffData);
+        logInfo("Processed staff data:", staffData);
         return staffData;
       }
       
-      console.log("No data returned for staff with ID:", userId);
+      logInfo("No data returned for staff with ID:", userId);
       return null;
     } catch (error: any) {
-      console.error(`Error fetching staff with ID ${userId}:`, error);
-      console.error("Error details:", error.response?.data || error.message);
+      logError(`Error fetching staff with ID ${userId}:`, error);
+      logError("Error details:", error.response?.data || error.message);
       return null; // Return null instead of throwing to prevent component crashes
     }
   },
@@ -91,7 +92,7 @@ export const staffService = {
     }
     
     try {
-      console.log(`Updating staff with userId: ${userId}`, formattedData);
+      logInfo(`Updating staff with userId: ${userId}`, formattedData);
       
       const response = await axios.put(
         `${API_URL}/staff/update/${userId}`,
@@ -101,7 +102,7 @@ export const staffService = {
         }
       );
       
-      console.log("Update staff response:", response);
+      logInfo("Update staff response:", response);
       
       if (response.data && typeof response.data === 'object') {
         return {
@@ -117,7 +118,7 @@ export const staffService = {
         data: response.data
       };
     } catch (error) {
-      console.error(`Error updating staff with ID ${userId}:`, error);
+      logError(`Error updating staff with ID ${userId}:`, error);
       throw error;
     }
   },
@@ -127,7 +128,7 @@ export const staffService = {
    */
   deleteStaff: async (userId: number): Promise<ApiResponse<any>> => {
     try {
-      console.log(`Deleting staff with userId: ${userId}`);
+      logInfo(`Deleting staff with userId: ${userId}`);
       
       const response = await axios.delete(
         `${API_URL}/staff/${userId}`,
@@ -136,7 +137,7 @@ export const staffService = {
         }
       );
       
-      console.log("Delete staff response:", response);
+      logInfo("Delete staff response:", response);
       
       return {
         success: true,
@@ -144,7 +145,7 @@ export const staffService = {
         data: response.data
       };
     } catch (error) {
-      console.error(`Error deleting staff with ID ${userId}:`, error);
+      logError(`Error deleting staff with ID ${userId}:`, error);
       throw error;
     }
   },
@@ -154,7 +155,7 @@ export const staffService = {
    */
   createStaff: async (staffData: any): Promise<ApiResponse<any>> => {
     try {
-      console.log("Creating new staff:", staffData);
+      logInfo("Creating new staff:", staffData);
       
       const response = await axios.post(
         `${API_URL}/auth/register/staff`,
@@ -164,7 +165,7 @@ export const staffService = {
         }
       );
       
-      console.log("Create staff response:", response);
+      logInfo("Create staff response:", response);
       
       return {
         success: response.status >= 200 && response.status < 300,
@@ -172,7 +173,7 @@ export const staffService = {
         data: response.data
       };
     } catch (error) {
-      console.error("Error creating staff:", error);
+      logError("Error creating staff:", error);
       throw error;
     }
   }

@@ -4,6 +4,7 @@ import SockJS from 'sockjs-client';
 import axios from 'axios';
 import { notification } from 'antd';
 import { notificationService, Notification } from '../services/notificationService';
+import { logError, logInfo } from "@/utilities/logger";
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -43,7 +44,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   const fetchNotifications = useCallback(async (userIdentifier: string) => {
     // If a fetch is already in progress, skip
     if (fetchInProgressRef.current) {
-      console.log("Fetch already in progress, skipping");
+      logInfo("Fetch already in progress, skipping");
       return;
     }
     
@@ -52,7 +53,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     const timeSinceLastFetch = now - lastFetchTimeRef.current;
     
     if (timeSinceLastFetch < FETCH_THROTTLE_TIME && lastFetchTimeRef.current !== 0) {
-      console.log(`Throttling fetch - last fetch was ${timeSinceLastFetch}ms ago`);
+      logInfo(`Throttling fetch - last fetch was ${timeSinceLastFetch}ms ago`);
       return;
     }
     
@@ -61,7 +62,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     setError(null);
     
     try {
-      console.log(`Fetching notifications for user: ${userIdentifier}`);
+      logInfo(`Fetching notifications for user: ${userIdentifier}`);
       let response;
       
       // Determine if it's a student or staff/admin
@@ -76,7 +77,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       
       setNotifications(response.data);
     } catch (err) {
-      console.error('Error fetching notifications:', err);
+      logError('Error fetching notifications:', err);
       setError(err instanceof Error ? err : new Error('Failed to fetch notifications'));
     } finally {
       setIsLoading(false);
@@ -91,7 +92,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     
     // Only create a new connection if one doesn't already exist
     if (connectedRef.current || (stompClientRef.current && stompClientRef.current.active)) {
-      console.log("WebSocket connection already exists, skipping new connection");
+      logInfo("WebSocket connection already exists, skipping new connection");
       return;
     }
 
@@ -101,7 +102,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       debug: (str: string) => {
         // Disable verbose logging
         if (process.env.NODE_ENV !== 'production') {
-          console.log(str);
+          logInfo(str);
         }
       },
       reconnectDelay: 5000,
@@ -110,14 +111,14 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     });
 
     client.onConnect = () => {
-      console.log('Connected to notification WebSocket');
+      logInfo('Connected to notification WebSocket');
       connectedRef.current = true;
       
       // Subscribe to user-specific topic
       client.subscribe(`/topic/user/${userIdentifier}`, (message) => {
         try {
           const newNotification: Notification = JSON.parse(message.body);
-          console.log('Received notification:', newNotification);
+          logInfo('Received notification:', newNotification);
           
           // Check if this notification already exists (prevent duplicates)
           if (newNotification.notificationId) {
@@ -126,7 +127,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
             );
             
             if (exists) {
-              console.log('Notification already exists, skipping duplicate:', newNotification.notificationId);
+              logInfo('Notification already exists, skipping duplicate:', newNotification.notificationId);
               return;
             }
           }
@@ -142,19 +143,19 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
             duration: 5,
           });
         } catch (err) {
-          console.error("Error processing received notification:", err);
+          logError("Error processing received notification:", err);
         }
       });
     };
 
     client.onStompError = (frame: Frame) => {
-      console.error('STOMP error:', frame.headers, frame.body);
+      logError('STOMP error:', frame.headers, frame.body);
       setError(new Error(`WebSocket connection error: ${frame.body}`));
       connectedRef.current = false;
     };
 
     client.onDisconnect = () => {
-      console.log('Disconnected from notification WebSocket');
+      logInfo('Disconnected from notification WebSocket');
       connectedRef.current = false;
     };
 
@@ -174,11 +175,11 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       userIdentifier = user.studentFullId || user.userId?.toString();
       
       if (!userIdentifier) {
-        console.log("No user identifier found, skipping notification setup");
+        logInfo("No user identifier found, skipping notification setup");
         return;
       }
     } catch (err) {
-      console.error("Error parsing user details:", err);
+      logError("Error parsing user details:", err);
       return;
     }
     
@@ -196,7 +197,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   const markAsRead = async (notificationId: number): Promise<void> => {
     if (!notificationId || isNaN(Number(notificationId))) {
-      console.error("Invalid notification ID:", notificationId);
+      logError("Invalid notification ID:", notificationId);
       return;
     }
 
@@ -213,10 +214,10 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
               : notification
           )
         );
-        console.log(`Notification ${notificationId} marked as read`);
+        logInfo(`Notification ${notificationId} marked as read`);
       }
     } catch (err) {
-      console.error('Error marking notification as read:', err);
+      logError('Error marking notification as read:', err);
       setError(err instanceof Error ? err : new Error('Failed to mark notification as read'));
     }
   };
@@ -228,7 +229,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       .map(notification => notification.notificationId);
     
     if (unreadIds.length === 0) {
-      console.log("No unread notifications to mark");
+      logInfo("No unread notifications to mark");
       return;
     }
     
@@ -249,10 +250,10 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
             return updated ? updated : notification;
           }) as Notification[]
         );
-        console.log(`${response.data.length} notifications marked as read`);
+        logInfo(`${response.data.length} notifications marked as read`);
       }
     } catch (err) {
-      console.error('Error marking all notifications as read:', err);
+      logError('Error marking all notifications as read:', err);
       setError(err instanceof Error ? err : new Error('Failed to mark all notifications as read'));
     }
   };
@@ -263,7 +264,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     
     // Only allow refresh if it's been a while since the last fetch
     if (timeSinceLastFetch < 5000 && lastFetchTimeRef.current !== 0) {
-      console.log("Ignoring rapid refresh request");
+      logInfo("Ignoring rapid refresh request");
       return;
     }
     
@@ -278,7 +279,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         fetchNotifications(userIdentifier);
       }
     } catch (err) {
-      console.error("Error parsing user details during refresh:", err);
+      logError("Error parsing user details during refresh:", err);
     }
   };
 

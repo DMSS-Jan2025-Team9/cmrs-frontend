@@ -9,6 +9,7 @@ import { Text } from "../../text";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { ExtendedUser } from "@/types";
+import { logError } from "@/utilities/logger";
 
 type Props = {
   opened: boolean;
@@ -36,7 +37,7 @@ export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
           });
         }
       } catch (error) {
-        console.error("Error loading user data:", error);
+        logError("Error loading user data:", error);
       } finally {
         setLoading(false);
       }

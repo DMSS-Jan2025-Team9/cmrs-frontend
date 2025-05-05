@@ -3,6 +3,7 @@ import { Table, Input, Space, Button, Row, Col, Popconfirm, message } from "antd
 import { SearchOutlined, DeleteOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
 import { CreateButton } from "@refinedev/antd";
 import axios from "axios";
+import { logError } from "@/utilities/logger";
 
 import { useGo } from "@refinedev/core";
 import { PaginationTotal } from "@/components";
@@ -38,7 +39,7 @@ export const PermissionListPage = ({ children }: React.PropsWithChildren) => {
         setTotal(filteredPermissions.length);
       }
     } catch (error) {
-      console.error("Error fetching permissions:", error);
+      logError("Error fetching permissions:", error);
       message.error("Failed to load permissions. Please try again.");
     } finally {
       setLoading(false);
@@ -68,7 +69,7 @@ export const PermissionListPage = ({ children }: React.PropsWithChildren) => {
       message.success("Permission deleted successfully");
       fetchPermissions(); // Reload the permissions after deletion
     } catch (error) {
-      console.error("Error deleting permission:", error);
+      logError("Error deleting permission:", error);
       message.error("Failed to delete permission. Please try again.");
     }
   };

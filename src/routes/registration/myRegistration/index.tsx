@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Table, Typography, Spin, Button, message } from "antd";
+import { logError, logInfo } from "@/utilities/logger";
 
 interface RawRegistration {
   registrationId: number;
@@ -37,7 +38,7 @@ export const MyRegistrationPage: React.FC = () => {
       const user = JSON.parse(userDetails);
       if (user.studentId) {
         setStudentId(user.studentId);
-        console.log(studentId);
+        logInfo(studentId);
 
       }
     }
@@ -46,10 +47,10 @@ export const MyRegistrationPage: React.FC = () => {
   // helper to reload everything
   const fetchAll = async () => {
     if (!studentId) {
-      console.log("fetchAll called but studentId is null");
+      logInfo("fetchAll called but studentId is null");
       return;
     }
-    console.log("Fetching registrations for studentId:", studentId);
+    logInfo("Fetching registrations for studentId:", studentId);
     setLoading(true);
     try {
       const { data: rawRegs } = await axios.get<RawRegistration[]>(
@@ -167,7 +168,7 @@ export const MyRegistrationPage: React.FC = () => {
 
       setRegistrations(enriched);
     } catch (err) {
-      console.error(err);
+      logError(err);
       message.error("Could not load your registrations");
     } finally {
       setLoading(false);

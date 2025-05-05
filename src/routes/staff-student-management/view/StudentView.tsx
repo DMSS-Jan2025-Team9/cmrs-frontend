@@ -18,6 +18,7 @@ import { EditOutlined, DeleteOutlined, ArrowLeftOutlined } from "@ant-design/ico
 import { useGo } from "@refinedev/core";
 import { Student } from "../models";
 import { studentService } from "../services";
+import { logError, logInfo } from "@/utilities/logger";
 
 interface StudentViewProps {
   userId: number;
@@ -48,7 +49,7 @@ export const StudentView: React.FC<StudentViewProps> = ({
           
           const data = await studentService.getStudentById(userId);
           if (data) {
-            console.log("Fetched student data:", data);
+            logInfo("Fetched student data:", data);
             
             // Ensure roles is an array
             if (!data.roles || !Array.isArray(data.roles)) {
@@ -64,7 +65,7 @@ export const StudentView: React.FC<StudentViewProps> = ({
             });
           }
         } catch (err) {
-          console.error("Error fetching student data", err);
+          logError("Error fetching student data", err);
           setError("Error fetching student data");
           notification.error({
             message: "Error",
@@ -108,7 +109,7 @@ export const StudentView: React.FC<StudentViewProps> = ({
         handleBack(); // Navigate back to list page
       }
     } catch (error) {
-      console.error("Error deleting student:", error);
+      logError("Error deleting student:", error);
       message.error("Failed to delete student. Please try again.");
     }
   };

@@ -3,6 +3,7 @@ import { Form, Input, Button, notification, Space } from "antd";
 import axios from "axios";
 import { useGo } from "@refinedev/core";
 import type { Permission } from "@/models/index";
+import { logError } from "@/utilities/logger";
 
 export const PermissionCreatePage = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
@@ -57,7 +58,7 @@ export const PermissionCreatePage = ({ children }: React.PropsWithChildren) => {
         });
       }
     } catch (error) {
-      console.error("There was an error adding the permission!", error);
+      logError("There was an error adding the permission!", error);
 
       // Show error notification in case of failure
       notification.error({

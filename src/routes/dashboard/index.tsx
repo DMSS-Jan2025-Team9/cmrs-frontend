@@ -4,6 +4,7 @@ import { TeamOutlined, WarningOutlined, SolutionOutlined } from "@ant-design/ico
 import axios from 'axios';
 import { useGo } from "@refinedev/core";
 import { PaginationTotal } from '@/components';
+import { logError } from "@/utilities/logger";
 
 export const DashboardPage = () => {
   const go = useGo();
@@ -29,7 +30,7 @@ export const DashboardPage = () => {
         setMostlyEmptyClasses(mostlyEmptyResponse.data);
         setError(null);
       } catch (err) {
-        console.error('Error fetching data:', err);
+        logError('Error fetching data:', err);
         notification.error({
           message: "Error",
           description: "There was an issue fetching the class schedules.",

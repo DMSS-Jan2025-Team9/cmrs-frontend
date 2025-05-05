@@ -106,7 +106,7 @@ const routeAccessRoles: Record<string, string[]> = {
 // Helper function to determine required roles for a path
 const getRequiredRolesForPath = (path: string) => {
   // Normalize path by removing trailing slash
-  let normalizedPath = path.endsWith('/') && path !== '/' 
+  const normalizedPath = path.endsWith('/') && path !== '/' 
     ? path.slice(0, -1) 
     : path;
     
@@ -134,12 +134,10 @@ const getRequiredRolesForPath = (path: string) => {
     
     // Check if this path is protected
     if (routeAccessRoles[currentPath]) {
-      console.log(`Path ${path} matched access rule for ${currentPath}`);
       return routeAccessRoles[currentPath];
     }
   }
   
-  console.log(`No access rules found for path: ${path}`);
   // Default - admin and staff only for unspecified routes
   return ["admin", "staff"];
 };

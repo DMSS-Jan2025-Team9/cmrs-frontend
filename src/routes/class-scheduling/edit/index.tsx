@@ -4,6 +4,7 @@ import axios from "axios";
 import { useGo } from "@refinedev/core";
 import { useParams } from "react-router-dom";
 import moment from "moment";
+import { logError } from "@/utilities/logger";
 
 // Define the interface for the ClassSchedule
 interface ClassSchedule {
@@ -49,7 +50,7 @@ export const ClassScheduleEditPage = ({ children }: React.PropsWithChildren) => 
         setCourses(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching courses:", error);
+        logError("Error fetching courses:", error);
         notification.error({
           message: "Error",
           description: "Failed to load courses. Please try again later.",
@@ -78,7 +79,7 @@ export const ClassScheduleEditPage = ({ children }: React.PropsWithChildren) => 
           });
         })
         .catch((error) => {
-          console.error("Error fetching class schedule data", error);
+          logError("Error fetching class schedule data", error);
           notification.error({
             message: "Error",
             description: "There was an issue fetching the class schedule details.",
@@ -145,7 +146,7 @@ export const ClassScheduleEditPage = ({ children }: React.PropsWithChildren) => 
         });
       })
       .catch((error) => {
-        console.error("There was an error updating the class schedule!", error);
+        logError("There was an error updating the class schedule!", error);
 
         // Show error notification in case of failure
         notification.error({

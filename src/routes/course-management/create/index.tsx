@@ -4,6 +4,7 @@ import axios from "axios";
 import type { Course, Program } from "@/models";
 import moment from "moment";
 import { useGo } from "@refinedev/core";
+import { logError } from "@/utilities/logger";
 
 export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
   const go = useGo();
@@ -36,7 +37,7 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
         setLoadingPrograms(false);
       })
       .catch((error) => {
-        console.error("Error fetching programs", error);
+        logError("Error fetching programs", error);
         notification.error({
           message: "Error",
           description: "There was an issue fetching the programs list.",
@@ -96,7 +97,7 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
         });
       })
       .catch((error) => {
-        console.error("There was an error adding the course!", error);
+        logError("There was an error adding the course!", error);
 
         // Show error notification in case of failure
         notification.error({

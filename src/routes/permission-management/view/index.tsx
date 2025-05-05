@@ -15,6 +15,7 @@ import axios from "axios";
 import { useGo } from "@refinedev/core";
 import type { Permission } from "@/models/index";
 import { useParams } from "react-router-dom";
+import { logError } from "@/utilities/logger";
 
 export const PermissionViewPage = ({ children }: React.PropsWithChildren) => {
   const { permissionId } = useParams();
@@ -52,7 +53,7 @@ export const PermissionViewPage = ({ children }: React.PropsWithChildren) => {
         });
       }
     } catch (error) {
-      console.error("Error fetching permission data", error);
+      logError("Error fetching permission data", error);
       notification.error({
         message: "Error",
         description: "There was an issue fetching the permission details.",
@@ -91,7 +92,7 @@ export const PermissionViewPage = ({ children }: React.PropsWithChildren) => {
       message.success("Permission deleted successfully");
       handleBack(); // Navigate back to list page
     } catch (error) {
-      console.error("Error deleting permission:", error);
+      logError("Error deleting permission:", error);
       message.error("Failed to delete permission. Please try again.");
     }
   };

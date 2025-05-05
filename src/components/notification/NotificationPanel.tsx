@@ -3,6 +3,7 @@ import { List, Typography, Tag, Button, Empty, Spin } from 'antd';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { NotificationType, Notification } from '../../services/notificationService';
 import { useNavigate } from 'react-router-dom';
+import { logError } from "@/utilities/logger";
 
 const { Text, Title } = Typography;
 
@@ -20,10 +21,10 @@ const NotificationPanel: React.FC = () => {
       if (id && !isNaN(Number(id))) {
         markAsRead(id);
       } else {
-        console.error('Invalid notification ID:', id);
+        logError('Invalid notification ID:', id);
       }
     } catch (err) {
-      console.error('Error marking notification as read:', err);
+      logError('Error marking notification as read:', err);
     }
   };
 
@@ -36,10 +37,10 @@ const NotificationPanel: React.FC = () => {
         markAsRead(notificationId);
         navigate(`/courseRegistration/new/${classId}`);
       } else {
-        console.error('Invalid IDs - classId:', classId, 'notificationId:', notificationId);
+        logError('Invalid IDs - classId:', classId, 'notificationId:', notificationId);
       }
     } catch (err) {
-      console.error('Error handling registration:', err);
+      logError('Error handling registration:', err);
     }
   };
 
@@ -76,7 +77,7 @@ const NotificationPanel: React.FC = () => {
                     if (notification.classId && notification.notificationId) {
                       handleRegister(notification.classId, notification.notificationId);
                     } else {
-                      console.error('Missing notification data:', notification);
+                      logError('Missing notification data:', notification);
                     }
                   }}
                 >
@@ -90,7 +91,7 @@ const NotificationPanel: React.FC = () => {
           return <Text>{notification.notificationMessage || "New notification"}</Text>;
       }
     } catch (err) {
-      console.error('Error rendering notification content:', err);
+      logError('Error rendering notification content:', err);
       return <Text>Error displaying notification</Text>;
     }
   };

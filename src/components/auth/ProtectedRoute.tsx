@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { logError, logInfo } from "@/utilities/logger";
 
 interface ProtectedRouteProps {
   requiredRoles?: string[];
@@ -24,7 +25,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       try {
         return JSON.parse(rolesString);
       } catch (e) {
-        console.error("Error parsing user roles:", e);
+        logError("Error parsing user roles:", e);
       }
     }
     return [];
@@ -40,19 +41,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Check if user has any of the required roles (or if no roles are required)
   const hasRequiredRole = (): boolean => {
     // Log for debugging
-    console.log(`Checking access to path: ${location.pathname}`);
-    console.log(`User roles: ${JSON.stringify(userRoles)}`);
-    console.log(`Required roles: ${JSON.stringify(requiredRoles)}`);
+    logInfo(`Checking access to path: ${location.pathname}`);
+    logInfo(`User roles: ${JSON.stringify(userRoles)}`);
+    logInfo(`Required roles: ${JSON.stringify(requiredRoles)}`);
     
     // Admin role has access to everything
     if (userRoles.includes("admin")) {
-      console.log('Access granted: User is admin');
+      logInfo('Access granted: User is admin');
       return true;
     }
     
     // If no specific roles required, allow access
     if (requiredRoles.length === 0) {
-      console.log('Access granted: No specific roles required');
+      logInfo('Access granted: No specific roles required');
       return true;
     }
     
@@ -60,9 +61,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     const hasAccess = requiredRoles.some(role => userRoles.includes(role));
     
     if (hasAccess) {
-      console.log('Access granted: User has required role');
+      logInfo('Access granted: User has required role');
     } else {
-      console.log('Access denied: User does not have required role');
+      logInfo('Access denied: User does not have required role');
     }
     
     return hasAccess;
@@ -70,7 +71,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // If user doesn't have required permissions, redirect to forbidden page
   if (!hasRequiredRole()) {
-    console.log(`Redirecting to forbidden page from ${location.pathname}`);
+    logInfo(`Redirecting to forbidden page from ${location.pathname}`);
     return <Navigate to="/forbidden" replace />;
   }
 

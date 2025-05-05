@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { Typography, Collapse, Button, Space, Spin } from "antd";
 import { Program } from "@/models"; 
+import { logError } from "@/utilities/logger";
 
 const { Panel } = Collapse;
 
@@ -16,7 +17,7 @@ export const ProgramsPage: React.FC = () => {
                 setPrograms(response.data);
             })
             .catch((error) => {
-                console.error("Failed to fetch programs:", error);
+                logError("Failed to fetch programs:", error);
             })
             .finally(() => {
                 setLoading(false);

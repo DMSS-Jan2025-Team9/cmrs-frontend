@@ -3,6 +3,7 @@ import { Card, Alert, Spin } from "antd";
 import { useParams } from "react-router-dom";
 import { StaffView } from "./StaffView";
 import { StudentView } from "./StudentView";
+import { logError } from "@/utilities/logger";
 
 export const UserViewPage = ({ children }: React.PropsWithChildren) => {
   const { type, id } = useParams<{ type: string; id: string }>();
@@ -27,7 +28,7 @@ export const UserViewPage = ({ children }: React.PropsWithChildren) => {
   }
 
   if (!id || !type) {
-    console.error("Missing parameters:", { type, id });
+    logError("Missing parameters:", { type, id });
     return (
       <Card>
         <Alert

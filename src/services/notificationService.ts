@@ -5,6 +5,7 @@ import SockJS from 'sockjs-client';
 import { Client, over } from 'stompjs';
 import { notification } from "antd";
 import axios from 'axios';
+import { logError, logInfo } from "@/utilities/logger";
 
 // Types
 export enum NotificationType {
@@ -48,7 +49,7 @@ const getBaseUrl = (): string => {
 
 // Utility function to handle API errors
 const handleApiError = (error: any, action: string): void => {
-  console.error(`Error ${action}:`, error);
+  logError(`Error ${action}:`, error);
   
   // Check if it's a network error (API not available)
   if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
@@ -77,28 +78,28 @@ export const notificationService = {
     
     // Prevent duplicate connections
     if (isConnecting) {
-      console.log("Already attempting to connect, skipping duplicate request");
+      logInfo("Already attempting to connect, skipping duplicate request");
       return;
     }
     
     if (stompClient && stompClient.connected && isConnected) {
-      console.log("WebSocket already connected, skipping connection attempt");
+      logInfo("WebSocket already connected, skipping connection attempt");
       return; // Already connected
     }
 
     try {
       isConnecting = true;
-      console.log("Initiating WebSocket connection...");
+      logInfo("Initiating WebSocket connection...");
       
       // Use relative path in development for proxy, absolute in production
       const socketUrl = `${getBaseUrl()}/ws-notifications`;
-      console.log(`Connecting to WebSocket at: ${socketUrl}`);
+      logInfo(`Connecting to WebSocket at: ${socketUrl}`);
       
       // Disconnect any existing connection before creating a new one
       if (stompClient && stompClient.connected) {
-        console.log("Disconnecting existing connection before creating a new one");
+        logInfo("Disconnecting existing connection before creating a new one");
         stompClient.disconnect(() => {
-          console.log("Existing connection disconnected");
+          logInfo("Existing connection disconnected");
         });
         stompClient = null;
       }
@@ -115,12 +116,12 @@ export const notificationService = {
         if (stompClient) {
           isConnected = true;
           isConnecting = false;
-          console.log(`WebSocket connected for user ${studentFullId}`);
+          logInfo(`WebSocket connected for user ${studentFullId}`);
           
           // Subscribe to user-specific topic
           stompClient.subscribe(`/topic/user/${studentFullId}`, (message) => {
             try {
-              let receivedNotification = JSON.parse(message.body) as Notification;
+              const receivedNotification = JSON.parse(message.body) as Notification;
               
               // Make sure notification has all required fields
               if (receivedNotification) {
@@ -144,18 +145,18 @@ export const notificationService = {
                 });
               }
             } catch (e) {
-              console.error("Error parsing notification:", e);
+              logError("Error parsing notification:", e);
             }
           });
         }
       }, (error) => {
-        console.error("WebSocket Connection Error:", error);
+        logError("WebSocket Connection Error:", error);
         isConnecting = false;
         isConnected = false;
         // Don't show error notification on initial connection failure to avoid annoying users
       });
     } catch (error) {
-      console.error("Error setting up WebSocket connection:", error);
+      logError("Error setting up WebSocket connection:", error);
       isConnecting = false;
       isConnected = false;
     }
@@ -165,7 +166,7 @@ export const notificationService = {
   disconnect: () => {
     if (stompClient && stompClient.connected) {
       stompClient.disconnect(() => {
-        console.log("WebSocket Disconnected");
+        logInfo("WebSocket Disconnected");
         isConnected = false;
       });
     }
@@ -178,14 +179,14 @@ export const notificationService = {
     const timeSinceLastFetch = now - lastFetchTime;
     
     if (timeSinceLastFetch < FETCH_THROTTLE_TIME && lastFetchTime !== 0) {
-      console.log(`Throttling getNotifications - last fetch was ${timeSinceLastFetch}ms ago`);
+      logInfo(`Throttling getNotifications - last fetch was ${timeSinceLastFetch}ms ago`);
       // Return empty array to prevent UI issues
       return [];
     }
     
     try {
       const apiUrl = `${getBaseUrl()}/api/notifications/student/${studentFullId}`;
-      console.log(`Fetching notifications from: ${apiUrl}`);
+      logInfo(`Fetching notifications from: ${apiUrl}`);
       
       const response = await axios.get(apiUrl);
       // Update last fetch time
@@ -218,13 +219,13 @@ export const notificationService = {
   // Mark notification as read
   markAsRead: async (notificationId: number): Promise<boolean> => {
     if (!notificationId || isNaN(Number(notificationId))) {
-      console.error("Invalid notification ID:", notificationId);
+      logError("Invalid notification ID:", notificationId);
       return false;
     }
     
     try {
       const apiUrl = `${getBaseUrl()}/api/notifications/${notificationId}/mark-as-sent`;
-      console.log(`Marking notification as read: ${apiUrl}`);
+      logInfo(`Marking notification as read: ${apiUrl}`);
       
       const response = await axios.put(apiUrl);
       return response.status >= 200 && response.status < 300;
@@ -267,7 +268,7 @@ export const notificationService = {
   ): Promise<boolean> => {
     // Validate parameters
     if (!studentFullId || !studentId || !classId || !courseCode || !courseName || !eventType) {
-      console.error("Missing required parameters for test notification:", { 
+      logError("Missing required parameters for test notification:", { 
         studentFullId, studentId, classId, courseCode, courseName, eventType 
       });
       return false;
@@ -275,7 +276,7 @@ export const notificationService = {
     
     try {
       const apiUrl = `${getBaseUrl()}/api/notifications/notificationEvent`;
-      console.log(`Sending test notification to: ${apiUrl}`);
+      logInfo(`Sending test notification to: ${apiUrl}`);
       
       // Try to send using POST with JSON body first
       try {
@@ -296,7 +297,7 @@ export const notificationService = {
           return true;
         }
       } catch (err) {
-        console.log("Failed to send with JSON body, trying URL parameters");
+        logInfo("Failed to send with JSON body, trying URL parameters");
       }
       
       // Fallback to URL parameters if JSON fails

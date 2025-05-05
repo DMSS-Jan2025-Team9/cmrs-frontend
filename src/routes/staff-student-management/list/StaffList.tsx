@@ -4,6 +4,7 @@ import { SearchOutlined, DeleteOutlined, EditOutlined, EyeOutlined } from "@ant-
 import { useGo } from "@refinedev/core";
 import { Staff, Role } from "../models";
 import { staffService } from "../services";
+import { logError } from "@/utilities/logger";
 
 interface StaffListProps {
   onSearch?: (searchTerm: string) => void;
@@ -49,7 +50,7 @@ export const StaffList: React.FC<StaffListProps> = ({ onSearch, searchValue = ""
       setStaffUsers(processedStaffData);
       filterStaff(processedStaffData, searchName);
     } catch (error) {
-      console.error("Error fetching staff:", error);
+      logError("Error fetching staff:", error);
       message.error("Failed to load staff users. Please try again.");
     } finally {
       setLoading(false);
@@ -92,7 +93,7 @@ export const StaffList: React.FC<StaffListProps> = ({ onSearch, searchValue = ""
       message.success("Staff deleted successfully");
       fetchStaff(); // Reload the staff list after deletion
     } catch (error) {
-      console.error("Error deleting staff:", error);
+      logError("Error deleting staff:", error);
       message.error("Failed to delete staff. Please try again.");
     }
   };

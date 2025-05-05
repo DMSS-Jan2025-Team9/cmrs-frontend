@@ -18,6 +18,7 @@ import { EditOutlined, DeleteOutlined, ArrowLeftOutlined } from "@ant-design/ico
 import { useGo } from "@refinedev/core";
 import { Staff } from "../models";
 import { staffService } from "../services";
+import { logError, logInfo } from "@/utilities/logger";
 
 interface StaffViewProps {
   userId: number;
@@ -48,7 +49,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
           
           const data = await staffService.getStaffById(userId);
           if (data) {
-            console.log("Fetched staff data:", data);
+            logInfo("Fetched staff data:", data);
             
             // Ensure roles is an array
             if (!data.roles || !Array.isArray(data.roles)) {
@@ -64,7 +65,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
             });
           }
         } catch (err) {
-          console.error("Error fetching staff data", err);
+          logError("Error fetching staff data", err);
           setError("Error fetching staff data");
           notification.error({
             message: "Error",
@@ -108,7 +109,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
         handleBack(); // Navigate back to list page
       }
     } catch (error) {
-      console.error("Error deleting staff:", error);
+      logError("Error deleting staff:", error);
       message.error("Failed to delete staff. Please try again.");
     }
   };

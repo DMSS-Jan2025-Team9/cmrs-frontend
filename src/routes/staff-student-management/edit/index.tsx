@@ -19,6 +19,7 @@ import { useGo } from "@refinedev/core";
 import { useParams } from "react-router-dom";
 import { staffService, studentService } from "../services";
 import { Staff, Student, Role, StaffUpdateRequest, StudentUpdateRequest } from "../models";
+import { logError, logInfo } from "@/utilities/logger";
 
 // Extend the models to include created/updated dates if they're missing
 interface UserWithDates {
@@ -68,8 +69,8 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
         }
         
         if (userData && roleData && roleData.length > 0) {
-          console.log("User data:", userData);
-          console.log("Roles data:", roleData);
+          logInfo("User data:", userData);
+          logInfo("Roles data:", roleData);
           setUserData(userData);
           
           // Process role data to match user roles with available roles
@@ -78,7 +79,7 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
               typeof role === 'string' ? role : role.roleName
             ).filter(Boolean);
             
-            console.log("User role names:", userRoleNames);
+            logInfo("User role names:", userRoleNames);
             
             // Find matching role IDs
             const matchedRoleIds = roleData
@@ -86,7 +87,7 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
               .map((role: Role) => role.roleId)
               .filter((id: number | undefined): id is number => id !== undefined);
             
-            console.log("Matched role IDs:", matchedRoleIds);
+            logInfo("Matched role IDs:", matchedRoleIds);
             
             // Set the selected roles
             setSelectedRoleIds(matchedRoleIds);
@@ -94,7 +95,7 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
             // Update the form values directly and force re-render
             setTimeout(() => {
               form.setFieldsValue({ roleIds: matchedRoleIds });
-              console.log("Form values set:", matchedRoleIds);
+              logInfo("Form values set:", matchedRoleIds);
               formInitialized.current = true;
               setFormKey(prev => prev + 1); // Increment key to force re-render
             }, 100);
@@ -119,7 +120,7 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
       });
       
       if (response.data.success) {
-        console.log("Fetched roles:", response.data.data);
+        logInfo("Fetched roles:", response.data.data);
         const roleData = response.data.data;
         setRoles(roleData);
         setRolesLoaded(true);
@@ -131,7 +132,7 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
         });
       }
     } catch (error) {
-      console.error("Error fetching roles:", error);
+      logError("Error fetching roles:", error);
       notification.error({
         message: "Error",
         description: "There was an issue fetching the available roles.",
@@ -162,7 +163,7 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
     if (!userData || !id) return;
 
     setSubmitting(true);
-    console.log("Submitting role update:", values);
+    logInfo("Submitting role update:", values);
     
     try {
       // Get updated roles data with proper typings
@@ -207,7 +208,7 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
         message.error(`Failed to update ${type} roles: ${result?.message || "Unknown error"}`);
       }
     } catch (error) {
-      console.error(`Error updating ${type}:`, error);
+      logError(`Error updating ${type}:`, error);
       message.error(`There was an error updating the ${type}. Please try again.`);
     } finally {
       setSubmitting(false);
@@ -251,7 +252,7 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
   }
 
   // Log current state for debugging
-  console.log("Current state on render:", {
+  logInfo("Current state on render:", {
     selectedRoleIds,
     formInitialized: formInitialized.current,
     formKey

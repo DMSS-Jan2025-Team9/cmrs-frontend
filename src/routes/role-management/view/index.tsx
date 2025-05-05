@@ -20,6 +20,7 @@ import axios from "axios";
 import { useGo } from "@refinedev/core";
 import type { Role, Permission } from "@/models/index";
 import { useParams } from "react-router-dom";
+import { logError } from "@/utilities/logger";
 
 
 export const RoleViewPage = ({ children }: React.PropsWithChildren) => {
@@ -62,7 +63,7 @@ export const RoleViewPage = ({ children }: React.PropsWithChildren) => {
             });
         }
         } catch (error) {
-        console.error("Error fetching role data", error);
+        logError("Error fetching role data", error);
         notification.error({
             message: "Error",
             description: "There was an issue fetching the role details.",
@@ -88,7 +89,7 @@ export const RoleViewPage = ({ children }: React.PropsWithChildren) => {
             setAllPermissions(response.data.data);
             }
         } catch (error) {
-            console.error("Error fetching permissions", error);
+            logError("Error fetching permissions", error);
         }
         };
 
@@ -135,7 +136,7 @@ export const RoleViewPage = ({ children }: React.PropsWithChildren) => {
         message.success("Role deleted successfully");
         handleBack();
         } catch (error) {
-        console.error("Error deleting role:", error);
+        logError("Error deleting role:", error);
         message.error("Failed to delete role. Please try again.");
         }
     };
@@ -183,7 +184,7 @@ export const RoleViewPage = ({ children }: React.PropsWithChildren) => {
             message.error(response.data.message || "Failed to add permissions");
         }
         } catch (error) {
-        console.error("Error adding permissions:", error);
+        logError("Error adding permissions:", error);
         message.error("Failed to add permissions. Please try again.");
         }
     };
@@ -223,7 +224,7 @@ export const RoleViewPage = ({ children }: React.PropsWithChildren) => {
             message.error(response.data.message || "Failed to remove permission");
         }
         } catch (error) {
-        console.error("Error removing permission:", error);
+        logError("Error removing permission:", error);
         message.error("Failed to remove permission. Please try again.");
         }
     };

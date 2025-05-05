@@ -4,6 +4,7 @@ import { SearchOutlined, DeleteOutlined, EditOutlined, EyeOutlined } from "@ant-
 import { useGo } from "@refinedev/core";
 import { Student, Role } from "../models";
 import { studentService } from "../services";
+import { logError } from "@/utilities/logger";
 
 interface StudentListProps {
   onSearch?: (searchTerm: string) => void;
@@ -49,7 +50,7 @@ export const StudentList: React.FC<StudentListProps> = ({ onSearch, searchValue 
       setStudentUsers(processedStudentData);
       filterStudents(processedStudentData, searchName);
     } catch (error) {
-      console.error("Error fetching students:", error);
+      logError("Error fetching students:", error);
       message.error("Failed to load student users. Please try again.");
     } finally {
       setLoading(false);
@@ -92,7 +93,7 @@ export const StudentList: React.FC<StudentListProps> = ({ onSearch, searchValue 
       message.success("Student deleted successfully");
       fetchStudents(); // Reload the students list after deletion
     } catch (error) {
-      console.error("Error deleting student:", error);
+      logError("Error deleting student:", error);
       message.error("Failed to delete student. Please try again.");
     }
   };

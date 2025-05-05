@@ -3,6 +3,7 @@ import { Table, Input, Space, Button, Row, Col } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { CreateButton } from "@refinedev/antd";
 import axios from "axios";
+import { logError } from "@/utilities/logger";
 
 import { useGo } from "@refinedev/core";
 import { PaginationTotal } from "@/components";
@@ -29,7 +30,7 @@ export const CourseListPage = ({ children }: React.PropsWithChildren) => {
       });
       setFilteredCourses(response.data); // Update the filtered courses (table)
     } catch (error) {
-      console.error("Error fetching courses:", error);
+      logError("Error fetching courses:", error);
     }
   };
 
