@@ -58,7 +58,7 @@ export const authProvider: AuthProvider = {
   login: async ({ username, password }) => {
     try {
       // Using the JWT API with username and password
-      const response = await axios.post("http://localhost:8085/api/auth/login", {
+      const response = await axios.post("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/auth/login", {
         username,
         password,
       }, {
@@ -81,7 +81,7 @@ export const authProvider: AuthProvider = {
         
         // If admin or staff role, fetch staff data
         if (isAdmin || decodedToken.roles.includes("staff")) {
-          const staffResponse = await axios.get(`http://localhost:8085/api/staff/${userId}`, {
+          const staffResponse = await axios.get(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/staff/${userId}`, {
             headers: {
               "accept": "*/*",
               "Authorization": `Bearer ${response.data.accessToken}`
@@ -92,7 +92,7 @@ export const authProvider: AuthProvider = {
           localStorage.setItem("user_roles", JSON.stringify(decodedToken.roles));
         } else {
           // Fetch student data
-          const studentResponse = await axios.get(`http://localhost:8085/api/students/secure/${userId}`, {
+          const studentResponse = await axios.get(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/students/secure/${userId}`, {
             headers: {
               "accept": "*/*",
               "Authorization": `Bearer ${response.data.accessToken}`

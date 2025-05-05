@@ -40,10 +40,10 @@ const FETCH_THROTTLE_TIME = 30000; // 30 seconds
 const getBaseUrl = (): string => {
   // In production, use the absolute URL
   if (process.env.NODE_ENV === 'production') {
-    return 'http://localhost:8084';
+    return 'https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/notification';
   }
   // In development, use relative URLs for proxying
-  return 'http://localhost:8084';
+  return 'https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/notification';
 };
 
 // Utility function to handle API errors

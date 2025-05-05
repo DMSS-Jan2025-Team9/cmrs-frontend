@@ -30,7 +30,7 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
   const fetchPrograms = () => {
     setLoadingPrograms(true);
     axios
-      .get("http://localhost:8081/api/program")
+      .get("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/program")
       .then((response) => {
         setPrograms(response.data);
         setLoadingPrograms(false);
@@ -73,7 +73,7 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
     const accessToken = localStorage.getItem("access_token");
 
     axios
-      .post("http://localhost:8081/api/courses/addCourse", newCourse, {
+      .post("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/courses/addCourse", newCourse, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type":"application/json"

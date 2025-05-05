@@ -15,7 +15,7 @@ interface NotificationContextType {
   refreshNotifications: () => void;
 }
 
-const API_URL = 'http://localhost:8084'; // Notification service URL
+const API_URL = 'https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/notification'; // Notification service URL
 const WS_URL = `${API_URL}/ws-notifications`;
 
 // Minimum time between API calls in milliseconds

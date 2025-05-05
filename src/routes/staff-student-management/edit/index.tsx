@@ -111,7 +111,7 @@ export const UserEditPage = ({ children }: React.PropsWithChildren) => {
   const fetchRoles = async (): Promise<Role[]> => {
     try {
       const accessToken = localStorage.getItem("access_token");
-      const response = await axios.get("http://localhost:8085/api/admin/roles", {
+      const response = await axios.get("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/admin/roles", {
         headers: {
           "Authorization": `Bearer ${accessToken}`,
           "Accept": "*/*"

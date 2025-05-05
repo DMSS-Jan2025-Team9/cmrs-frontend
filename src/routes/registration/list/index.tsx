@@ -15,7 +15,7 @@ export const CourseClassList: React.FC = () => {
     // Fetch courses from the specified URL
     useEffect(() => {
         setLoading(true);
-        fetch("http://localhost:8081/api/courses/getActiveCourses")
+        fetch("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/courses/getActiveCourses")
             .then((res) => res.json())
             .then((data: Course[]) => {
                 setCourses(data);
@@ -31,7 +31,7 @@ export const CourseClassList: React.FC = () => {
     const fetchClassesForCourse = async (courseId: number) => {
         if (classesMap[courseId]) return;
         try {
-            const res = await fetch(`http://localhost:8081/api/classSchedule?courseId=${courseId}`);
+            const res = await fetch(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/classSchedule?courseId=${courseId}`);
             const data: ClassSchedule[] = await res.json();
             setClassesMap((prev) => ({ ...prev, [courseId]: data }));
         } catch (error) {

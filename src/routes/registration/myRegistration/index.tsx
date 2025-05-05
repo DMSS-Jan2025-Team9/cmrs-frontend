@@ -53,7 +53,7 @@ export const MyRegistrationPage: React.FC = () => {
     setLoading(true);
     try {
       const { data: rawRegs } = await axios.get<RawRegistration[]>(
-        "http://localhost:8083/api/courseRegistration",
+        "https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-registration/api/courseRegistration",
         { params: { studentId } } // Use the studentId from state
       );
       const regs = rawRegs.map(r => ({
@@ -71,7 +71,7 @@ export const MyRegistrationPage: React.FC = () => {
             startTime: string;
             endTime: string;
             vacancy: number;
-          }>(`http://localhost:8081/api/classSchedule/classId/${id}`,
+          }>(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/classSchedule/classId/${id}`,
             {headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
           )
         )
@@ -97,7 +97,7 @@ export const MyRegistrationPage: React.FC = () => {
       const courseResponses = await Promise.all(
         courseIds.map(cid =>
           axios.get<{ courseId: number; courseName: string }>(
-            `http://localhost:8081/api/courses/courseId/${cid}`
+            `https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/courses/courseId/${cid}`
           )
         )
       );
@@ -118,7 +118,7 @@ export const MyRegistrationPage: React.FC = () => {
       await Promise.all(
         groupIds.map(async gid => {
           const { data: groupRegs } = await axios.get<RawRegistration[]>(
-            "http://localhost:8083/api/courseRegistration",
+            "https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-registration/api/courseRegistration",
             { params: { groupRegistrationId: gid } }
           );
           const uniqueSids = Array.from(
@@ -127,7 +127,7 @@ export const MyRegistrationPage: React.FC = () => {
           const members = await Promise.all(
             uniqueSids.map(async sid => {
               const { data: s } = await axios.get<{ studentId: number; name: string }>(
-                `http://localhost:8085/api/students/${sid}`
+                `https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/students/${sid}`
               );
               return { studentId: s.studentId, name: s.name };
             })
@@ -183,7 +183,7 @@ export const MyRegistrationPage: React.FC = () => {
   const handleUnenroll = async (registrationId: number) => {
     try {
       await axios.put(
-        `http://localhost:8083/api/courseRegistration/unenroll/${registrationId}`
+        `https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-registration/api/courseRegistration/unenroll/${registrationId}`
       );
       message.success("Unenrolled successfully");
       fetchAll();
@@ -195,7 +195,7 @@ export const MyRegistrationPage: React.FC = () => {
   const handleEnroll = async (idRegistration: number, identifier: number) => {
     try {
       await axios.put(
-        "http://localhost:8083/api/courseRegistration/status",
+        "https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-registration/api/courseRegistration/status",
         {
           id: idRegistration,
           newStatus: "Registered",

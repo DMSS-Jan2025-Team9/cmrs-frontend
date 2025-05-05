@@ -28,7 +28,7 @@ export const PermissionCreatePage = ({ children }: React.PropsWithChildren) => {
         description
       };
 
-      const response = await axios.post("http://localhost:8085/api/admin/permissions", newPermission, {
+      const response = await axios.post("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/admin/permissions", newPermission, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"

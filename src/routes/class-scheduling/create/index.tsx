@@ -50,7 +50,7 @@ export const ClassScheduleCreatePage = ({ children }: React.PropsWithChildren) =
   // Fetch the specific course details if courseId is provided
   useEffect(() => {
     if (courseId) {
-      axios.get(`http://localhost:8081/api/courses/courseId/${courseId}`)
+      axios.get(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/courses/courseId/${courseId}`)
         .then((response) => {
           setCurrentCourse(response.data);
           setShowCourseDropdown(false);
@@ -77,7 +77,7 @@ export const ClassScheduleCreatePage = ({ children }: React.PropsWithChildren) =
 
   // Function to fetch all courses
   const fetchAllCourses = () => {
-    axios.get("http://localhost:8081/api/courses")
+    axios.get("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/courses")
       .then((response) => {
         setCourses(response.data);
         setShowCourseDropdown(true);
@@ -112,7 +112,7 @@ export const ClassScheduleCreatePage = ({ children }: React.PropsWithChildren) =
       vacancy: values.maxCapacity, // Initial vacancy equals max capacity
     };
 
-    axios.post("http://localhost:8081/api/classSchedule/addClassSchedule", newClassSchedule,{
+    axios.post("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/classSchedule/addClassSchedule", newClassSchedule,{
       headers: {
         "Authorization": `Bearer ${accessToken}`,
         "Content-Type":"application/json"

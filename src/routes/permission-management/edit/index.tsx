@@ -22,7 +22,7 @@ export const PermissionEditPage = ({ children }: React.PropsWithChildren) => {
       setLoading(true);
       try {
         const accessToken = localStorage.getItem("access_token");
-        const response = await axios.get(`http://localhost:8085/api/admin/permissions/${permissionId}`, {
+        const response = await axios.get(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/admin/permissions/${permissionId}`, {
           headers: {
             "Authorization": `Bearer ${accessToken}`,
             "Accept": "*/*"
@@ -69,7 +69,7 @@ export const PermissionEditPage = ({ children }: React.PropsWithChildren) => {
       const accessToken = localStorage.getItem("access_token");
       
       const response = await axios.put(
-        `http://localhost:8085/api/admin/permissions/${permissionId}`,
+        `https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/admin/permissions/${permissionId}`,
         values,
         {
           headers: {

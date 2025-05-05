@@ -19,7 +19,7 @@ export const CourseListPage = ({ children }: React.PropsWithChildren) => {
   // Fetch courses from the API
   const fetchCourses = async (searchName: string, searchCode: string, page: number, pageSize: number) => {
     try {
-      const response = await axios.get("http://localhost:8081/api/courses/searchCourses", {
+      const response = await axios.get("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/courses/searchCourses", {
         params: {
           courseName: searchName,
           courseCode: searchCode,

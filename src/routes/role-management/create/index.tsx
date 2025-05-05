@@ -27,7 +27,7 @@ export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
           return;
         }
         
-        const response = await axios.get("http://localhost:8085/api/test/authorities", {
+        const response = await axios.get("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/test/authorities", {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type":"application/json"
@@ -57,7 +57,7 @@ export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
 
       console.log("Token BEFORE api call:", token);
 
-      const response = await axios.get("http://localhost:8085/api/admin/permissions", {
+      const response = await axios.get("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/admin/permissions", {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -106,7 +106,7 @@ export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
       permissions: permissionsToSend,
     };
 
-    axios.post("http://localhost:8085/api/admin/roles", newRole, {
+    axios.post("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/admin/roles", newRole, {
         headers: {
           Authorization: `Bearer ${token}`
         }
