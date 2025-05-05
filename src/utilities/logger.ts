@@ -7,7 +7,7 @@ export const logError = (...args: any[]) => {
 
 export const logInfo = (...args: any[]) => {
     if (process.env.NODE_ENV !== 'production') {
-       
-      logInfo(...args);
+      // eslint-disable-next-line no-console
+      console.log(...args);
     }
 };
