@@ -5,7 +5,7 @@ import SockJS from 'sockjs-client';
 import { Client, over } from 'stompjs';
 import { notification } from "antd";
 import axios from 'axios';
-import { logError, logInfo } from "@/utilities/logger";
+import { logError, logInfo, logWarn } from "@/utilities/logger";
 
 // Types
 export enum NotificationType {
@@ -128,7 +128,7 @@ export const notificationService = {
                 // Generate a random ID if it doesn't exist
                 if (!receivedNotification.notificationId) {
                   receivedNotification.notificationId = Date.now();
-                  console.warn("Generated temporary ID for notification:", receivedNotification.notificationId);
+                  logWarn("Generated temporary ID for notification:", receivedNotification.notificationId);
                 }
                 
                 // Set read status

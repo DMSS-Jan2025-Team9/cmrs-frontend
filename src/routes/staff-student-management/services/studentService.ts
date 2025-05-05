@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Student, StudentUpdateRequest, ApiResponse } from "../models";
-import { logError, logInfo } from "@/utilities/logger";
+import { logError, logInfo, logWarn } from "@/utilities/logger";
 
 const API_URL = "http://localhost:8085/api";
 
@@ -37,7 +37,7 @@ export const studentService = {
           return response.data.data;
         }
       } catch (adminError) {
-        console.warn("Admin endpoint failed, trying alternative:", adminError);
+        logWarn("Admin endpoint failed, trying alternative:", adminError);
         
         // Try the regular endpoint as a fallback
         const fallbackResponse = await axios.get(`${API_URL}/students/all`, {
