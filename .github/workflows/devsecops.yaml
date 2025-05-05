@@ -21,7 +21,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: [self-hosted, cmrs-github-runner-03]
     env:
       GENERATE_SOURCEMAP: false
       NODE_ENV: production  # Ensure build is optimized for production
@@ -55,7 +55,7 @@ jobs:
 
 
   deploy:
-    runs-on: self-hosted
+    runs-on: [self-hosted, cmrs-github-runner-03]
     needs: build  # Ensure deploy happens after build finishes
 
     steps:
