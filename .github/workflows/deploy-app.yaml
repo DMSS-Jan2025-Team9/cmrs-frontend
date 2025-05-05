@@ -11,14 +11,13 @@
 # Build optimized React app
 # Deploy to S3
 # Invalidate CloudFront cache - to remove the outdated cache
-
-name: DevSecOps: CI/CD Pipeline
+name: DevSecOps CI/CD Pipeline for releases
 
 on:
   push:
-    branches: [ "release/dev" ]
+    branches: [ "release/*" ]
   pull_request:
-    branches: [ "release/dev" ]
+    branches: [ "release/*" ]
 
 jobs:
   build:
