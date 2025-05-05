@@ -131,7 +131,7 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
           }
         }
       ) // Update course with the courseId
-      .then((response) => {
+      .then((_response) => {
         form.resetFields(); // Reset the form
 
         // Show success notification

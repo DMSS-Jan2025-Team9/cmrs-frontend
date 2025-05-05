@@ -7,16 +7,14 @@ import {
   Button, 
   Radio, 
   Empty, 
-  Space,
-  Tabs
+  Space
 } from 'antd';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { NotificationType, Notification } from '../../services/notificationService';
 import { useNavigate } from 'react-router-dom';
 import { logError } from "@/utilities/logger";
 
-const { Text, Title } = Typography;
-const { TabPane } = Tabs;
+const { Text } = Typography;
 
 export const NotificationPage: React.FC = () => {
   const { notifications, markAsRead, refreshNotifications, markMultipleAsRead } = useNotifications();
@@ -24,7 +22,7 @@ export const NotificationPage: React.FC = () => {
 
   // Filter state
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
-  const [typeFilter, setTypeFilter] = useState<'all' | NotificationType>('all');
+  const [typeFilter] = useState<'all' | NotificationType>('all');
   
   // Pagination state
   const [pagination, setPagination] = useState({
@@ -33,7 +31,7 @@ export const NotificationPage: React.FC = () => {
   });
 
   // Check if user is admin or staff
-  const isAdminOrStaff = (): boolean => {
+  const _isAdminOrStaff = (): boolean => {
     const rolesString = localStorage.getItem("user_roles");
     if (rolesString) {
       try {

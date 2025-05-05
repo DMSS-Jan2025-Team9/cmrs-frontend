@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Form, Input, Button, notification, Space } from "antd";
 import axios from "axios";
 import { useGo } from "@refinedev/core";
-import type { Permission } from "@/models/index";
 import { logError } from "@/utilities/logger";
 
 export const PermissionCreatePage = ({ children }: React.PropsWithChildren) => {

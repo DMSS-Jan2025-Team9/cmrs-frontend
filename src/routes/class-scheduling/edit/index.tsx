@@ -132,7 +132,7 @@ export const ClassScheduleEditPage = ({ children }: React.PropsWithChildren) => 
         }
       }
     )
-      .then((response) => {
+      .then((_response) => {
         // Show success notification
         notification.success({
           message: "Class Schedule Updated Successfully!",
@@ -221,7 +221,7 @@ export const ClassScheduleEditPage = ({ children }: React.PropsWithChildren) => 
           name="maxCapacity"
           rules={[
             { required: true, message: "Maximum capacity is required!" },
-            ({ getFieldValue }) => ({
+            ({ getFieldValue: _ }) => ({
               validator(_, value) {
                 if (value >= currentEnrollment) {
                   return Promise.resolve();

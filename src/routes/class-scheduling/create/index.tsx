@@ -119,7 +119,7 @@ export const ClassScheduleCreatePage = ({ children }: React.PropsWithChildren) =
         "Content-Type":"application/json"
       }
     })
-      .then((response) => {
+      .then((_response) => {
         // Reset the form after successful submission
         form.resetFields();
 

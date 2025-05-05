@@ -10,10 +10,10 @@ import routerProvider, {
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
 
-import { App as AntdApp, ConfigProvider, theme } from "antd";
+import { App as AntdApp, ConfigProvider } from "antd";
 
 import { Layout, ProtectedRoute } from "@/components";
-import { resources, getResourcesByRole } from "@/config/resources";
+import { getResourcesByRole } from "@/config/resources";
 import { authProvider, dataProvider, liveProvider } from "@/providers";
 import dataProviders from "@refinedev/simple-rest";
 import {

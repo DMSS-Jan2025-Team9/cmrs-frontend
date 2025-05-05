@@ -4,7 +4,7 @@ import { ArrowLeftOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useGo } from "@refinedev/core";
 import { useParams } from "react-router-dom";
-import type { Role, Permission } from "@/models/index";
+import type { Role } from "@/models/index";
 import { logError } from "@/utilities/logger";
 
 export const RoleEditPage = ({ children }: React.PropsWithChildren) => {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Table, Input, Space, Button, Row, Col, Popconfirm, message, Tag } from "antd";
 import { SearchOutlined, DeleteOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
 import { useGo } from "@refinedev/core";
-import { Staff, Role } from "../models";
+import { Staff } from "../models";
 import { staffService } from "../services";
 import { logError } from "@/utilities/logger";
 

@@ -70,7 +70,7 @@ const handleApiError = (error: any, action: string): void => {
 // Notification service
 export const notificationService = {
   // Callbacks
-  onNotificationReceived: (notification: Notification) => {},
+  onNotificationReceived: (_notification: Notification) => {},
   
   // Connect to WebSocket
   connect: (studentFullId: string, callback: (notification: Notification) => void) => {
@@ -297,7 +297,7 @@ export const notificationService = {
           return true;
         }
       } catch (err) {
-        logInfo("Failed to send with JSON body, trying URL parameters");
+        logError("Failed to send with JSON body, trying URL parameters", err);
       }
       
       // Fallback to URL parameters if JSON fails

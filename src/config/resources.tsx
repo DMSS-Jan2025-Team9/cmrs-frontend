@@ -1,23 +1,14 @@
 import type { IResourceItem } from "@refinedev/core";
-import { jwtDecode} from "jwt-decode";
 import { logError } from "@/utilities/logger";
 
 import {
   DashboardOutlined,
-  ProjectOutlined,
   ScheduleOutlined,
-  ShopOutlined,
-  UserAddOutlined,
   FileAddOutlined,
   TagOutlined,
   LockOutlined,
-  UserOutlined,
-  BellOutlined
+  UserOutlined
 } from "@ant-design/icons";
-interface DecodedToken {
-  role: string;
-  // other fields if necessary
-}
 
 export const resources: IResourceItem[] = [
   {

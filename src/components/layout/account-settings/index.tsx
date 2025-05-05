@@ -1,13 +1,9 @@
-import { SaveButton, useForm } from "@refinedev/antd";
-import type { HttpError } from "@refinedev/core";
 import { useGetIdentity } from "@refinedev/core";
 import { CloseOutlined } from "@ant-design/icons";
-import { Button, Card, Drawer, Form, Input, Spin, Tag, Row, Col, Descriptions } from "antd";
-import { getNameInitials } from "@/utilities";
+import { Button, Card, Drawer, Form, Spin, Tag, Row, Col, Descriptions } from "antd";
 import { CustomAvatar } from "../../custom-avatar";
 import { Text } from "../../text";
 import { useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
 import { ExtendedUser } from "@/types";
 import { logError } from "@/utilities/logger";
 
@@ -17,7 +13,7 @@ type Props = {
   userId: string;
 };
 
-export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
+export const AccountSettings = ({ opened, setOpened, userId: _userId }: Props) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(true);
   const { data: user } = useGetIdentity<ExtendedUser>();

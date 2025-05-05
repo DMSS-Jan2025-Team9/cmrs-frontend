@@ -4,8 +4,7 @@ import {
   Button, 
   Radio, 
   Typography, 
-  Space,
-  Divider
+  Space
 } from "antd";
 import { UserOutlined, IdcardOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { useGo } from "@refinedev/core";

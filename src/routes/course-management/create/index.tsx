@@ -80,7 +80,7 @@ export const CourseCreatePage = ({ children }: React.PropsWithChildren) => {
           "Content-Type":"application/json"
         }
       })
-      .then((response) => {
+      .then((_response) => {
         // Reset the form after successful submission
         form.resetFields(); // Reset the form using form's resetFields()
 

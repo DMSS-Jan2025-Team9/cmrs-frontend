@@ -824,7 +824,7 @@ type Props = {
   userId: string;
 };
 
-export const AccountSettings = ({ opened, setOpened, userId }: Props) => {
+export const AccountSettings = ({ opened, setOpened, userId: _userId }: Props) => {
   /**
    * useForm in Refine is used to manage forms. It provides us with a lot of useful props and methods that we can use to manage forms.
    * https://refine.dev/docs/data/hooks/use-form/#usage

@@ -12,7 +12,7 @@ export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
   const [description, setDescription] = useState<string>("");
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [_loading, setLoading] = useState<boolean>(false);
 
   const [form] = Form.useForm();
 
@@ -111,7 +111,7 @@ export const RoleCreatePage = ({ children }: React.PropsWithChildren) => {
           Authorization: `Bearer ${token}`
         }
       })
-      .then((response) => {
+      .then((_response) => {
         // Reset the form after successful submission
         form.resetFields();
         setSelectedPermissions([]);

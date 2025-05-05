@@ -4,7 +4,7 @@ import { Card, Layout, Typography, Form, Input, Button, theme, Alert } from "ant
 import { ThemedTitleV2 } from "@refinedev/antd";
 import { authCredentials } from "@/providers";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { useToken } = theme;
 
 export const LoginPage: React.FC = () => {

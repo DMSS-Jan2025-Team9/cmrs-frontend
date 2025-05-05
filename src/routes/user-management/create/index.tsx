@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Create, useForm } from "@refinedev/antd";
-import { Form, Input, Button, Upload, message, Table, Typography } from "antd";
+import { Create } from "@refinedev/antd";
+import { Form, Button, Upload, message, Table, Typography } from "antd";
 import { RcFile } from "antd/es/upload";
 import axios from "axios";
 import { logError } from "@/utilities/logger";
@@ -28,7 +28,7 @@ interface Student {
 export const BatchJobUploadPage: React.FC = () => {
     const [file, setFile] = useState<RcFile | undefined>(undefined);
     const [loading, setLoading] = useState<boolean>(false);
-    const [batchJobStatus, setBatchJobStatus] = useState<BatchJobStatus | null>(null);
+    const [_batchJobStatus, _setBatchJobStatus] = useState<BatchJobStatus | null>(null);
     const [csvContents, setCsvContents] = useState<CsvData[]>([]);
     const [students, setStudents] = useState<Student[]>([]);  // To hold the list of students
 
@@ -71,7 +71,7 @@ export const BatchJobUploadPage: React.FC = () => {
 
     const accessToken = localStorage.getItem("access_token");
 
-    const handleBatchJobSubmit = async (values: BatchJobUploadFormValues) => {
+    const handleBatchJobSubmit = async (_values: BatchJobUploadFormValues) => {
         if (!file) {
             message.error("Please upload a CSV file before submitting.");
             return;

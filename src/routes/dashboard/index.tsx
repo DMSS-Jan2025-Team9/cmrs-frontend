@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Col, Row, notification, Card, Statistic, Table, Button, Empty } from "antd";
+import { Col, Row, notification, Card, Statistic, Table, Button } from "antd";
 import { TeamOutlined, WarningOutlined, SolutionOutlined } from "@ant-design/icons";
 import axios from 'axios';
 import { useGo } from "@refinedev/core";
@@ -9,8 +9,8 @@ import { logError } from "@/utilities/logger";
 export const DashboardPage = () => {
   const go = useGo();
 
-  const [isLoading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [_isLoading, setLoading] = useState(true);
+  const [_error, setError] = useState(null);
   const [fullClasses, setFullClasses] = useState([]);
   const [nearFullClasses, setNearFullClasses] = useState([]);
   const [mostlyEmptyClasses, setMostlyEmptyClasses] = useState([]);

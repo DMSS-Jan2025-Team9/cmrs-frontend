@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Form, Input, Button, List, message } from "antd";
 import axios, { AxiosError } from "axios";
-import { logError } from "@/utilities/logger";
 
-interface CreateRegistrationDTO {
+interface _CreateRegistrationDTO {
     classId: number;
     studentFullIds: string[];
 }

@@ -37,8 +37,6 @@ export const StaffView: React.FC<StaffViewProps> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { Title } = Typography;
-
   // Fetch user data
   useEffect(() => {
     const fetchData = async () => {

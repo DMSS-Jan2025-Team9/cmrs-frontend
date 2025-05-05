@@ -3,7 +3,7 @@ import { Client, Frame } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import axios from 'axios';
 import { notification } from 'antd';
-import { notificationService, Notification } from '../services/notificationService';
+import { Notification } from '../services/notificationService';
 import { logError, logInfo } from "@/utilities/logger";
 
 interface NotificationContextType {

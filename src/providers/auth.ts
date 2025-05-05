@@ -1,8 +1,5 @@
 import type { AuthProvider } from "@refinedev/core";
 
-import type { User } from "@/graphql/schema.types";
-
-import { API_URL, dataProvider } from "./data";
 import { logError } from "@/utilities/logger";
 
 import { jwtDecode } from "jwt-decode";
@@ -190,6 +187,7 @@ export const authProvider: AuthProvider = {
         authenticated: true,
       };
     } catch (error) {
+      logError('Token is expired or invalid format', error);
       return {
         authenticated: false,
         redirectTo: "/login",

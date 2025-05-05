@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Table, Input, Space, Button, Row, Col, Popconfirm, message } from "antd";
-import { SearchOutlined, DeleteOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
+import { SearchOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { CreateButton } from "@refinedev/antd";
 import axios from "axios";
 import { logError } from "@/utilities/logger";
