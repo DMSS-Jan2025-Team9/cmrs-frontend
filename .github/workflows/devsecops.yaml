@@ -53,9 +53,12 @@ jobs:
       - name: 🏗️ Build React App (Optimized)
         run: npm run build
 
+
   deploy:
-    needs: build  # Ensure deploy happens after build finishes
     runs-on: self-hosted
+    needs: build  # Ensure deploy happens after build finishes
+
+    steps:
       - name: 📤 Upload to S3
         uses: jakejarvis/s3-sync-action@master
         with:
