@@ -50,9 +50,7 @@ export const RegistrationCreatePage: React.FC = () => {
           } catch (err) {
             // Check if it's an AxiosError with a response payload
             const axiosErr = err as AxiosError<{ message?: string }>;
-            const serverMessage =
-              axiosErr.response?.data?.message; 
-              axiosErr.message;             
+            const serverMessage = axiosErr.response?.data?.message || axiosErr.message;             
         
             message.error(serverMessage);
           }
