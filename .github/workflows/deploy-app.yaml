@@ -2,9 +2,9 @@ name: Upload Website
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "release/dev" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "release/dev" ]
 
 jobs:
   build:
