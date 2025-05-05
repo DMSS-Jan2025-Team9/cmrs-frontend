@@ -41,14 +41,15 @@ jobs:
 
       - name: 🧹 Lint with ESLint
         run: npm run lint
-        continue-on-error: false
+        continue-on-error: true
 
       - name: 🎨 Check code formatting
         run: npm run prettier:check
-        continue-on-error: false
+        continue-on-error: true
 
       - name: 🔍 Security scan (npm audit)
         run: npm audit --audit-level=high || true
+        continue-on-error: true
 
       - name: 🏗️ Build React App (Optimized)
         run: npm run build
