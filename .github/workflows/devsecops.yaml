@@ -38,6 +38,7 @@ jobs:
 
       - name: 🚮 Remove node_modules and reinstall dependencies
         run: |
+          npm cache clean -force
           rm -rf node_modules
           npm install
 

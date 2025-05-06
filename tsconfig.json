@@ -4,13 +4,13 @@
     "useDefineForClassFields": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
-    "skipLibCheck": false,  // Set to false for stricter type checking
-    "esModuleInterop": true,  // Set to true if you're using ES Modules with interop
+    "skipLibCheck": true,
+    "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
-    "strict": true,  // Keep strict mode enabled for type safety
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
-    "moduleResolution": "node",  // Use "node" resolution strategy
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -18,9 +18,7 @@
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"]
-    },
-    "incremental": true,
-    "types": ["react", "react-dom"]
+    }
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
