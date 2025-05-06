@@ -22,9 +22,6 @@ on:
 jobs:
   build:
     runs-on: [self-hosted, cmrs-github-runner-03]
-    env:
-      GENERATE_SOURCEMAP: false
-      NODE_ENV: production  # Ensure build is optimized for production
 
     steps:
       - name: 🧾 Checkout code
@@ -40,10 +37,9 @@ jobs:
         run: |
           npm cache clean -force
           rm -rf node_modules package-lock.json
-          npm install
 
-      - name: 📦 Install dependencies (via npm ci)
-        run: npm ci
+      - name: 📦 Reinstall dependencies (via npm install)
+        run: npm install
 
       - name: 🧹 Lint with ESLint
         run: npm run lint
