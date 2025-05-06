@@ -39,7 +39,7 @@ jobs:
       - name: 🚮 Remove node_modules and reinstall dependencies
         run: |
           npm cache clean -force
-          rm -rf node_modules
+          rm -rf node_modules package-lock.json
           npm install
 
       - name: 📦 Install dependencies (via npm ci)
