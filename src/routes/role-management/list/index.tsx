@@ -21,7 +21,7 @@ export const RoleListPage = ({ children }: React.PropsWithChildren) => {
     setLoading(true);
     try {
       const accessToken = localStorage.getItem("access_token");
-      const response = await axios.get("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/admin/roles", {
+      const response = await axios.get("https://app.cmrsapp.site/user-management/api/admin/roles", {
         headers: {
           "Authorization": `Bearer ${accessToken}`,
           "Accept": "*/*"
@@ -58,7 +58,7 @@ export const RoleListPage = ({ children }: React.PropsWithChildren) => {
   const handleDelete = async (roleId: number) => {
     try {
       const accessToken = localStorage.getItem("access_token");
-      await axios.delete(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/admin/roles/${roleId}`, {
+      await axios.delete(`https://app.cmrsapp.site/user-management/api/admin/roles/${roleId}`, {
         headers: {
           "Authorization": `Bearer ${accessToken}`,
           "Accept": "*/*"

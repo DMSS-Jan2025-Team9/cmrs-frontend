@@ -26,7 +26,7 @@ export const ProgramViewPage = ({ children }: React.PropsWithChildren) => {
     if (programId) {
       setLoading(true);
       axios
-        .get(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/program/${programId}`)
+        .get(`https://app.cmrsapp.site/course-management/api/program/${programId}`)
         .then((response) => {
           setProgramData(response.data);
           setCourses(response.data.courses || []);

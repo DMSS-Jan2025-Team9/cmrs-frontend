@@ -21,7 +21,7 @@ export const StudentsByProgramPage: React.FC = () => {
     useEffect(() => {
         if (!programName) return;
 
-        axios.get(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/students/program/${encodeURIComponent(programName)}`)
+        axios.get(`https://app.cmrsapp.site/user-management/api/students/program/${encodeURIComponent(programName)}`)
             .then((response) => {
                 setStudents(response.data || []);
             })

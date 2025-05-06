@@ -32,7 +32,7 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
     if (courseId) {
       setLoading(true);
       axios
-        .get(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/courses/courseId/${courseId}`)
+        .get(`https://app.cmrsapp.site/course-management/api/courses/courseId/${courseId}`)
         .then((response) => {
           setCourseData(response.data);
           setLoading(false);
@@ -57,7 +57,7 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
   const fetchProgramData = (programId: number) => {
     setProgramLoading(true);
     axios
-      .get(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/program/${programId}`)
+      .get(`https://app.cmrsapp.site/course-management/api/program/${programId}`)
       .then((response) => {
         setProgramData(response.data);
         setProgramLoading(false);
@@ -77,7 +77,7 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
     if (courseId) {
       setSchedulesLoading(true);
       axios
-        .get(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/classSchedule?courseId=${courseId}`)
+        .get(`https://app.cmrsapp.site/course-management/api/classSchedule?courseId=${courseId}`)
         .then((response) => {
           setClassSchedules(response.data);
           setSchedulesLoading(false);
@@ -117,7 +117,7 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
   const handleDeleteCourse = () => {
     setDeleteLoading(true);
     axios
-      .delete(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/courses/deleteCourse/${courseId}`,
+      .delete(`https://app.cmrsapp.site/course-management/api/courses/deleteCourse/${courseId}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -165,7 +165,7 @@ export const CourseViewPage = ({ children }: React.PropsWithChildren) => {
   const handleDeleteClassSchedule = (classId: number) => {
     setDeleteLoading(true);
     axios
-      .delete(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/classSchedule/deleteClassSchedule/${classId}`,
+      .delete(`https://app.cmrsapp.site/course-management/api/classSchedule/deleteClassSchedule/${classId}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

@@ -32,7 +32,7 @@ export const StaffCreateForm: React.FC<StaffCreateFormProps> = ({ onBack }) => {
     setLoading(true);
     try {
       const accessToken = localStorage.getItem("access_token");
-      const response = await axios.get("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/admin/roles", {
+      const response = await axios.get("https://app.cmrsapp.site/user-management/api/admin/roles", {
         headers: {
           "Authorization": `Bearer ${accessToken}`,
           "Accept": "*/*"
@@ -79,7 +79,7 @@ export const StaffCreateForm: React.FC<StaffCreateFormProps> = ({ onBack }) => {
       };
       
       const response = await axios.post(
-        "https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/auth/register/staff",
+        "https://app.cmrsapp.site/user-management/api/auth/register/staff",
         payload,
         {
           headers: {

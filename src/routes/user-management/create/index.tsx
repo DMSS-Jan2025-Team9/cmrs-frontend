@@ -83,7 +83,7 @@ export const BatchJobUploadPage: React.FC = () => {
 
         try {
             // Sending the file to the backend
-            const response = await axios.post("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/jobs/importStudents", formData, {
+            const response = await axios.post("https://app.cmrsapp.site/user-management/jobs/importStudents", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                     "Authorization": `Bearer ${accessToken}`,

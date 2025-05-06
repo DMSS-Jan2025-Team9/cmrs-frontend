@@ -36,7 +36,7 @@ export const PermissionViewPage = ({ children }: React.PropsWithChildren) => {
     setLoading(true);
     try {
       const accessToken = localStorage.getItem("access_token");
-      const response = await axios.get(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/admin/permissions/${permissionId}`, {
+      const response = await axios.get(`https://app.cmrsapp.site/user-management/api/admin/permissions/${permissionId}`, {
         headers: {
           "Authorization": `Bearer ${accessToken}`,
           "Accept": "*/*"
@@ -80,7 +80,7 @@ export const PermissionViewPage = ({ children }: React.PropsWithChildren) => {
   const handleDeletePermission = async () => {
     try {
       const accessToken = localStorage.getItem("access_token");
-      await axios.delete(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/admin/permissions/${permissionId}`, {
+      await axios.delete(`https://app.cmrsapp.site/user-management/api/admin/permissions/${permissionId}`, {
         headers: {
           "Authorization": `Bearer ${accessToken}`,
           "Accept": "*/*",

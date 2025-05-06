@@ -11,7 +11,7 @@ export const ProgramsPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/program")
+        axios.get("https://app.cmrsapp.site/course-management/api/program")
             .then((response) => {
                 setPrograms(response.data);
             })

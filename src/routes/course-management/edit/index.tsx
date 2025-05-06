@@ -35,7 +35,7 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
   const fetchPrograms = () => {
     setLoadingPrograms(true);
     axios
-      .get("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/program")
+      .get("https://app.cmrsapp.site/course-management/api/program")
       .then((response) => {
         setPrograms(response.data);
         setLoadingPrograms(false);
@@ -60,7 +60,7 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
   const fetchCourseData = () => {
     if (courseId) {
       axios
-        .get(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/courses/courseId/${courseId}`) // Fetch course data by ID
+        .get(`https://app.cmrsapp.site/course-management/api/courses/courseId/${courseId}`) // Fetch course data by ID
         .then((response) => {
           const courseData = response.data;
 
@@ -122,7 +122,7 @@ export const CourseEditPage = ({ children }: React.PropsWithChildren) => {
     const accessToken = localStorage.getItem("access_token");
 
     axios
-      .put(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/courses/editCourse/${courseId}`, 
+      .put(`https://app.cmrsapp.site/course-management/api/courses/editCourse/${courseId}`, 
         updatedCourse,{
           headers: {
             "Authorization": `Bearer ${accessToken}`,

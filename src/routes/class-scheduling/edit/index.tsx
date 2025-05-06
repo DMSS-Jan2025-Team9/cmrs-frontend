@@ -44,7 +44,7 @@ export const ClassScheduleEditPage = ({ children }: React.PropsWithChildren) => 
 
   // Fetch courses for the dropdown
   useEffect(() => {
-    axios.get("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/courses")
+    axios.get("https://app.cmrsapp.site/course-management/api/courses")
       .then((response) => {
         setCourses(response.data);
       })
@@ -60,7 +60,7 @@ export const ClassScheduleEditPage = ({ children }: React.PropsWithChildren) => 
   // Fetch class schedule data based on classId
   useEffect(() => {
     if (classId) {
-      axios.get(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/classSchedule/classId/${classId}`)
+      axios.get(`https://app.cmrsapp.site/course-management/api/classSchedule/classId/${classId}`)
         .then((response) => {
           const classData = response.data;
           
@@ -123,7 +123,7 @@ export const ClassScheduleEditPage = ({ children }: React.PropsWithChildren) => 
       vacancy: newVacancy >= 0 ? newVacancy : 0, // Ensure vacancy is not negative
     };
 
-    axios.put(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/classSchedule/editClassSchedule/${classId}`, updatedClassSchedule,
+    axios.put(`https://app.cmrsapp.site/course-management/api/classSchedule/editClassSchedule/${classId}`, updatedClassSchedule,
       {
         headers: {
           "Authorization": `Bearer ${accessToken}`,

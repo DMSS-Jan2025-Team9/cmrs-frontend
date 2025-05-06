@@ -52,7 +52,7 @@ import { useEffect, useState } from "react";
 
 import { ProgramViewPage } from "./routes/program-management";
 import { NotificationProvider } from "./contexts/NotificationContext";
-const REGISTRATION_API_URL = "https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-registration/api";
+const REGISTRATION_API_URL = "https://app.cmrsapp.site/course-registration/api";
 
 // Create a custom theme that extends the Refine Blue theme
 const customTheme = {

@@ -48,7 +48,7 @@ export const StudentCreateForm: React.FC<StudentCreateFormProps> = ({ onBack }) 
   const fetchRoles = async () => {
     try {
       const accessToken = localStorage.getItem("access_token");
-      const response = await axios.get("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/admin/roles", {
+      const response = await axios.get("https://app.cmrsapp.site/user-management/api/admin/roles", {
         headers: {
           "Authorization": `Bearer ${accessToken}`,
           "Accept": "*/*"
@@ -78,7 +78,7 @@ export const StudentCreateForm: React.FC<StudentCreateFormProps> = ({ onBack }) 
     setLoading(true);
     try {
       const accessToken = localStorage.getItem("access_token");
-      const response = await axios.get("https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/program", {
+      const response = await axios.get("https://app.cmrsapp.site/course-management/api/program", {
         headers: {
           "Authorization": `Bearer ${accessToken}`,
           "Accept": "*/*"
@@ -123,7 +123,7 @@ export const StudentCreateForm: React.FC<StudentCreateFormProps> = ({ onBack }) 
       };
       
       const response = await axios.post(
-        "https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/auth/register/student",
+        "https://app.cmrsapp.site/user-management/api/auth/register/student",
         payload,
         {
           headers: {

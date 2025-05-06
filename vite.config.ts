@@ -22,13 +22,13 @@ export default defineConfig({
     proxy: {
       // Proxy WebSocket requests
       '/ws': {
-        target: 'https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/notification',
+        target: 'https://app.cmrsapp.site/notification',
         ws: true,
         changeOrigin: true,
       },
       // Proxy API requests
       '/api/notifications': {
-        target: 'https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/notification',
+        target: 'https://app.cmrsapp.site/notification',
         changeOrigin: true,
       }
     }

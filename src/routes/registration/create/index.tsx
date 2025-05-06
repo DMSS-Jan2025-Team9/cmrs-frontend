@@ -38,7 +38,7 @@ export const RegistrationCreatePage: React.FC = () => {
 
         try {
             const response = await axios.post(
-              "https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-registration/api/courseRegistration",
+              "https://app.cmrsapp.site/course-registration/api/courseRegistration",
               values
             );
             if (response.status === 201) {

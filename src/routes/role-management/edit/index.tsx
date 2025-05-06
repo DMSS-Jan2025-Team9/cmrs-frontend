@@ -22,7 +22,7 @@ export const RoleEditPage = ({ children }: React.PropsWithChildren) => {
         setLoading(true);
         try {
         const accessToken = localStorage.getItem("access_token");
-        const response = await axios.get(`https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/admin/roles/${roleId}`, {
+        const response = await axios.get(`https://app.cmrsapp.site/user-management/api/admin/roles/${roleId}`, {
             headers: {
             "Authorization": `Bearer ${accessToken}`,
             "Accept": "*/*"
@@ -72,7 +72,7 @@ export const RoleEditPage = ({ children }: React.PropsWithChildren) => {
         const permissionIds = roleData.permissions.map(p => p.permissionId);
         
         const response = await axios.put(
-        `https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api/admin/roles/${roleId}`,
+        `https://app.cmrsapp.site/user-management/api/admin/roles/${roleId}`,
         {
             ...values,
             permissionIds

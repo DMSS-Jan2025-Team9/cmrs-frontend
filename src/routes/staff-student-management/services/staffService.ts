@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Staff, StaffUpdateRequest, ApiResponse } from "../models";
 
-const API_URL = "https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/user-management/api";
+const API_URL = "https://app.cmrsapp.site/user-management/api";
 
 // Helper to get authentication headers
 const getAuthHeaders = (contentType = false) => {

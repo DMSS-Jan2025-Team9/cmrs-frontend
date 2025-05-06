@@ -19,9 +19,9 @@ export const DashboardPage = () => {
       try {
         setLoading(true);
         const [fullResponse, nearFullResponse, mostlyEmptyResponse] = await Promise.all([
-          axios.get('https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/classSchedule/full'),
-          axios.get('https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/classSchedule/nearFull'),
-          axios.get('https://alb-cmrs-app-790797307.ap-southeast-1.elb.amazonaws.com/course-management/api/classSchedule/mostlyEmpty')
+          axios.get('https://app.cmrsapp.site/course-management/api/classSchedule/full'),
+          axios.get('https://app.cmrsapp.site/course-management/api/classSchedule/nearFull'),
+          axios.get('https://app.cmrsapp.site/course-management/api/classSchedule/mostlyEmpty')
         ]);
 
         setFullClasses(fullResponse.data);
