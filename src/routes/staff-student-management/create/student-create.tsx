@@ -228,7 +228,7 @@ export const StudentCreateForm: React.FC<StudentCreateFormProps> = ({ onBack }) 
           loading={loading}
         >
           {programs.map(program => (
-            <Option key={program.programId} value={program.programName}>
+            <Option key={program.programId} value={`${program.programId} ${program.programName}`}>
               {program.programName}
             </Option>
           ))}
