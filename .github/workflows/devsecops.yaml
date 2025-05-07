@@ -88,6 +88,9 @@ jobs:
     needs: build  # This ensures that SonarQube analysis runs only after the build job is successful
 
     steps:
+      - name: 🧾 Checkout code
+        uses: actions/checkout@v4
+        
       - name: Test SonarQube Connection
         run: |
           echo "Testing connection to SonarQube server via ngrok..."
