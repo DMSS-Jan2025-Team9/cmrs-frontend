@@ -64,11 +64,16 @@ export const StaffCreateForm: React.FC<StaffCreateFormProps> = ({ onBack }) => {
     setSubmitting(true);
     try {
       const accessToken = localStorage.getItem("access_token");
+
+      const selectedRoleNames = values.role.map((roleId: number) => {
+        const role = roles.find(r => r.roleId === roleId);
+        return role ? role.roleName : null;
+      }).filter(Boolean);
       
       // Format the request payload according to the expected format
       const payload = {
         user: {
-          role: values.role.map((roleId: number) => roleId.toString()),
+          role: selectedRoleNames,
         },
         staff: {
           firstName: values.firstName,
