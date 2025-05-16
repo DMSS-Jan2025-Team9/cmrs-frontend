@@ -10,23 +10,40 @@ export const DashboardPage = () => {
 
   const [isLoading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [fullClasses, setFullClasses] = useState([]);
-  const [nearFullClasses, setNearFullClasses] = useState([]);
-  const [mostlyEmptyClasses, setMostlyEmptyClasses] = useState([]);
+  const [classData, setClassData] = useState({
+    full: { classes: [], title: "Full Classes", icon: <TeamOutlined />, color: '#cf1322' },
+    nearfull: { classes: [], title: "Nearly Full Classes", icon: <WarningOutlined />, color: '#faad14' },
+    mostlyempty: { classes: [], title: "Low Enrollment Classes", icon: <SolutionOutlined />, color: '#3f8600' }
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        
+        // Use the new filter endpoint with different filter types
         const [fullResponse, nearFullResponse, mostlyEmptyResponse] = await Promise.all([
-          axios.get('http://localhost:8081/api/classSchedule/full'),
-          axios.get('http://localhost:8081/api/classSchedule/nearFull'),
-          axios.get('http://localhost:8081/api/classSchedule/mostlyEmpty')
+          axios.get('http://localhost:8081/api/classSchedule/filter?filterType=full'),
+          axios.get('http://localhost:8081/api/classSchedule/filter?filterType=nearfull'),
+          axios.get('http://localhost:8081/api/classSchedule/filter?filterType=mostlyempty')
         ]);
 
-        setFullClasses(fullResponse.data);
-        setNearFullClasses(nearFullResponse.data);
-        setMostlyEmptyClasses(mostlyEmptyResponse.data);
+        // Update state with the new data structure
+        setClassData({
+          full: { 
+            ...classData.full, 
+            classes: fullResponse.data 
+          },
+          nearfull: { 
+            ...classData.nearfull, 
+            classes: nearFullResponse.data 
+          },
+          mostlyempty: { 
+            ...classData.mostlyempty, 
+            classes: mostlyEmptyResponse.data 
+          }
+        });
+        
         setError(null);
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -42,133 +59,64 @@ export const DashboardPage = () => {
     fetchData();
   }, []);
 
+  // Helper function to render a Class Card
+  const renderClassCard = (filterType: keyof typeof classData) => {
+    const { classes, title, icon, color } = classData[filterType];
+    
+    return classes.length > 0 ? (
+      <Card 
+        title={title} 
+        style={{ marginBottom: 16 }}
+        extra={<span>{classes.length} classes</span>}
+      >      
+        <Table 
+          dataSource={classes}
+          rowKey="classScheduleId"
+          pagination={{
+            pageSize: 5,
+            showTotal: (total) => <PaginationTotal total={total} entityName="classes" />,
+          }}
+        >
+          <Table.Column title="Course Name" dataIndex="courseName" />
+          <Table.Column title="Course Code" dataIndex="courseCode" />
+          <Table.Column title="Schedule" render={(_, record) => (
+            `${record.dayOfWeek}, ${record.startTime} - ${record.endTime}`
+          )} />
+          <Table.Column 
+            title="Enrollment" 
+            render={(_, record) => (
+              `${(record.maxCapacity - record.vacancy)}/${record.maxCapacity} (${Math.round((record.maxCapacity - record.vacancy) / record.maxCapacity * 100)}%)`
+            )} 
+          />
+          <Table.Column title="Actions" key="actions" render={(value, record) => (
+              <Button size="small" onClick={() => go({ to: `/courseManagement/view/${record.courseId}` })}>View</Button>
+          )} />
+        </Table>
+      </Card>
+    ) : null;
+  };
+
   return (
     <div className="page-container">
       <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={8}>
-          <Card>
-            <Statistic
-              title="Full Classes"
-              value={fullClasses.length}
-              valueStyle={{ color: '#cf1322' }}
-              prefix={<TeamOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card>
-            <Statistic
-              title="Nearly Full Classes"
-              value={nearFullClasses.length}
-              valueStyle={{ color: '#faad14' }}
-              prefix={<WarningOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card>
-            <Statistic
-              title="Low Enrollment Classes"
-              value={mostlyEmptyClasses.length}
-              valueStyle={{ color: '#3f8600' }}
-              prefix={<SolutionOutlined />}
-            />
-          </Card>
-        </Col>
+        {Object.entries(classData).map(([filterType, data]) => (
+          <Col span={8} key={filterType}>
+            <Card>
+              <Statistic
+                title={data.title}
+                value={data.classes.length}
+                valueStyle={{ color: data.color }}
+                prefix={data.icon}
+              />
+            </Card>
+          </Col>
+        ))}
       </Row>
 
-      {fullClasses.length > 0 ? (
-      <Card 
-        title={"Full Classes"} 
-        style={{ marginBottom: 16 }}
-        extra={<span>{fullClasses.length} classes</span>}
-      >      
-        <Table 
-          dataSource={fullClasses}
-          rowKey="classScheduleId"
-          pagination={{
-            pageSize: 5,
-            showTotal: (total) => <PaginationTotal total={total} entityName="classes" />,
-          }}
-        >
-          <Table.Column title="Course Name" dataIndex="courseName" />
-          <Table.Column title="Course Code" dataIndex="courseCode" />
-          <Table.Column title="Schedule" render={(_, record) => (
-            `${record.dayOfWeek}, ${record.startTime} - ${record.endTime}`
-          )} />
-          <Table.Column 
-            title="Enrollment" 
-            render={(_, record) => (
-              `${(record.maxCapacity - record.vacancy)}/${record.maxCapacity} (${Math.round((record.maxCapacity - record.vacancy) / record.maxCapacity * 100)}%)`
-            )} 
-          />
-          <Table.Column title="Actions" key="actions" render={(value, record) => (
-              <Button size="small" onClick={() => go({ to: `/courseManagement/view/${record.courseId}` })}>View</Button>
-          )} />
-        </Table>
-      </Card>): null}
-
-      {nearFullClasses.length > 0 ? (
-      <Card 
-        title={"Nearly Full Classes"} 
-        style={{ marginBottom: 16 }}
-        extra={<span>{nearFullClasses.length} classes</span>}
-      >
-        <Table 
-          dataSource={nearFullClasses}
-          rowKey="classScheduleId"
-          pagination={{
-            pageSize: 5,
-            showTotal: (total) => <PaginationTotal total={total} entityName="classes" />,
-          }}
-        >
-          <Table.Column title="Course Name" dataIndex="courseName" />
-          <Table.Column title="Course Code" dataIndex="courseCode" />
-          <Table.Column title="Schedule" render={(_, record) => (
-            `${record.dayOfWeek}, ${record.startTime} - ${record.endTime}`
-          )} />
-          <Table.Column 
-            title="Enrollment" 
-            render={(_, record) => (
-              `${(record.maxCapacity - record.vacancy)}/${record.maxCapacity} (${Math.round((record.maxCapacity - record.vacancy) / record.maxCapacity * 100)}%)`
-            )} 
-          />
-          <Table.Column title="Actions" key="actions" render={(value, record) => (
-              <Button size="small" onClick={() => go({ to: `/courseManagement/view/${record.courseId}` })}>View</Button>
-          )} />
-        </Table>
-      </Card>) : null}
-
-      {mostlyEmptyClasses.length > 0 ? (
-      <Card 
-        title={"Low Enrollment Classes"} 
-        style={{ marginBottom: 16 }}
-        extra={<span>{mostlyEmptyClasses.length} classes</span>}
-      >
-        <Table 
-          dataSource={mostlyEmptyClasses}
-          rowKey="classScheduleId"
-          pagination={{
-            pageSize: 5,
-            showTotal: (total) => <PaginationTotal total={total} entityName="classes" />,
-          }}
-        >
-          <Table.Column title="Course Name" dataIndex="courseName" />
-          <Table.Column title="Course Code" dataIndex="courseCode" />
-          <Table.Column title="Schedule" render={(_, record) => (
-            `${record.dayOfWeek}, ${record.startTime} - ${record.endTime}`
-          )} />
-          <Table.Column 
-            title="Enrollment" 
-            render={(_, record) => (
-              `${(record.maxCapacity - record.vacancy)}/${record.maxCapacity} (${Math.round((record.maxCapacity - record.vacancy) / record.maxCapacity * 100)}%)`
-            )} 
-          />
-          <Table.Column title="Actions" key="actions" render={(value, record) => (
-              <Button size="small" onClick={() => go({ to: `/courseManagement/view/${record.courseId}` })}>View</Button>
-          )} />
-        </Table>
-      </Card>) : null}
+      {/* Render class cards for each filter type */}
+      {renderClassCard('full')}
+      {renderClassCard('nearfull')}
+      {renderClassCard('mostlyempty')}
     </div>
   );
 };
